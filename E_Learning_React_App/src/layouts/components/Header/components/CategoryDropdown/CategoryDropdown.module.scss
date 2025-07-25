@@ -1,0 +1,95 @@
+.menuList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menuItem {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    color: #222;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+    font-size: 14px; // chỉnh lại 14px
+}
+
+.menuItem:hover,
+.menuItem:focus {
+    background: #f0f4ff;
+    color: #0d6efd;
+}
+
+.arrowIcon {
+    margin-left: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+}
+
+.hasSubmenu {
+    position: relative;
+}
+
+.submenu {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    min-width: 200px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+    padding: 0.25rem 0;
+}
+
+.dropdownMenu {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    padding: 0.5rem 0;
+    min-width: 220px;
+}
+
+.dropdownButton {
+    background: transparent;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    color: #222;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+    font-size: 14px; // chỉnh lại 14px
+    font-weight: 500;
+}
+.dropdownButton:hover,
+.dropdownButton:focus {
+    background: rgba(13, 110, 253, 0.08); // xanh mờ
+    color: #0d6efd;
+    box-shadow: none;
+}
+
+.custom-my-course-btn {
+    background: transparent;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    color: #222;
+    text-decoration: none;
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+    font-size: 14px; // chỉnh lại 14px
+    font-weight: 500;
+}
+.custom-my-course-btn:hover,
+.custom-my-course-btn:focus {
+    background: rgba(13, 110, 253, 0.08); // xanh mờ
+    color: #0d6efd;
+    box-shadow: none;
+}

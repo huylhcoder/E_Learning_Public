@@ -2,17 +2,28 @@ package com.fpoly.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.fpoly.entity.Category;
+
 import com.fpoly.entity.Course;
-import com.fpoly.entity.Voucher;
+
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Integer> {
+	
+//Home Page
+	//Tổng số khóa học + trạng thái đã đăng
+	@Query("SELECT COUNT(c.courseId) FROM Course c WHERE c.status = 1")
+	Long countTotalCoursePublic();
+	
+	//Top 4 khóa học
+	@Query("SELECT c FROM Course c WHERE c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
+	List<Course> getTopRegisteredCourses(Pageable pageable);
+
 
 	// ------------ CÂU TRUY VẤN SQL CỦA HBảo ----------------------------------
 	// 1. LẤY DANH SÁCH KHÓA HỌC CÓ TRẠNG THÁI Status = 1
@@ -114,17 +125,19 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
 	// 9 TÌM DANH MỤC KHÓA HỌC THEO CATEGORY_ID VÀ TRẠNG THÁI status = 1
 	// TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
-	@Query("SELECT c FROM Course c JOIN c.category ct WHERE ct.categoryId = :categoryId AND c.status = 1")
-	List<Course> findCourseByCategoryId(@Param("categoryId") int categoryId);
+//	@Query("SELECT c FROM Course c JOIN c.category ct WHERE ct.categoryId = :categoryId AND c.status = 1")
+//	List<Course> findCourseByCategoryId(@Param("categoryId") int categoryId);
 
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
-	@Query("SELECT c FROM Course c LEFT JOIN RegisteredCourse rc ON c.courseId = rc.course.courseId AND rc.user.id = :userId WHERE rc.course IS NULL AND c.category.categoryId = :categoryId AND c.status = 1")
-	List<Course> findCourseByCategoryId(@Param("userId") int userId, @Param("categoryId") int categoryId);
+//	@Query("SELECT c FROM Course c LEFT JOIN RegisteredCourse rc ON c.courseId = rc.course.courseId AND rc.user.id = :userId WHERE rc.course IS NULL AND c.category.categoryId = :categoryId AND c.status = 1")
+//	List<Course> findCourseByCategoryId(@Param("userId") int userId, @Param("categoryId") int categoryId);
 
 	// 10 SẮP XẾP KHÓA HỌC LƯỢT THEO ĐĂNG KÝ (THEO DÕI) VỚI TRẠNG THÁI Status = 1
 	// TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
-	@Query("SELECT c FROM Course c WHERE  c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
-	List<Course> findCoursesByFollow();
+//	@Query("SELECT TOP 4 c FROM Course c WHERE  c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
+//	List<Course> getTopRegisteredCourses();
+	
+	
 	
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
 	@Query("SELECT c FROM Course c LEFT JOIN RegisteredCourse rc ON c.courseId = rc.course.courseId AND rc.user.id = :userId WHERE rc.course IS NULL AND c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
@@ -172,9 +185,10 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
 //	Course findByCourseId(int CourseId);
 
-	List<Course> findByCategoryNameIgnoreCase(String categoryName);
+	//List<Course> findByCategoryNameIgnoreCase(String categoryName);
+	
 
-	List<Course> findByCategory(Category category);
+	//List<Course> findByCategory(Category category);
 
 	// Cái này của thằng nào làm coi lại ở trên trùng tên nha
 	// List<Course> findCoursesByAverageRatingDesc();
@@ -191,12 +205,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 	List<Course> findTopRatedCourses();
 
 	List<Course> findTop4ByStatusOrderByFollowDesc(int status);
-
-	@Query("SELECT COUNT(c.courseId) FROM Course c WHERE c.status = 1")
-	Long countCourseNames();
-
-	@Query("SELECT COUNT(c.name) FROM Category c")
-	Long countCateNames();
 
 	@Query(value = "SELECT CEILING(AVG(c.average_rating) * 10) / 10.0 FROM course c", nativeQuery = true)
 	Double countStarAVG();

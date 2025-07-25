@@ -1,0 +1,80 @@
+.courses-section {
+    padding: 60px 0;
+}
+
+.section-title {
+    margin-bottom: 30px;
+}
+
+.courses-item {
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+        transform: translateY(-5px);
+    }
+}
+
+.courses-item-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.img-box {
+    width: 100%;
+    height: 180px; // cố định chiều cao
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; // đảm bảo ảnh không méo
+        object-position: center;
+        border-radius: 0;
+        transition: transform 0.3s;
+    }
+
+    &:hover img {
+        transform: scale(1.05);
+    }
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 12px;
+    min-height: 48px;
+
+    // Trường hợp chỉ 1 dòng:
+    // overflow: hidden;
+    // text-overflow: ellipsis;
+    // white-space: nowrap;
+
+    // Nếu muốn 2 dòng có thể dùng cách dưới:
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.rating {
+    margin: 0 12px 12px 12px;
+    .average-stars {
+        display: flex;
+        gap: 2px;
+    }
+}
+
+.link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}

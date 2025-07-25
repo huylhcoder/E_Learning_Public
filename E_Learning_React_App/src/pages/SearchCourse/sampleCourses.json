@@ -1,0 +1,11 @@
+[
+    {
+        "courseId": 1,
+        "name": "React Cơ Bản",
+        "description": "Học React từ đầu",
+        "avatar": "https://via.placeholder.com/200",
+        "price": 0,
+        "follow": 120,
+        "averageRating": 5
+    }
+]

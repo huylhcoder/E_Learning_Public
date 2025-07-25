@@ -204,6 +204,11 @@
 			<artifactId>javase</artifactId>
 			<version>3.4.1</version>
 		</dependency>
+		<dependency>
+			<groupId>com.spring</groupId>
+			<artifactId>dlearning</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>

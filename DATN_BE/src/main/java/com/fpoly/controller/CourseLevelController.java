@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fpoly.dto.CourseDetailDTO;
 import com.fpoly.dto.CourseDetailManagerDTO;
+import com.fpoly.dto.CourseLevelDto;
 import com.fpoly.entity.CourseLevel;
 import com.fpoly.service.CourseLevelService;
 import com.fpoly.service.CourseService;
@@ -26,12 +27,13 @@ import com.fpoly.service.UserService;
 public class CourseLevelController {
 	@Autowired
 	private CourseLevelService courseLevelService;
-	
-	@GetMapping
-	public ResponseEntity<?> getListCourseLevel(){
-		List<CourseLevel> listLevel = new ArrayList<CourseLevel>();
-		listLevel = courseLevelService.hienThiTatCaLevel();
-		return ResponseEntity.ok(listLevel);
-	}
+
+//Search Page
+	//Filter Course
+	@GetMapping("/list-course-level")
+    public ResponseEntity<List<CourseLevelDto>> getListCourseLevel() {
+        List<CourseLevelDto> listLevel = courseLevelService.hienThiTatCaLevel();
+        return ResponseEntity.ok(listLevel);
+    }
 	
 }

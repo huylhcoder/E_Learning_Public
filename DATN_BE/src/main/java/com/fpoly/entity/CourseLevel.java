@@ -10,8 +10,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "course_level")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class CourseLevel {
@@ -26,28 +36,4 @@ public class CourseLevel {
 	@JsonIgnore
 	@OneToMany(mappedBy = "courseLevel")
 	List<Course> listCourse;
-
-	public int getCourseLevelId() {
-		return courseLevelId;
-	}
-
-	public void setCourseLevelId(int courseLevelId) {
-		this.courseLevelId = courseLevelId;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public List<Course> getListCourse() {
-		return listCourse;
-	}
-
-	public void setListCourse(List<Course> listCourse) {
-		this.listCourse = listCourse;
-	}
 }

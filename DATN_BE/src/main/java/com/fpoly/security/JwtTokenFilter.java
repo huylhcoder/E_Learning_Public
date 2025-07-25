@@ -53,8 +53,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 			}
 			final String authHeader = request.getHeader("Authorization");
 			if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-				System.out.println("Chưa nhập token");
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Chưa nhập Token");
+				System.out.println("Chưa nhập token - JWT Filter");
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Chưa nhập token - JWT Filter");
 				return;
 			}
 			// Đoạn này cần kiểm tra thì nó làm gì
@@ -91,7 +91,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 			}
 
 		} catch (Exception e) {
-			System.out.println("JWT Filter - Đã có lỗi xảy ra:");
+			System.out.println("JWT Toekn Filter - Đã có lỗi xảy ra");
 			System.out.println(e);
 			e.printStackTrace(); // Ghi lại thông tin lỗi
 			// Khí nó có Exception thì văng ra lỗi 401 thay vì lỗi 500

@@ -44,7 +44,11 @@ public class CourseDetailManagerController {
 	private LessonService lessonService;
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private CloudinaryService cloudinaryService;
 
+	//Tìm khóa học theo mã khóa hoc
 	@GetMapping("/{courseId}")
 	public ResponseEntity<?> courseDetails(@PathVariable("courseId") int courseId) {
 		Course course = new Course();
@@ -60,25 +64,12 @@ public class CourseDetailManagerController {
 			courseDTO.setPrice(course.getPrice());
 			courseDTO.setTopic(course.getTopic());
 			courseDTO.setAvatar(course.getAvatar());
-			courseDTO.setCategoryId(course.getCategory().getCategoryId());
+//			courseDTO.setCategoryId(course.getCategory().getCategoryId());
 			courseDTO.setLevelId(course.getCourseLevel().getCourseLevelId());
 			return ResponseEntity.ok(courseDTO);
 		}
 		return ResponseEntity.ok("Chi tiết khóa học");
-	}
-
-//	@PutMapping(value = "/{courseId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//	public ResponseEntity<?> updateCourseDetailInfo(@PathVariable("courseId") int courseId,
-//			@RequestParam("file") MultipartFile file,
-//			@RequestParam("name") String name) {
-//		System.out.println(file);
-//		System.out.println(name);
-//		// Xử lý các tệp tin ở đây
-//		return ResponseEntity.ok("Cập nhật khóa học thành công");
-//	}
-
-	@Autowired
-	private CloudinaryService cloudinaryService;
+	}	
 
 	@PutMapping(value = "/{courseId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> updateCourseDetailInfo(@PathVariable("courseId") int courseId,
@@ -108,7 +99,7 @@ public class CourseDetailManagerController {
 			courseDTO.setAvatar(avatar.orElse(null));
 			courseDTO.setPrice(price.orElse((float) 0));
 			courseDTO.setTopic(topic.orElse(null));
-			courseDTO.setCategoryId(categoryId.orElse(null));
+//			courseDTO.setCategoryId(categoryId.orElse(null));
 			courseDTO.setLevelId(levelId.orElse(null));
 			return ResponseEntity.ok(courseService.luuThongTinKhoaHoc(courseDTO));
 		} catch (Exception e) {

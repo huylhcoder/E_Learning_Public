@@ -38,79 +38,65 @@ public class WebSecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeHttpRequests(requests -> {
+
 					requests
-							// Category
-							// CourseLevel
-							// Course
+							// Get Public
 							.requestMatchers(GET,
-									// Course Level
-									String.format("%s/course-level", apiPrefix),
 									// Category
-									String.format("api/category"),
+									String.format("%s/category/list-category", apiPrefix),
+									String.format("%s/category/tree", apiPrefix),
 									// Course
+									String.format("%s/course/fun-fact", apiPrefix),
+									String.format("%s/course/top-registered-course", apiPrefix),
+									String.format("%s/course/top-rated", apiPrefix),
+									String.format("%s/course/search", apiPrefix),
 									String.format("%s/course-manager-detail/**", apiPrefix),
 									String.format("%s/course-manager/draft-course", apiPrefix),
 									String.format("%s/course-manager/posted-course", apiPrefix),
 									// Section
-									String.format("%s/section-manager/**", apiPrefix))
+									String.format("%s/section-manager/**", apiPrefix),
+									// Course Level
+									String.format("%s/course-level", apiPrefix),
+									String.format("%s/course-level/list-course-level", apiPrefix),
+									// Payment
+									String.format("%s/thanhtoanthanhcong", apiPrefix),
+									// Upload - Download file
+									String.format("%s/upload-file/download-video-on-server", apiPrefix),
+									String.format("%s/upload-file/download-video", apiPrefix),
+									// Role
+									String.format("%s/roles**", apiPrefix))
 							.permitAll()
-							//Payment
-							.requestMatchers(GET, String.format("%s/thanhtoanthanhcong", apiPrefix)).permitAll() // Cho phép truy cập
-							.requestMatchers(GET, String.format("%s/upload-file/download-video-on-server", apiPrefix)).permitAll() // Cho phép truy cập
-							.requestMatchers(GET, String.format("%s/upload-file/download-video", apiPrefix)).permitAll()
-							// Course
-							// Account
-							.requestMatchers(POST, String.format("%s/users/register", apiPrefix),
+							// Post Public
+							.requestMatchers(POST,
+									// Auth
+									String.format("%s/users/register", apiPrefix),
 									String.format("%s/users/check-user", apiPrefix),
 									String.format("%s/users/send-verification-code", apiPrefix),
 									String.format("%s/users/login", apiPrefix),
-									String.format("%s/course-manager", apiPrefix),
-									String.format("%s/section-manager/**", apiPrefix))
+									// Course
+									String.format("%s/course-manager/**", apiPrefix),
+									// Section
+									String.format("%s/section-manager/**", apiPrefix),
+									// Category
+									String.format("%s/category/add-category/**", apiPrefix))
 							.permitAll()
-							//
-							.requestMatchers(PUT, String.format("%s/course-manager-detail/**", apiPrefix)).permitAll()
-							// Test
-							.requestMatchers(GET, String.format("%s/roles**", apiPrefix)).permitAll()
 
-							.requestMatchers(GET, String.format("%s/categories**", apiPrefix)).permitAll()
+							// Put Public
+							.requestMatchers(PUT, 
+									String.format("%s/course-manager-detail/**", apiPrefix),
+									String.format("%s/category/update-category/**", apiPrefix))
+							.permitAll()
 
+							// Post With Role Admin
 							.requestMatchers(POST, String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN)
-
+							// Put With Role Admin
 							.requestMatchers(PUT, String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN)
-
+							// Delete With Role Admin
 							.requestMatchers(DELETE, String.format("%s/categories/**", apiPrefix))
 							.hasAnyRole(Role.ADMIN)
-//
-//							.requestMatchers(GET, String.format("%s/products**", apiPrefix)).permitAll()
-//
-//							.requestMatchers(GET, String.format("%s/products/images/*", apiPrefix)).permitAll()
-//
-//							.requestMatchers(POST, String.format("%s/products**", apiPrefix)).hasAnyRole(Role.ADMIN)
-//
-//							.requestMatchers(PUT, String.format("%s/products/**", apiPrefix)).hasAnyRole(Role.ADMIN)
-//
-//							.requestMatchers(DELETE, String.format("%s/products/**", apiPrefix)).hasAnyRole(Role.ADMIN)
-//
-//							.requestMatchers(POST, String.format("%s/orders/**", apiPrefix)).hasAnyRole(Role.USER)
-//
-//							.requestMatchers(GET, String.format("%s/orders/**", apiPrefix)).permitAll()
-//
-//							.requestMatchers(PUT, String.format("%s/orders/**", apiPrefix)).hasRole(Role.ADMIN)
-//
-//							.requestMatchers(DELETE, String.format("%s/orders/**", apiPrefix)).hasRole(Role.ADMIN)
-//
-//							.requestMatchers(POST, String.format("%s/order_details/**", apiPrefix))
-//							.hasAnyRole(Role.USER)
-//
-//							.requestMatchers(GET, String.format("%s/order_details/**", apiPrefix)).permitAll()
-//
-//							.requestMatchers(PUT, String.format("%s/order_details/**", apiPrefix)).hasRole(Role.ADMIN)
-//
-//							.requestMatchers(DELETE, String.format("%s/order_details/**", apiPrefix))
-//							.hasRole(Role.ADMIN)
-
+							// Tất cả request còn lại phải xác thực
 							.anyRequest().authenticated();
-					// .anyRequest().permitAll();
+					// .anyRequest().permitAll(); //Cho phép tất cả Request được thông qua
 
 				}).csrf(AbstractHttpConfigurer::disable);
 		http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {

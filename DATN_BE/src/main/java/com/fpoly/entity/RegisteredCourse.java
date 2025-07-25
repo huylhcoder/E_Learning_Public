@@ -1,7 +1,11 @@
 package com.fpoly.entity;
 
 import java.util.Date;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,8 +16,18 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "registered_course")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class RegisteredCourse {
@@ -46,70 +60,4 @@ public class RegisteredCourse {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "create_at")
 	private Date createAt;
-
-
-	public int getRegisteredCourseId() {
-		return registeredCourseId;
-	}
-
-	public void setRegisteredCourseId(int registeredCourseId) {
-		this.registeredCourseId = registeredCourseId;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public Course getCourse() {
-		return course;
-	}
-
-	public void setCourse(Course course) {
-		this.course = course;
-	}
-
-	public Payment getPayment() {
-		return payment;
-	}
-
-	public void setPayment(Payment payment) {
-		this.payment = payment;
-	}
-
-	public float getPrice() {
-		return price;
-	}
-
-	public void setPrice(float price) {
-		this.price = price;
-	}
-
-	public boolean isStatusComment() {
-		return statusComment;
-	}
-
-	public void setStatusComment(boolean statusComment) {
-		this.statusComment = statusComment;
-	}
-
-	public Date getCreateAt() {
-		return createAt;
-	}
-
-	public void setCreateAt(Date createAt) {
-		this.createAt = createAt;
-	}
-
-	public boolean isStatusPayment() {
-		return statusPayment;
-	}
-
-	public void setStatusPayment(boolean statusPayment) {
-		this.statusPayment = statusPayment;
-	}
-
 }

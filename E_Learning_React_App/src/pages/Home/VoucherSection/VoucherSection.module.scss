@@ -1,0 +1,46 @@
+.voucher-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.voucher-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+}
+
+.voucher-card .card-body {
+    background: linear-gradient(135deg, #ffffff, #f3f6f9);
+    border-radius: 15px;
+}
+
+.exclusive-voucher .card-body {
+    background: linear-gradient(135deg, #fffbf0, #fff3d4);
+}
+
+.btn-use {
+    background-color: #0d762e;
+    color: white;
+    border-radius: 20px;
+    transition: background-color 0.3s, transform 0.2s;
+    font-size: 13px;
+}
+
+.btn-use:hover {
+    background-color: #76ea93;
+    transform: scale(1.05);
+}
+
+.btn-receive {
+    background-color: #ffc107;
+    color: black;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-receive:hover {
+    background-color: #e0a800;
+    transform: scale(1.05);
+}

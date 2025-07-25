@@ -1,17 +1,32 @@
 package com.fpoly.service;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.fpoly.entity.Category;
 import com.fpoly.entity.Course;
+import com.fpoly.entity.CourseCategory;
+import com.fpoly.entity.CourseCategoryId;
 import com.fpoly.repository.CategoryRepository;
+import com.fpoly.repository.CourseCategoryRepository;
 import com.fpoly.dto.CourseDetailManagerDTO;
+import com.fpoly.dto.CourseResponseDTO;
+import com.fpoly.dto.CourseSearchRequest;
+import com.fpoly.dto.CourseSearchResponseDTO;
+import com.fpoly.dto.FunFactDTO;
 import com.fpoly.entity.Category;
 import com.fpoly.entity.Course;
 import com.fpoly.entity.CourseLevel;
@@ -20,38 +35,127 @@ import com.fpoly.entity.Lesson;
 import com.fpoly.entity.RegisteredCourse;
 import com.fpoly.entity.Section;
 import com.fpoly.entity.Test;
+import com.fpoly.entity.User;
 import com.fpoly.entity.Voucher;
+
 import com.fpoly.repository.CategoryRepository;
 import com.fpoly.repository.CourseLevelRepository;
 import com.fpoly.repository.CourseRepository;
+import com.fpoly.repository.CourseRepositoryCustom;
 import com.fpoly.repository.HashtagOfCourseRepository;
 import com.fpoly.repository.LessonRepository;
 import com.fpoly.repository.RegisteredCourseRepository;
 import com.fpoly.repository.SectionRepository;
 import com.fpoly.repository.TestRepository;
+import com.fpoly.repository.UserRepository;
 import com.fpoly.repository.VoucherRepository;
 
 @Service
 public class CourseService {
 	@Autowired
-	CourseRepository courseRepository;
+	private CourseRepository courseRepository;
 	@Autowired
-	CategoryRepository categoryRepository;
+	private CourseRepositoryCustom courseRepositoryCustom;
 	@Autowired
-	CategoryRepository categoryRepo;
+	private CategoryRepository categoryRepository;
 	@Autowired
-	CourseLevelRepository levelRepo;
+	private CategoryRepository categoryRepo;
 	@Autowired
-	HashtagOfCourseRepository hashtagOfCourseRepository;
-    @Autowired
-    private SectionRepository sectionRepository;
-    @Autowired
-    private LessonRepository lessonRepository;
-    @Autowired
-    private TestRepository testRepository;
-    @Autowired
-    private RegisteredCourseRepository registeredCourseRepository;
-    
+	private CourseLevelRepository levelRepo;
+	@Autowired
+	private SectionRepository sectionRepository;
+	@Autowired
+	private LessonRepository lessonRepository;
+	@Autowired
+	private TestRepository testRepository;
+	@Autowired
+	private RegisteredCourseRepository registeredCourseRepository;
+	@Autowired
+	private CourseCategoryRepository courseCategoryRepository;
+	@Autowired
+	private UserRepository userRepository;
+	
+	@Autowired
+	private UserService userService;
+
+//Home Page
+	// Funfact
+	public FunFactDTO getFunFact() {
+		FunFactDTO funFactDTO = new FunFactDTO();
+		funFactDTO.setTotalUsers(userRepository.countByRoleName("USER"));
+		funFactDTO.setTotalCourses(courseRepository.countTotalCoursePublic());
+		funFactDTO.setTotalCategories(categoryRepo.countTotalCategory());
+		funFactDTO.setAverageRating(courseRepository.countStarAVG());
+		return funFactDTO;
+	}
+
+	// Top 4 khóa học được đăng ký nhiều nhất
+	public List<Course> getTop4RegisteredCourses() {
+		Pageable pageable = PageRequest.of(0, 4);
+		return courseRepository.getTopRegisteredCourses(pageable);
+	}
+
+	// Top 4 khóa học được đánh giá cao nhất
+	public List<Course> getTopRatedCourses() {
+		return courseRepository.findTopRatedCourses();
+	}
+
+//SearchCourse Page
+	// Tìm kiếm khóa học có phân trang
+	public Page<CourseSearchResponseDTO> searchCoursesWithFilters(
+	        String email,
+	        String category,
+	        String courseName,
+	        Boolean free,
+	        Float minPrice,
+	        Float maxPrice,
+	        Integer ratedStar,
+	        Integer levelId,
+	        Boolean priceASC,
+	        Boolean priceDESC,
+	        int page,
+	        int size
+	) {
+	    Pageable pageable;
+	    if (Boolean.TRUE.equals(priceASC)) {
+	        pageable = PageRequest.of(page, size, Sort.by("price").ascending());
+	    } else if (Boolean.TRUE.equals(priceDESC)) {
+	        pageable = PageRequest.of(page, size, Sort.by("price").descending());
+	    } else {
+	        pageable = PageRequest.of(page, size, Sort.by("averageRating").descending().and(Sort.by("follow").descending()));
+	    }
+
+	    // Gọi repository tùy chỉnh để thực hiện truy vấn động
+	    Page<Course> coursePage = courseRepositoryCustom.searchCourses(
+	            category, courseName, free, minPrice, maxPrice, ratedStar, levelId, pageable);
+
+	    // Khai báo biến final để sử dụng trong lambda
+	    final Set<Integer> registeredCourseIds;
+
+	    if (email != null) {
+	        User user = userService.getUserByEmailToan(email);
+	        registeredCourseIds = registeredCourseRepository.findCourseIdsByUserId(user.getUserId());
+	    } else {
+	        registeredCourseIds = Collections.emptySet(); // không đăng nhập thì set rỗng
+	    }
+
+	    // Trả về kết quả sau khi map sang DTO
+	    return coursePage.map(course -> {
+	        boolean isRegistered = registeredCourseIds.contains(course.getCourseId());
+	        return new CourseSearchResponseDTO(
+	                course.getCourseId(),
+	                course.getName(),
+	                course.getAvatar(),
+	                course.getPrice(),
+	                course.getAverageRating(),
+	                course.getFollow(),
+	                isRegistered
+	        );
+	    });
+	}
+
+
+
 	public Course timKhoaHocTheoMaKhoaHocToan(int courseId) {
 		return courseRepository.findByCourseId(courseId);
 	}
@@ -194,20 +298,14 @@ public class CourseService {
 
 	// - 9.2 TÌM KHÓA HỌC THEO Category_Id
 	// + TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
-	public List<Course> getCoursesByCategoryId(int categoryId) {
-		return courseRepository.findCourseByCategoryId(categoryId);
-	}
+//	public List<Course> getCoursesByCategoryId(int categoryId) {
+//		return courseRepository.findCourseByCategoryId(categoryId);
+//	}
 
 	// + TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
-	public List<Course> getCoursesByCategoryId(int userId, int categoryId) {
-		return courseRepository.findCourseByCategoryId(userId, categoryId);
-	}
-
-	// - 10. SẮP XẾP KHÓA HỌC LƯỢT THEO ĐĂNG KÝ (THEO DÕI) VỚI TRẠNG THÁI Status = 1
-	// TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
-	public List<Course> findCoursesByFollow() {
-		return courseRepository.findCoursesByFollow();
-	}
+//	public List<Course> getCoursesByCategoryId(int userId, int categoryId) {
+//		return courseRepository.findCourseByCategoryId(userId, categoryId);
+//	}
 
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
 	public List<Course> findCoursesByFollow(int userId) {
@@ -230,50 +328,50 @@ public class CourseService {
 	public List<Course> findCoursesByPriceAsc() {
 		return courseRepository.findCoursesByPriceAsc();
 	}
-	
+
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
 	public List<Course> findCoursesByPriceAsc(int userId) {
 		return courseRepository.findCoursesByPriceAsc(userId);
 	}
-	
+
 	// - 13. SẮP XẾP KHÓA HỌC THEO GIÁ GIẢM DẦN VỚI TRẠNG THÁI Status = 1
 	// TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
 	public List<Course> findCoursesByPriceDesc() {
 		return courseRepository.findCoursesByPriceDesc();
 	}
-	
+
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
 	public List<Course> findCoursesByPriceDesc(int userId) {
 		return courseRepository.findCoursesByPriceDesc(userId);
 	}
-	
-	// - 14. TÌM KIẾM KHÓA HỌC TRONG KHÓA HỌC ĐÃ ĐĂNG KÝ 
-	public List<Course> findCoursesOnRegisteredCourse(int courseId, int userId){
+
+	// - 14. TÌM KIẾM KHÓA HỌC TRONG KHÓA HỌC ĐÃ ĐĂNG KÝ
+	public List<Course> findCoursesOnRegisteredCourse(int courseId, int userId) {
 		return courseRepository.findCoursesOnRegisteredCourse(courseId, userId);
 	}
-	
+
 	// TEST ĐÃ MUA
 	public boolean checkIfRegistered(int courseId, int userId) {
-        return registeredCourseRepository.existsByCourseIdAndUserId(courseId, userId);
-    }
-	
-	//------------------------- HẾT CODE CỦA HBAO ------------------------ 
-	
+		return registeredCourseRepository.existsByCourseIdAndUserId(courseId, userId);
+	}
+
+	// ------------------------- HẾT CODE CỦA HBAO ------------------------
+
 	public List<Course> getHashTagsByCourseId(int hashTagId) {
 		return courseRepository.findCoursesByHashTag(hashTagId);
 	}
-	
+
 	public Course hienThiKhoaHocTheoIdHao(int id) {
 		return courseRepository.findByCourseId(id);
 	}
 
-	public List<Course> findCoursesByCategory(String categoryName) {
-		return courseRepository.findByCategoryNameIgnoreCase(categoryName);
-	}
+//	public List<Course> findCoursesByCategory(String categoryName) {
+//		return courseRepository.findByCategoryNameIgnoreCase(categoryName);
+//	}
 
-	public List<Course> getCoursesByCategory(Category category) {
-		return courseRepository.findByCategory(category);
-	}
+//	public List<Course> getCoursesByCategory(Category category) {
+//		return courseRepository.findByCategory(category);
+//	}
 
 	public List<Course> hienThiKhoaHocTheoTrangThaiKhoaHoc_Huy(List<Integer> trangThai) {
 		return courseRepository.findByStatusIn(trangThai);
@@ -288,47 +386,89 @@ public class CourseService {
 		return courseRepository.save(course);
 	}
 
+//	public CourseDetailManagerDTO luuThongTinKhoaHoc(CourseDetailManagerDTO courseDTO) {
+//		Course courseEntity = new Course();
+//		courseEntity.setCourseId(courseDTO.getCourseId());
+//		courseEntity.setName(courseDTO.getName());
+//		courseEntity.setStatus(courseDTO.getStatus());
+//		courseEntity.setDescription(courseDTO.getDescription());
+//		courseEntity.setAvatar(courseDTO.getAvatar());
+//		courseEntity.setPrice(courseDTO.getPrice());
+//		courseEntity.setTopic(courseDTO.getTopic());
+//		Category category = categoryRepo.findByCategoryId(courseDTO.getCategoryId());
+////		courseEntity.setCategory(category);
+//		CourseLevel level = levelRepo.findById(courseDTO.getLevelId()).orElse(null);
+//		courseEntity.setCourseLevel(level);
+//		courseEntity.setUpdateAt(new Date());
+//		courseRepository.save(courseEntity);
+//		// Trả về DTo cho để hiển thị
+//		return courseDTO;
+//	}
+
+	@Transactional
 	public CourseDetailManagerDTO luuThongTinKhoaHoc(CourseDetailManagerDTO courseDTO) {
-		Course courseEntity = new Course();
-		courseEntity.setCourseId(courseDTO.getCourseId());
+		Course courseEntity;
+
+		if (courseDTO.getCourseId() != 0) {
+			courseEntity = courseRepository.findById(courseDTO.getCourseId())
+					.orElseThrow(() -> new RuntimeException("Course not found"));
+		} else {
+			courseEntity = new Course();
+			courseEntity.setCreateAt(new Date());
+		}
+
 		courseEntity.setName(courseDTO.getName());
 		courseEntity.setStatus(courseDTO.getStatus());
 		courseEntity.setDescription(courseDTO.getDescription());
 		courseEntity.setAvatar(courseDTO.getAvatar());
 		courseEntity.setPrice(courseDTO.getPrice());
 		courseEntity.setTopic(courseDTO.getTopic());
-		Category category = categoryRepo.findByCategoryId(courseDTO.getCategoryId());
-		courseEntity.setCategory(category);
+		courseEntity.setUpdateAt(new Date());
+
+		// Level
 		CourseLevel level = levelRepo.findById(courseDTO.getLevelId()).orElse(null);
 		courseEntity.setCourseLevel(level);
-		courseEntity.setUpdateAt(new Date());
-		courseRepository.save(courseEntity);
-		// Trả về DTo cho để hiển thị
-		return courseDTO;
-	}
 
-	public List<Course> getTopRatedCourses() {
-		return courseRepository.findTopRatedCourses();
+		// Lưu course
+		Course savedCourse = courseRepository.save(courseEntity);
+
+		// === Xử lý category ===
+		List<Integer> inputCategoryIds = courseDTO.getCategoryIds();
+		if (inputCategoryIds != null) {
+			// Lấy danh sách các category từ DB
+			List<Category> newCategories = categoryRepo.findAllById(inputCategoryIds);
+
+			// Lấy danh sách courseCategory hiện tại từ DB
+			List<CourseCategory> currentCourseCategories = courseCategoryRepository.findByCourse(savedCourse);
+
+			// Danh sách categoryId hiện có
+			Set<Integer> existingCategoryIds = currentCourseCategories.stream()
+					.map(cc -> cc.getCategory().getCategoryId()).collect(Collectors.toSet());
+
+			// Xóa các course_category không còn nằm trong danh sách mới
+			for (CourseCategory cc : currentCourseCategories) {
+				if (!inputCategoryIds.contains(cc.getCategory().getCategoryId())) {
+					courseCategoryRepository.delete(cc);
+				}
+			}
+
+			// Thêm mới nếu chưa có
+			for (Category category : newCategories) {
+				if (!existingCategoryIds.contains(category.getCategoryId())) {
+					CourseCategory cc = new CourseCategory();
+					cc.setId(new CourseCategoryId(savedCourse.getCourseId(), category.getCategoryId()));
+					cc.setCourse(savedCourse);
+					cc.setCategory(category);
+					courseCategoryRepository.save(cc);
+				}
+			}
+		}
+
+		return courseDTO;
 	}
 
 	public List<Course> getTopFollowCourses() {
 		return courseRepository.findTop4ByStatusOrderByFollowDesc(1);
-	}
-
-	public Long getNameCourses() {
-		return courseRepository.countCourseNames();
-	}
-
-	public Long getCateCourses() {
-		return courseRepository.countCateNames();
-	}
-
-	public Double getStarCourses() {
-		return courseRepository.countStarAVG();
-	}
-
-	public Long getUserCourses() {
-		return courseRepository.countUserNames();
 	}
 
 	@Autowired
@@ -337,29 +477,30 @@ public class CourseService {
 	public List<Voucher> getRDVoucher() {
 		return voucherRepository.findRandomVouchers();
 	}
-	
-	//Xóa khóa học nháp
+
+	// Xóa khóa học nháp
 	@Transactional
-    public void removeDraftCourse(int courseId) {
-        // Tìm khóa học
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Khóa học không tồn tại"));
+	public void removeDraftCourse(int courseId) {
+		// Tìm khóa học
+		Course course = courseRepository.findById(courseId)
+				.orElseThrow(() -> new RuntimeException("Khóa học không tồn tại"));
 
-        // Xóa tất cả các phần liên quan đến khóa học
-        for (Section section : course.getListSection()) {
-            // Xóa tất cả các bài học trong phần
-            for (Lesson lesson : section.getListLesson()) {
-                lessonRepository.delete(lesson);
-            }
-            // Xóa tất cả các bài kiểm tra trong phần
-            for (Test test : section.getListTest()) {
-                testRepository.delete(test);
-            }
-            // Xóa phần
-            sectionRepository.delete(section);
-        }
+		// Xóa tất cả các phần liên quan đến khóa học
+		for (Section section : course.getListSection()) {
+			// Xóa tất cả các bài học trong phần
+			for (Lesson lesson : section.getListLesson()) {
+				lessonRepository.delete(lesson);
+			}
+			// Xóa tất cả các bài kiểm tra trong phần
+			for (Test test : section.getListTest()) {
+				testRepository.delete(test);
+			}
+			// Xóa phần
+			sectionRepository.delete(section);
+		}
 
-        // Cuối cùng, xóa khóa học
-        courseRepository.delete(course);
-    }
+		// Cuối cùng, xóa khóa học
+		courseRepository.delete(course);
+	}
+
 }
