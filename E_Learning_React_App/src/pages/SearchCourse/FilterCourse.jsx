@@ -11,7 +11,7 @@ function FilterCourse({ setSearchParams }) {
     const [levelId, setLevelId] = useState('');
     const [categorySlug, setCategorySlug] = useState('');
     const [minPrice, setMinPrice] = useState(0);
-    const [maxPrice, setMaxPrice] = useState(1000000);
+    const [maxPrice, setMaxPrice] = useState(5000000);
     const [free, setFree] = useState(false);
 
     const [levels, setLevels] = useState([]);

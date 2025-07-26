@@ -12,7 +12,8 @@ function SearchCourse() {
     const [loading, setLoading] = useState(true);
     const [paginationInfo, setPaginationInfo] = useState({
         page: 0,
-        totalPages: 1,
+        totalPages: 0,
+        totalElements: 0,
     });
 
     useEffect(() => {
@@ -25,6 +26,7 @@ function SearchCourse() {
                 setPaginationInfo({
                     page: response.data.number,
                     totalPages: response.data.totalPages,
+                    totalElements: response.data.totalElements,
                 });
             } catch (error) {
                 console.error('Error fetching courses:', error);
@@ -47,7 +49,7 @@ function SearchCourse() {
                 {/* Nội dung chính: danh sách + phân trang (9 cột) */}
                 <div className="col-lg-9">
                     <div className="d-flex justify-content-end mb-3">
-                        <SortCourse setSearchParams={setSearchParams} />
+                        <SortCourse totalElements={paginationInfo.totalElements} setSearchParams={setSearchParams} />
                     </div>
 
                     <ListCourse loading={loading} courses={courses} />

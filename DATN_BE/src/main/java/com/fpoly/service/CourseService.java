@@ -23,6 +23,7 @@ import com.fpoly.entity.CourseCategoryId;
 import com.fpoly.repository.CategoryRepository;
 import com.fpoly.repository.CourseCategoryRepository;
 import com.fpoly.dto.CourseDetailManagerDTO;
+import com.fpoly.dto.CourseNameSuggestionDTO;
 import com.fpoly.dto.CourseResponseDTO;
 import com.fpoly.dto.CourseSearchRequest;
 import com.fpoly.dto.CourseSearchResponseDTO;
@@ -99,6 +100,14 @@ public class CourseService {
 	public List<Course> getTopRatedCourses() {
 		return courseRepository.findTopRatedCourses();
 	}
+//Header 
+	//Gợi ý tên khóa học
+	public List<CourseNameSuggestionDTO> getCourseNameSuggestions(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return List.of();  // Trả về danh sách rỗng nếu không có từ khóa
+        }
+        return courseRepository.findCourseNamesByKeyword(keyword.trim());
+    }
 
 //SearchCourse Page
 	// Tìm kiếm khóa học có phân trang

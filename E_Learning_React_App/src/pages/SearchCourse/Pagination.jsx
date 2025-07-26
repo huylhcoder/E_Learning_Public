@@ -7,6 +7,9 @@ function Pagination({ page, totalPages, setSearchParams }) {
         const newParams = new URLSearchParams(searchParams);
         newParams.set('page', newPage);
         setSearchParams(newParams);
+
+        // Cuộn lên đầu danh sách (mượt)
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     if (totalPages <= 1) return null;

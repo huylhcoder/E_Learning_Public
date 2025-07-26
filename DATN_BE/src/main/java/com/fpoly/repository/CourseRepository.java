@@ -8,22 +8,26 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-
+import com.fpoly.dto.CourseNameSuggestionDTO;
 import com.fpoly.entity.Course;
-
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Integer> {
-	
+
 //Home Page
-	//Tổng số khóa học + trạng thái đã đăng
+	// Tổng số khóa học + trạng thái đã đăng
 	@Query("SELECT COUNT(c.courseId) FROM Course c WHERE c.status = 1")
 	Long countTotalCoursePublic();
-	
-	//Top 4 khóa học
+
+	// Top 4 khóa học
 	@Query("SELECT c FROM Course c WHERE c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
 	List<Course> getTopRegisteredCourses(Pageable pageable);
 
+//Header
+	// Gợi ý tên khóa học + chỉ gợi ý khóa học với trạng thái công khai
+	@Query("SELECT new com.fpoly.dto.CourseNameSuggestionDTO(c.name) " + "FROM Course c "
+			+ "WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " + "AND c.status = 1")
+	List<CourseNameSuggestionDTO> findCourseNamesByKeyword(@Param("keyword") String keyword);
 
 	// ------------ CÂU TRUY VẤN SQL CỦA HBảo ----------------------------------
 	// 1. LẤY DANH SÁCH KHÓA HỌC CÓ TRẠNG THÁI Status = 1
@@ -136,48 +140,44 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 	// TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
 //	@Query("SELECT TOP 4 c FROM Course c WHERE  c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
 //	List<Course> getTopRegisteredCourses();
-	
-	
-	
+
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
 	@Query("SELECT c FROM Course c LEFT JOIN RegisteredCourse rc ON c.courseId = rc.course.courseId AND rc.user.id = :userId WHERE rc.course IS NULL AND c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
 	List<Course> findCoursesByFollow(@Param("userId") int userId);
-	
+
 	// 11 SẮP XẾP KHÓA HỌC THEO ĐÁNH GIÁ VỚI TRẠNG THÁI Status = 1
 	// TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
 	@Query("SELECT c FROM Course c WHERE c.status = 1 ORDER BY c.averageRating DESC")
 	List<Course> findCoursesByAverageRatingDesc();
-	
+
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
 	@Query("SELECT c FROM Course c LEFT JOIN RegisteredCourse rc ON c.courseId = rc.course.courseId AND rc.user.id = :userId WHERE rc.course IS NULL AND c.status = 1 ORDER BY c.averageRating DESC")
 	List<Course> findCoursesByAverageRatingDesc(@Param("userId") int userId);
-	
+
 	// 12 SẮP XẾP KHÓA HỌC THEO GIÁ TĂNG DẦN VỚI TRẠNG THÁI Status = 1
 	// TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
 	@Query("SELECT c FROM Course c WHERE c.status = 1 ORDER BY c.price ASC")
 	List<Course> findCoursesByPriceAsc();
-	
+
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
 	@Query("SELECT c FROM Course c LEFT JOIN RegisteredCourse rc ON c.courseId = rc.course.courseId AND rc.user.id = :userId WHERE rc.course IS NULL AND c.status = 1 ORDER BY c.price ASC")
 	List<Course> findCoursesByPriceAsc(@Param("userId") int userId);
-	
+
 	// 13 SẮP XẾP KHÓA HỌC THEO GIÁ GIẢM DẦN VỚI TRẠNG THÁI Status = 1
 	// TÌM KIẾM KHÓA HỌC KHI "CHƯA ĐĂNG NHẬP"
 	@Query("SELECT c FROM Course c WHERE c.status = 1 ORDER BY c.price DESC")
 	List<Course> findCoursesByPriceDesc();
+
 	// TÌM KIẾM KHÓA HỌC KHI "ĐÃ ĐĂNG NHẬP"
 	@Query("SELECT c FROM Course c LEFT JOIN RegisteredCourse rc ON c.courseId = rc.course.courseId AND rc.user.id = :userId WHERE rc.course IS NULL AND c.status = 1 ORDER BY c.price DESC")
 	List<Course> findCoursesByPriceDesc(@Param("userId") int userId);
-	
-	// 14 TÌM KIẾM KHÓA HỌC TRONG KHÓA HỌC ĐÃ ĐĂNG KÝ 
-	@Query("SELECT c FROM Course c " +
-		       "JOIN c.listRegisteredCourse rc " +
-		       "WHERE rc.course.courseId = :courseId " +
-		       "AND rc.user.userId = :userId " +
-		       "AND rc.statusPayment = true ")
+
+	// 14 TÌM KIẾM KHÓA HỌC TRONG KHÓA HỌC ĐÃ ĐĂNG KÝ
+	@Query("SELECT c FROM Course c " + "JOIN c.listRegisteredCourse rc " + "WHERE rc.course.courseId = :courseId "
+			+ "AND rc.user.userId = :userId " + "AND rc.statusPayment = true ")
 	List<Course> findCoursesOnRegisteredCourse(@Param("courseId") int courseId, @Param("userId") int userId);
-	
-	//------------------------- HẾT CODE CỦA HBAO ------------------------ 
+
+	// ------------------------- HẾT CODE CỦA HBAO ------------------------
 
 	// HIỂN THỊ DANH SÁCH KHÓA HỌC THEO HASHTAG
 	@Query("SELECT htc.course FROM HashTagOfCourse htc WHERE htc.hashTag.hashTagId = :hashTagId")
@@ -185,10 +185,9 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
 //	Course findByCourseId(int CourseId);
 
-	//List<Course> findByCategoryNameIgnoreCase(String categoryName);
-	
+	// List<Course> findByCategoryNameIgnoreCase(String categoryName);
 
-	//List<Course> findByCategory(Category category);
+	// List<Course> findByCategory(Category category);
 
 	// Cái này của thằng nào làm coi lại ở trên trùng tên nha
 	// List<Course> findCoursesByAverageRatingDesc();

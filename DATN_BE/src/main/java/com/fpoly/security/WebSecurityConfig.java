@@ -50,6 +50,7 @@ public class WebSecurityConfig {
 									String.format("%s/course/top-registered-course", apiPrefix),
 									String.format("%s/course/top-rated", apiPrefix),
 									String.format("%s/course/search", apiPrefix),
+									String.format("%s/course/suggestions", apiPrefix),
 									String.format("%s/course-manager-detail/**", apiPrefix),
 									String.format("%s/course-manager/draft-course", apiPrefix),
 									String.format("%s/course-manager/posted-course", apiPrefix),

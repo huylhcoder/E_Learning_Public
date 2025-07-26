@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fpoly.dto.AnswerDTO;
 import com.fpoly.dto.CourseDetailDTO;
+import com.fpoly.dto.CourseNameSuggestionDTO;
 import com.fpoly.dto.CourseResponseDTO;
 import com.fpoly.dto.CourseSearchRequest;
 import com.fpoly.dto.CourseSearchResponseDTO;
@@ -86,6 +87,13 @@ public class CourseController {
 	public ResponseEntity<List<Course>> findCoursesByFollow() {
 		return ResponseEntity.ok(courseService.getTop4RegisteredCourses());
 	}
+
+//Header
+	//Gợi ý tên khóa học để tìm kiếm
+	@GetMapping("/suggestions")
+    public List<CourseNameSuggestionDTO> getCourseNameSuggestions(@RequestParam("query") String keyword) {
+        return courseService.getCourseNameSuggestions(keyword);
+    }
 
 //Search Course Page
 	// Tìm kiếm khóa học với nhiều param và có phân trang

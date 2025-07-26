@@ -65,7 +65,7 @@
 }
 
 .search-result {
-    width: 361px;
+    // width: 361px; ❌ xoá dòng này
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -74,6 +74,7 @@
     z-index: 1000;
 }
 
+
 .search-title {
     padding: 5px 16px;
     font-size: 14px;
@@ -81,4 +82,28 @@
     color: #888;
     margin-bottom: 0.5rem;
     border-bottom: 1px solid #eee;
+}
+
+.suggestion-item {
+    display: block;
+    padding: 8px 16px;
+    font-size: 15px;
+    color: #333;
+    text-decoration: none;
+    transition: background 0.2s;
+
+    &:hover {
+        background-color: #f5f5f5;
+        color: #0d6efd;
+    }
+}
+
+.search-result {
+    width: 100%; // làm rộng bằng với .search-wrapper
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    margin-top: 8px;
+    padding: 0.5rem 0;
+    z-index: 1000;
 }

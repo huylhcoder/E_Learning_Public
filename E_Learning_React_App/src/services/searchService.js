@@ -1,15 +1,8 @@
-import * as httpRequest from '~/utils/httpRequest';
+import axios from '~/utils/CustomizeAxios';
 
-export const search = async (q, type = 'less') => {
-    try {
-        const res = await httpRequest.get('users/search', {
-            params: {
-                q,
-                type,
-            },
-        });
-        return res.data;
-    } catch (error) {
-        console.log(error);
-    }
+export const search = async (query) => {
+    const res = await axios.get(`/course/suggestions`, {
+        params: { query },
+    });
+    return res.data;
 };
