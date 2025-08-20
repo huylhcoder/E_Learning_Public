@@ -23,6 +23,8 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 	@Query("SELECT c FROM Course c WHERE c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
 	List<Course> getTopRegisteredCourses(Pageable pageable);
 
+//Tìm kiếm  khóa học theo ID
+	Course findByCourseId(int CourseId);
 //Header
 	// Gợi ý tên khóa học + chỉ gợi ý khóa học với trạng thái công khai
 	@Query("SELECT new com.fpoly.dto.CourseNameSuggestionDTO(c.name) " + "FROM Course c "
@@ -192,7 +194,7 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 	// Cái này của thằng nào làm coi lại ở trên trùng tên nha
 	// List<Course> findCoursesByAverageRatingDesc();
 
-	Course findByCourseId(int CourseId);
+
 
 	List<Course> findByStatusIn(List<Integer> statuses);
 

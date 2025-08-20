@@ -36,15 +36,34 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @CrossOrigin("*") // cho phép bên ngoài truy xuất vào thoải mái k ngăn cản gì cả
 @RestController
-@RequestMapping("/api/video_progress")
+@RequestMapping("${api.prefix}/video_progress")
 public class VideoProgressController {
 	@Autowired
     private VideoProgressService videoProgressService;
 	@Autowired
-    private JwtTokenUtils jwtTokenUtils;
+	private UserService UserService;
 	
 	@Autowired
-	private UserService UserService;
+    private JwtTokenUtils jwtTokenUtils;
+	
+
+
+//Learning Page
+	//Lưu  tiến  độ video
+//	@PutMapping("/video-progress")
+//	public ResponseEntity<?> updateVideoProgress(@RequestBody VideoProgressRequest req, @AuthenticationPrincipal User user) {
+//	    VideoProgress vp = videoProgressRepo.findByUserIdAndLessonId(user.getId(), req.getLessonId())
+//	        .orElse(new VideoProgress());
+//	    vp.setUserId(user.getId());
+//	    vp.setLessonId(req.getLessonId());
+//	    vp.setRegisteredCourseId(req.getRegisteredCourseId());
+//	    vp.setPathVideo(req.getPathVideo());
+//	    vp.setUpdate_at(LocalDateTime.now());
+//	    vp.setVideoProgress(req.getVideoProgress());
+//	    videoProgressRepo.save(vp);
+//	    return ResponseEntity.ok("Video progress updated");
+//	}
+
 
     // API để lưu hoặc cập nhật tiến độ video
     @PostMapping("/save")

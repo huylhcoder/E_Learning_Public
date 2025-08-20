@@ -17,8 +17,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "section")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class Section {
@@ -36,6 +42,9 @@ public class Section {
 	
 	@Column(name = "description")
 	private String description;
+	
+	@Column(name = "content_description", columnDefinition = "NVARCHAR(MAX)")
+	private String contentDescription; //Quill Text Editor
 	
 	@Column(name = "section_duration")
 	private float sectionDuration;
@@ -58,86 +67,5 @@ public class Section {
 	
 	@JsonIgnore
 	@OneToMany(mappedBy = "section")
-	List<Test> listTest;
-
-	public int getSectionId() {
-		return sectionId;
-	}
-
-	public Course getCourse() {
-		return course;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public float getSectionDuration() {
-		return sectionDuration;
-	}
-
-	public Date getCreateAt() {
-		return createAt;
-	}
-
-	public Date getUpdateAt() {
-		return updateAt;
-	}
-
-	public List<Lesson> getListLesson() {
-		return listLesson;
-	}
-
-	public List<Material> getListMaterial() {
-		return listMaterial;
-	}
-
-	public List<Test> getListTest() {
-		return listTest;
-	}
-
-	public void setSectionId(int sectionId) {
-		this.sectionId = sectionId;
-	}
-
-	public void setCourse(Course course) {
-		this.course = course;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public void setSectionDuration(float sectionDuration) {
-		this.sectionDuration = sectionDuration;
-	}
-
-	public void setCreateAt(Date createAt) {
-		this.createAt = createAt;
-	}
-
-	public void setUpdateAt(Date updateAt) {
-		this.updateAt = updateAt;
-	}
-
-	public void setListLesson(List<Lesson> listLesson) {
-		this.listLesson = listLesson;
-	}
-
-	public void setListMaterial(List<Material> listMaterial) {
-		this.listMaterial = listMaterial;
-	}
-
-	public void setListTest(List<Test> listTest) {
-		this.listTest = listTest;
-	}
-	
+	List<Test> listTest;	
 }

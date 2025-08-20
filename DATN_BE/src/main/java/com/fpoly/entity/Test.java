@@ -17,8 +17,14 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "test")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class Test {
@@ -63,93 +69,4 @@ public class Test {
 	@JsonIgnore
 	@OneToMany(mappedBy = "test")
 	List<UserAnswerHistory> listUserAnswerHistory;
-
-	public int getTestId() {
-		return testId;
-	}
-
-	public void setTestId(int testId) {
-		this.testId = testId;
-	}
-
-	public Section getSection() {
-		return section;
-	}
-
-	public void setSection(Section section) {
-		this.section = section;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public String getNumberOfQuestion() {
-		return numberOfQuestion;
-	}
-
-	public void setNumberOfQuestion(String numberOfQuestion) {
-		this.numberOfQuestion = numberOfQuestion;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public Date getCreateAt() {
-		return createAt;
-	}
-
-	public void setCreateAt(Date createAt) {
-		this.createAt = createAt;
-	}
-
-	public Date getUpdateAt() {
-		return updateAt;
-	}
-
-	public void setUpdateAt(Date updateAt) {
-		this.updateAt = updateAt;
-	}
-
-	public List<UserTestResult> getListUserTestResult() {
-		return listUserTestResult;
-	}
-
-	public void setListUserTestResult(List<UserTestResult> listUserTestResult) {
-		this.listUserTestResult = listUserTestResult;
-	}
-
-	public List<Question> getListQuestion() {
-		return listQuestion;
-	}
-
-	public void setListQuestion(List<Question> listQuestion) {
-		this.listQuestion = listQuestion;
-	}
-
-	public int getCountdownTimer() {
-		return countdownTimer;
-	}
-
-	public List<UserAnswerHistory> getListUserAnswerHistory() {
-		return listUserAnswerHistory;
-	}
-
-	public void setCountdownTimer(int countdownTimer) {
-		this.countdownTimer = countdownTimer;
-	}
-
-	public void setListUserAnswerHistory(List<UserAnswerHistory> listUserAnswerHistory) {
-		this.listUserAnswerHistory = listUserAnswerHistory;
-	}
-
 }

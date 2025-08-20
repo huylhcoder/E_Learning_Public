@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,14 +17,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.fpoly.dto.AnswerDTO;
 import com.fpoly.dto.QuestionDTO;
 import com.fpoly.dto.TestDTO;
+import com.fpoly.dto.quiz.SaveAnswerRequest;
+import com.fpoly.dto.quiz.TestQuestionsDTO;
+import com.fpoly.dto.quiz.TestResultDTO;
 import com.fpoly.entity.Answer;
 import com.fpoly.entity.CourseProgress;
 import com.fpoly.entity.Question;
-import com.fpoly.entity.RegisteredCourse;
 import com.fpoly.entity.Test;
 import com.fpoly.entity.User;
 import com.fpoly.entity.UserAnswerHistory;
@@ -60,6 +64,58 @@ public class TestController {
 	@Autowired
 	private CourseProgressService courseProgressService;
 
+//Quiz Page
+	//Kêt quả bài kiểm tra của người dùng
+	@GetMapping("/{testId}/result")
+	public ResponseEntity<UserTestResult> getTestResult(@PathVariable Integer testId,
+			@RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", ""));
+		return ResponseEntity.ok(testService.getOrCreateTestResult(testId, email));
+	}
+	
+	//Hiển thị đáp án cho người dùng theo dõi
+	@GetMapping("/{testId}/answers")
+	public ResponseEntity<TestResultDTO> getTestResultWithAnswers(
+	        @PathVariable Integer testId,
+	        @RequestHeader("Authorization") String token) {
+	    String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", ""));
+	    return ResponseEntity.ok(testService.getTestResultWithAnswers(testId, email));
+	}
+	
+	//Hiển thị danh sách câu hỏi cho ngươi dùng làm
+	@GetMapping("/{testId}/questions")
+	public ResponseEntity<TestQuestionsDTO> getTestQuestions(@PathVariable Integer testId,
+			@RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", ""));
+		return ResponseEntity.ok(testService.getTestQuestions(testId, email));
+	}
+
+	//Lưu đáp án mà người dùng chọn
+	@PostMapping("/{testId}/answer")
+	public ResponseEntity<Void> saveAnswer(@PathVariable Integer testId, @RequestBody SaveAnswerRequest request,
+			@RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", ""));
+		testService.saveUserAnswer(testId, request, email);
+		return ResponseEntity.ok().build();
+	}
+	
+	//Nộp bài kiểm tra, thực hiện chấm điểm
+	@PostMapping("/{testId}/submit")
+	public ResponseEntity<UserTestResult> submitTest(@PathVariable Integer testId,
+			@RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", ""));
+		return ResponseEntity.ok(testService.submitTest(testId, email));
+	}
+
+	//Set score =  0  và xóa danh sách đáp án mà người dùng đã chọn
+	@DeleteMapping("/{testId}/reset")
+	public ResponseEntity<Void> resetTest(@PathVariable Integer testId, @RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", ""));
+		testService.resetTest(testId, email);
+		return ResponseEntity.ok().build();
+	}
+
+//Khác
 	// Kiểm tra đã làm bài test hay chưa => Hiển thị bài kiểm tra hoặc hiển thị kết
 	// quả
 	@GetMapping("/check-if-the-user-has-taken-the-quiz/{testId}")
@@ -202,7 +258,7 @@ public class TestController {
 
 		// Tính tỷ lệ phần trăm
 		score = ((float) numberOfCorrectAnswer / questions.size()) * 10;
-		System.out.println(score);
+		System.out.println("Điểm: " + score);
 
 		// Tìm kết quả bài kiểm tra của người dùng
 		UserTestResult userTestResult = userTestResultService.findByUserAndTest(user, test);
@@ -331,32 +387,6 @@ public class TestController {
 
 		public void setAnswerId(int answerId) {
 			this.answerId = answerId;
-		}
-	}
-
-	// DTO cho kết quả bài kiểm tra
-	public static class TestResultDTO {
-		private float score;
-		private int totalQuestions;
-		private double percentage;
-
-		public TestResultDTO(float score, int totalQuestions, double percentage) {
-			this.score = score;
-			this.totalQuestions = totalQuestions;
-			this.percentage = percentage;
-		}
-
-		// Getters
-		public float getScore() {
-			return score;
-		}
-
-		public int getTotalQuestions() {
-			return totalQuestions;
-		}
-
-		public double getPercentage() {
-			return percentage;
 		}
 	}
 

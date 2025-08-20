@@ -20,36 +20,38 @@ import com.fpoly.entity.Category;
 import com.fpoly.entity.Course;
 import com.fpoly.entity.CourseCategory;
 import com.fpoly.entity.CourseCategoryId;
-import com.fpoly.repository.CategoryRepository;
-import com.fpoly.repository.CourseCategoryRepository;
+
 import com.fpoly.dto.CourseDetailManagerDTO;
+import com.fpoly.dto.CourseDetailSearchDTO;
+import com.fpoly.dto.CourseDetailSearchCategoryDTO;
+import com.fpoly.dto.CourseDetailSearchSectionDTO;
 import com.fpoly.dto.CourseNameSuggestionDTO;
-import com.fpoly.dto.CourseResponseDTO;
-import com.fpoly.dto.CourseSearchRequest;
 import com.fpoly.dto.CourseSearchResponseDTO;
 import com.fpoly.dto.FunFactDTO;
-import com.fpoly.entity.Category;
-import com.fpoly.entity.Course;
+import com.fpoly.dto.learning.CourseDetailDTO;
+import com.fpoly.dto.learning.LessonDTO;
+import com.fpoly.dto.learning.SectionDTO;
+import com.fpoly.dto.learning.TestDTO;
 import com.fpoly.entity.CourseLevel;
-import com.fpoly.entity.HashTagOfCourse;
 import com.fpoly.entity.Lesson;
-import com.fpoly.entity.RegisteredCourse;
 import com.fpoly.entity.Section;
 import com.fpoly.entity.Test;
 import com.fpoly.entity.User;
 import com.fpoly.entity.Voucher;
-
+import com.fpoly.repository.CartRepository;
 import com.fpoly.repository.CategoryRepository;
+import com.fpoly.repository.CommentRepository;
+import com.fpoly.repository.CourseCategoryRepository;
 import com.fpoly.repository.CourseLevelRepository;
 import com.fpoly.repository.CourseRepository;
 import com.fpoly.repository.CourseRepositoryCustom;
-import com.fpoly.repository.HashtagOfCourseRepository;
 import com.fpoly.repository.LessonRepository;
 import com.fpoly.repository.RegisteredCourseRepository;
 import com.fpoly.repository.SectionRepository;
 import com.fpoly.repository.TestRepository;
 import com.fpoly.repository.UserRepository;
 import com.fpoly.repository.VoucherRepository;
+import com.fpoly.security.JwtTokenUtils;
 
 @Service
 public class CourseService {
@@ -61,6 +63,8 @@ public class CourseService {
 	private CategoryRepository categoryRepository;
 	@Autowired
 	private CategoryRepository categoryRepo;
+	@Autowired
+	private CommentRepository commentRepository;
 	@Autowired
 	private CourseLevelRepository levelRepo;
 	@Autowired
@@ -75,9 +79,14 @@ public class CourseService {
 	private CourseCategoryRepository courseCategoryRepository;
 	@Autowired
 	private UserRepository userRepository;
-	
+	@Autowired
+	private CartRepository cartRepository;
+
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private JwtTokenUtils jwtTokenUtils;
 
 //Home Page
 	// Funfact
@@ -100,70 +109,117 @@ public class CourseService {
 	public List<Course> getTopRatedCourses() {
 		return courseRepository.findTopRatedCourses();
 	}
+
 //Header 
-	//Gợi ý tên khóa học
+	// Gợi ý tên khóa học
 	public List<CourseNameSuggestionDTO> getCourseNameSuggestions(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return List.of();  // Trả về danh sách rỗng nếu không có từ khóa
-        }
-        return courseRepository.findCourseNamesByKeyword(keyword.trim());
-    }
+		if (keyword == null || keyword.trim().isEmpty()) {
+			return List.of(); // Trả về danh sách rỗng nếu không có từ khóa
+		}
+		return courseRepository.findCourseNamesByKeyword(keyword.trim());
+	}
 
 //SearchCourse Page
 	// Tìm kiếm khóa học có phân trang
-	public Page<CourseSearchResponseDTO> searchCoursesWithFilters(
-	        String email,
-	        String category,
-	        String courseName,
-	        Boolean free,
-	        Float minPrice,
-	        Float maxPrice,
-	        Integer ratedStar,
-	        Integer levelId,
-	        Boolean priceASC,
-	        Boolean priceDESC,
-	        int page,
-	        int size
-	) {
-	    Pageable pageable;
-	    if (Boolean.TRUE.equals(priceASC)) {
-	        pageable = PageRequest.of(page, size, Sort.by("price").ascending());
-	    } else if (Boolean.TRUE.equals(priceDESC)) {
-	        pageable = PageRequest.of(page, size, Sort.by("price").descending());
-	    } else {
-	        pageable = PageRequest.of(page, size, Sort.by("averageRating").descending().and(Sort.by("follow").descending()));
-	    }
+	public Page<CourseSearchResponseDTO> searchCoursesWithFilters(String email, String category, String courseName,
+			Boolean free, Float minPrice, Float maxPrice, Integer ratedStar, Integer levelId, Boolean priceASC,
+			Boolean priceDESC, int page, int size) {
+		Pageable pageable;
+		if (Boolean.TRUE.equals(priceASC)) {
+			pageable = PageRequest.of(page, size, Sort.by("price").ascending());
+		} else if (Boolean.TRUE.equals(priceDESC)) {
+			pageable = PageRequest.of(page, size, Sort.by("price").descending());
+		} else {
+			pageable = PageRequest.of(page, size,
+					Sort.by("averageRating").descending().and(Sort.by("follow").descending()));
+		}
 
-	    // Gọi repository tùy chỉnh để thực hiện truy vấn động
-	    Page<Course> coursePage = courseRepositoryCustom.searchCourses(
-	            category, courseName, free, minPrice, maxPrice, ratedStar, levelId, pageable);
+		// Gọi repository tùy chỉnh để thực hiện truy vấn động
+		Page<Course> coursePage = courseRepositoryCustom.searchCourses(category, courseName, free, minPrice, maxPrice,
+				ratedStar, levelId, pageable);
 
-	    // Khai báo biến final để sử dụng trong lambda
-	    final Set<Integer> registeredCourseIds;
+		// Khai báo biến final để sử dụng trong lambda
+		final Set<Integer> registeredCourseIds;
 
-	    if (email != null) {
-	        User user = userService.getUserByEmailToan(email);
-	        registeredCourseIds = registeredCourseRepository.findCourseIdsByUserId(user.getUserId());
-	    } else {
-	        registeredCourseIds = Collections.emptySet(); // không đăng nhập thì set rỗng
-	    }
+		if (email != null) {
+			User user = userService.getUserByEmailToan(email);
+			registeredCourseIds = registeredCourseRepository.findCourseIdsByUserId(user.getUserId());
+		} else {
+			registeredCourseIds = Collections.emptySet(); // không đăng nhập thì set rỗng
+		}
 
-	    // Trả về kết quả sau khi map sang DTO
-	    return coursePage.map(course -> {
-	        boolean isRegistered = registeredCourseIds.contains(course.getCourseId());
-	        return new CourseSearchResponseDTO(
-	                course.getCourseId(),
-	                course.getName(),
-	                course.getAvatar(),
-	                course.getPrice(),
-	                course.getAverageRating(),
-	                course.getFollow(),
-	                isRegistered
-	        );
-	    });
+		// Trả về kết quả sau khi map sang DTO
+		return coursePage.map(course -> {
+			boolean isRegistered = registeredCourseIds.contains(course.getCourseId());
+			return new CourseSearchResponseDTO(course.getCourseId(), course.getName(), course.getAvatar(),
+					course.getPrice(), course.getAverageRating(), course.getFollow(), isRegistered);
+		});
 	}
 
+//CourseDetailPage
+	public CourseDetailSearchDTO getCourseDetail(int courseId, String token) {
+		Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Course not found"));
 
+		int totalComments = commentRepository.countByCourse_CourseId(courseId);
+		int totalRegistered = registeredCourseRepository.countByCourse_CourseIdAndStatusPaymentTrue(courseId);
+
+		List<CourseDetailSearchCategoryDTO> categories = courseCategoryRepository.findByCourse_CourseId(courseId)
+				.stream()
+				.map(cc -> new CourseDetailSearchCategoryDTO(cc.getCategory().getSlug(), cc.getCategory().getName()))
+				.collect(Collectors.toList());
+
+		List<CourseDetailSearchSectionDTO> sections = sectionRepository.findByCourse_CourseId(courseId).stream()
+				.map(section -> new CourseDetailSearchSectionDTO(section.getName(), section.getDescription(),
+						section.getContentDescription()))
+				.collect(Collectors.toList());
+
+		// Xử lý trạng thái thanh toán
+		boolean isPaid = false;
+		boolean isInCart = false;
+		if (token != null && token.startsWith("Bearer ")) {
+			try {
+				String jwt = token.replace("Bearer ", "").trim();
+				String email = jwtTokenUtils.extractEmail(jwt);
+				User user = userService.getUserByEmailToan(email);
+				isPaid = registeredCourseRepository
+						.existsByUser_UserIdAndCourse_CourseIdAndStatusPaymentTrue(user.getUserId(), courseId);
+				isInCart = cartRepository.existsByUser_UserIdAndCourse_CourseId(user.getUserId(), courseId);
+			} catch (Exception e) {
+				System.err.println("Lỗi xử lý token: " + e.getMessage());
+			}
+		}
+
+		return new CourseDetailSearchDTO(course.getCourseId(), course.getAvatar(), course.getName(),
+				course.getAverageRating(), course.getDescription(), course.getContentDescription(), course.getPrice(),
+				course.getCourseLevel() != null ? course.getCourseLevel().getName() : null, totalComments,
+				totalRegistered, isPaid, // boolean
+				isInCart, categories, sections);
+
+	}
+
+//Learning
+	public CourseDetailDTO getCourseDetail(int courseId) {
+		Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Not found"));
+
+		List<SectionDTO> sectionDTOs = course.getListSection().stream().map(section -> {
+			List<LessonDTO> lessons = section.getListLesson().stream()
+					.map(l -> new LessonDTO(l.getLessonId(), l.getName(), l.getDescription(), null, l.getLessionDuration(), null, false)).toList();
+
+			List<TestDTO> tests = section.getListTest().stream()
+					.map(t -> new TestDTO(t.getTestId(), t.getTitle(), null, null, 0)).toList();
+
+			return new SectionDTO(section.getSectionId(), section.getName(), lessons, tests);
+		}).toList();
+
+		return new CourseDetailDTO(course.getCourseId(), course.getName(), course.getTopic(), course.getDescription(),
+				sectionDTOs);
+	}
+
+//Method cũ
+
+	public Optional<Course> timKhoaHocTheoMaKhoaHocHuy(int courseId) {
+		return courseRepository.findById(courseId);
+	}
 
 	public Course timKhoaHocTheoMaKhoaHocToan(int courseId) {
 		return courseRepository.findByCourseId(courseId);
@@ -171,10 +227,6 @@ public class CourseService {
 
 	public List<Course> getAllCourse() {
 		return courseRepository.findAll();
-	}
-
-	public Optional<Course> timKhoaHocTheoMaKhoaHocHuy(int courseId) {
-		return courseRepository.findById(courseId);
 	}
 
 	public Optional<Course> timKhoaHocTheoMaKhoaHocTam(int courseId) {

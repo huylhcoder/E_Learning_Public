@@ -56,6 +56,9 @@ public class Course {
 
 	@Column(name = "description")
 	private String description;
+	
+	@Column(name = "content_description", columnDefinition = "NVARCHAR(MAX)")
+	private String contentDescription; //Quill Text Editor
 
 	@Column(name = "path_video_demo")
 	private String pathVideoDemo;

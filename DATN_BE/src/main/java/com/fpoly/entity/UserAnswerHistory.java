@@ -14,8 +14,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_answer_history")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class UserAnswerHistory {
@@ -50,61 +56,5 @@ public class UserAnswerHistory {
 	@Temporal(TemporalType.DATE)
 	@Column(name = "created_ad")
 	private Date createAt;
-
-	public int getUserAnswerHistoryId() {
-		return userAnswerHistoryId;
-	}
-
-	public void setUserAnswerHistoryId(int userAnswerHistoryId) {
-		this.userAnswerHistoryId = userAnswerHistoryId;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public Question getQuestion() {
-		return question;
-	}
-
-	public void setQuestion(Question question) {
-		this.question = question;
-	}
-
-	public Answer getAnswer() {
-		return answer;
-	}
-
-	public void setAnswer(Answer answer) {
-		this.answer = answer;
-	}
-
-	public boolean isCorrect() {
-		return isCorrect;
-	}
-
-	public void setCorrect(boolean isCorrect) {
-		this.isCorrect = isCorrect;
-	}
-
-	public Date getCreateAt() {
-		return createAt;
-	}
-
-	public void setCreateAt(Date createAt) {
-		this.createAt = createAt;
-	}
-
-	public Test getTest() {
-		return test;
-	}
-
-	public void setTest(Test test) {
-		this.test = test;
-	}
 
 }

@@ -115,14 +115,6 @@ const learnController = function ($scope, $http, $location, $rootScope, $window)
   };
   $scope.lessonsProgress = []; // Mảng lưu tiến độ của các bài học trong khóa học
 
-  // Hàm cập nhật tiến độ cho tất cả bài học có cùng registerCourseId
-
-  // $scope.updateCourseProgress = function () {
-  //   if ($scope.totalLession > 0) {
-  //     const newProgress =
-  //       (($scope.totalLessionComplete + $scope.totalTestComplete) /
-  //         ($scope.totalLession + $scope.totalQuiz)) *
-  //       100;
   $scope.updateCourseProgress = function () {
     if ($scope.totalLession > 0) {
       const newProgress =
@@ -137,12 +129,7 @@ const learnController = function ($scope, $http, $location, $rootScope, $window)
       if (newProgress > $scope.progressPercentage) {
         $scope.progressPercentage = Math.round(newProgress); // Làm tròn tiến độ khóa học về số nguyên
 
-        // Cập nhật giao diện thanh tiến độ
         const progressBar = document.getElementById("progressBarCourse");
-        // const progress =
-        //   (($scope.totalLessionComplete + $scope.totalTestComplete) /
-        //     ($scope.totalLession + $scope.totalQuiz)) *
-        //   100;
         const progress = ($scope.totalLessionComplete + $scope.totalTestComplete) /
           ($scope.totalLession + $scope.totalQuiz) * 100;
         progressBar.style.setProperty("--progress", progress.toFixed(0));
@@ -152,8 +139,6 @@ const learnController = function ($scope, $http, $location, $rootScope, $window)
         } else {
           progressBar.style.backgroundColor = "IndianRed";
         }
-
-        //document.querySelector("span#completionTick").style.display = newProgress >= 100 ? "inline" : "none"; // Hiển thị dấu tick khi hoàn thành
 
         document.querySelector("span#completionTick").style.display = newProgress >= 100 ? 'inline' : 'none'; // Hiển thị dấu tick khi hoàn thành
 
@@ -221,11 +206,6 @@ const learnController = function ($scope, $http, $location, $rootScope, $window)
     videoElement.addEventListener("pause", function () {
       const progress = (videoElement.currentTime / videoElement.duration) * 100;
       const videoProgress = videoElement.currentTime;
-
-      // Kiểm tra nếu video đã xem hết (hoặc tiến độ gần 100%)
-      // if (progress >= 100) {
-      // Lưu tiến độ khi video đã xem hết
-      //$scope.saveVideoProgress(lessonId, videoElement.src, progress.toFixed(0));
       $scope.saveVideoProgress(
         lessonId,
         videoElement.src,
@@ -299,7 +279,6 @@ const learnController = function ($scope, $http, $location, $rootScope, $window)
 
           if (videoProgress) {
             // Tính toán tiến độ video và cập nhật thanh tiến độ
-            //const progress = (videoProgress.videoProgress / lesson.duration) * 100; // Giả sử bạn có thuộc tính `duration` cho video
             const progress = (videoProgress.videoProgress / lesson.duration) * 100; // Giả sử bạn có thuộc tính `duration` cho video
             const progressBar = document.getElementById("progressBar");
 
@@ -318,7 +297,6 @@ const learnController = function ($scope, $http, $location, $rootScope, $window)
             videoElement.currentTime = videoProgress.videoProgress;
 
             // Cập nhật tiến độ khóa học
-            // $scope.courseProgress = videoProgress.totalProgress; // Lấy tổng tiến độ khóa học từ dữ liệu API
             $scope.updateCourseProgress(); // Cập nhật thanh tiến độ khóa học
           }
 
@@ -503,35 +481,7 @@ const learnController = function ($scope, $http, $location, $rootScope, $window)
     };
     $scope.comment.statRating = rating; // Gán giá trị sao được chọn
   };
-  // $scope.addCMT = function () {
-  //   if (!$scope.comment.statRating || $scope.comment.statRating === 0) {
-  //     alert("Vui lòng chọn số sao trước khi gửi đánh giá.");
-  //     return;
-  // }
 
-  //   const comment = {
-  //     courseId: id,
-  //     content: $scope.comment.content,
-  //     starRating: $scope.comment.statRating
-  //   };
-
-  //   $http({
-  //     method: 'POST',
-  //     url: `http://localhost:8080/api/v1/comment/${token}`,
-  //     data: comment,
-  //     headers: {
-  //       'Authorization': `Bearer ${token}`
-  //     }
-  //   }).then(function (resp) {
-  //     console.log("Thêm comment mới thành công", resp);
-  //     $scope.listComment.push(resp.data);
-  //     $scope.comment.content = "";
-  //     $scope.comment.statRating = 0;
-  //     $scope.loadListComment(); // Reload lại trang (không khuyến khích cách này, nhưng đúng logic bạn đưa ra)
-  //   }).catch(function (err) {
-  //     console.error("Lỗi không thể thêm comment mới", err);
-  //   });
-  // };
   $scope.addCMT = function () {
     if (!$scope.comment.statRating || $scope.comment.statRating === 0) {
       // Hiển thị thông báo lỗi bằng SweetAlert2
@@ -631,96 +581,10 @@ const learnController = function ($scope, $http, $location, $rootScope, $window)
         alert("Không thể tải tiến trình khóa học. Vui lòng thử lại sau.");
       });
 
-    // $http.get(urlCourseProgress, {
-    //   headers: {
-    //     'Authorization': `Bearer ${token}`
-    //   }
-    // }).then((response) => {
-    //   $scope.listCourseProgress = response.data;
-    //   console.log("Tiến trình khóa học đã được tải:", $scope.listCourseProgress);
-
-    //   // Lấy trực tiếp progressPercentage từ dữ liệu API trả về
-    //   $scope.progressPercentage = $scope.listCourseProgress.progressPercentage;
-
-    //   // Cập nhật thanh tiến độ
-    //   document.getElementById('progressBarCourse').style.setProperty('--progress', $scope.progressPercentage + '%');
-
-
-    // }).catch((error) => {
-    //   console.error("Lỗi không thể tải dữ liệu:", error);
-    //   alert("Không thể tải tiến trình khóa học. Vui lòng thử lại sau.");
-    // });
   };
 
   // Gọi hàm lấy tiến trình khóa học
   $scope.getCourseProgress();
-
-  // - Phát chứng chỉ
-  // $scope.receiveCertificate = function () {
-  //   if (!token || !id) {
-  //     Swal.fire({
-  //       title: "Token hoặc ID khóa học không hợp lệ!",
-  //       icon: "warning",
-  //     });
-  //     return;
-  //   }
-  //   Swal.fire({
-  //     title: "Bạn có muốn nhận chứng chỉ không ?",
-  //     icon: "question",
-  //     showCancelButton: true,
-  //     confirmButtonText: "Có",
-  //     cancelButtonText: "Hủy",
-  //   }).then((result) => {
-  //     if (result.isConfirmed) {
-  //       Swal.fire({
-  //         title: "Đang xử lý...",
-  //         allowOutsideClick: false,
-  //         didOpen: () => {
-  //           Swal.showLoading();
-  //         },
-  //       });
-  //       $http
-  //         .post(
-  //           `http://localhost:8080/api/v1/user/sendCertificate/${id}`,
-  //           null,
-  //           {
-  //             headers: {
-  //               Authorization: `Bearer ${token}`,
-  //             },
-  //           }
-  //         )
-  //         .then((resp) => {
-  //           Swal.fire({
-  //             title: resp.data.message,
-  //             icon: "success",
-  //           });
-  //           $window.location.reload();
-  //         })
-  //         .catch((err) => {
-  //           const message =
-  //             err.data?.message ||
-  //             (err.status === -1
-  //               ? "Không thể kết nối đến server."
-  //               : "Có lỗi xảy ra. Vui lòng thử lại sau.");
-  //           Swal.fire({
-  //             title: message,
-  //             icon: "error",
-  //           });
-  //         });
-  //         setInterval(function () {
-  //           $window.location.reload();
-  //         }, 1000);
-  //         //$window.location.reload();
-  //       }).catch(err => {
-  //         const message = err.data?.message || (err.status === -1 ? "Không thể kết nối đến server." : "Có lỗi xảy ra. Vui lòng thử lại sau.");
-  //         Swal.fire({
-  //           title: message,
-  //           icon: "error"
-  //         });
-  //       });
-  //     }
-  //   });
-  // };
 
   $scope.receiveCertificate = function () {
     if (!token || !id) {

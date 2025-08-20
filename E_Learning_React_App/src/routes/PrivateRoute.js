@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { introspect } from '~/services/authService';
+import { introspect} from '~/services/AuthenticationService';
 import LoadingSpinner from '~/components/LoadingSpinner';
 
 const PrivateRoute = ({ children }) => {

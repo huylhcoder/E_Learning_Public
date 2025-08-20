@@ -3,7 +3,9 @@ package com.fpoly.entity;
 import java.util.Date;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,9 +18,17 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "lesson")
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Lesson {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,6 +47,9 @@ public class Lesson {
 
 	@Column(name = "description")
 	private String description;
+	
+	@Column(name = "content_description", columnDefinition = "NVARCHAR(MAX)")
+	private String contentDescription; //Quill Text Editor
 
 	@Temporal(TemporalType.DATE)
 	@Column(name = "create_at")
@@ -51,78 +64,9 @@ public class Lesson {
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "lesson")
-	List<LessonComplete> listLessonComplete;
-
-	public int getLessonId() {
-		return lessonId;
-	}
-
-	public Section getSection() {
-		return section;
-	}
-
-	public float getLessionDuration() {
-		return lessionDuration;
-	}
-
-	public String getPathVideo() {
-		return pathVideo;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public Date getCreateAt() {
-		return createAt;
-	}
-
-	public Date getUpdateAt() {
-		return updateAt;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public List<LessonComplete> getListLessonComplete() {
-		return listLessonComplete;
-	}
-
-	public void setLessonId(int lessonId) {
-		this.lessonId = lessonId;
-	}
-
-	public void setSection(Section section) {
-		this.section = section;
-	}
-
-	public void setLessionDuration(float lessionDuration) {
-		this.lessionDuration = lessionDuration;
-	}
-
-	public void setPathVideo(String pathVideo) {
-		this.pathVideo = pathVideo;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public void setCreateAt(Date createAt) {
-		this.createAt = createAt;
-	}
-
-	public void setUpdateAt(Date updateAt) {
-		this.updateAt = updateAt;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public void setListLessonComplete(List<LessonComplete> listLessonComplete) {
-		this.listLessonComplete = listLessonComplete;
-	}
+	List<LessonComplete> listLessonComplete;	
 	
+	@JsonIgnore
+	@OneToMany(mappedBy = "currentLesson")
+	List<CourseProgress> listCourseProgress;	
 }

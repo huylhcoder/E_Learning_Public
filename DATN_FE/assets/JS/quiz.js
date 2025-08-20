@@ -16,23 +16,6 @@ app.controller("quizController", function ($scope, $http, $window, $location) {
   $scope.isSubmitted = false;
   const userId = 2;
 
-  //   $scope.checkTested = function(){
-  //     $http
-  //         .get("http://localhost:8080/api/v1/test/check-if-the-user-has-taken-the-quiz/" + $scope.id, {
-  //           headers: {
-  //             Authorization: `Bearer ${token}`,
-  //           },
-  //         })
-  //         .then(
-  //           function (res) {
-  //            $scope.isSubmitted = res;
-  //           },
-  //           function (err) {
-  //             console.error("Lỗi khi request môn học:", err);
-  //           }
-  //         );
-  //   };
-  //   $scope.checkTested();
 
   // Khởi tạo khi load trang
   $scope.init = function () {

@@ -12,8 +12,14 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "user_test_result")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class UserTestResult {
@@ -52,85 +58,13 @@ public class UserTestResult {
 	
 	@Column(name = "max_score")
 	private float maxScore;
-
-	public int getUserTestResultId() {
-		return userTestResultId;
-	}
-
-	public void setUserTestResultId(int userTestResultId) {
-		this.userTestResultId = userTestResultId;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public Test getTest() {
-		return test;
-	}
-
-	public void setTest(Test test) {
-		this.test = test;
-	}
-
-	public float getScore() {
-		return score;
-	}
-
-	public void setScore(float score) {
-		this.score = score;
-	}
-
-	public float getCompletionTime() {
-		return completionTime;
-	}
-
-	public void setCompletionTime(float completionTime) {
-		this.completionTime = completionTime;
-	}
-
-	public int getNumberOfCorrectAnswer() {
-		return numberOfCorrectAnswer;
-	}
-
-	public void setNumberOfCorrectAnswer(int numberOfCorrectAnswer) {
-		this.numberOfCorrectAnswer = numberOfCorrectAnswer;
-	}
-
-	public boolean isStatus() {
-		return status;
-	}
-
-	public void setStatus(boolean status) {
-		this.status = status;
-	}
-
-	public Date getCreateAt() {
-		return createAt;
-	}
-
-	public void setCreateAt(Date createAt) {
-		this.createAt = createAt;
-	}
-
-	public Date getUpdateAt() {
-		return updateAt;
-	}
-
-	public void setUpdateAt(Date updateAt) {
-		this.updateAt = updateAt;
-	}
-
-	public float getMaxScore() {
-		return maxScore;
-	}
-
-	public void setMaxScore(float maxScore) {
-		this.maxScore = maxScore;
-	}
 	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "start_time")
+	private Date startTime;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "end_time")
+	private Date endTime;
+
 }

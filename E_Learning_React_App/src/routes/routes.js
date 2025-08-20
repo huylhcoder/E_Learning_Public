@@ -10,6 +10,11 @@ import CourseManager from '~/pages/CourseManager';
 import MyCourse from '~/pages/MyCourse';
 import Login from '~/pages/Login';
 import SearchCourse from '~/pages/SearchCourse';
+import Checkout from '~/pages/Checkout/Checkout';
+import PaymentResult from '~/pages/PaymentResult/PaymentResult';
+import Cart from '~/pages/Cart/Cart';
+import Learning from '~/pages/Learning/Learning';
+import Quiz from '~/pages/Quiz/Quiz';
 
 //config.routes.myCourse => myCourse: '/my-course'
 
@@ -19,10 +24,18 @@ const publicRoutes = [
     { path: config.routes.login, component: Login },
     { path: config.routes.searchCourses, component: SearchCourse },
     { path: config.routes.courseDetail, component: CourseDetail },
+    { path: config.routes.cart, component: Cart },
 ];
 
-// User routes (đăng nhập mới xem được)
-const privateRoutes = [{ path: config.routes.myCourse, component: MyCourse }];
+// Private routes (đăng nhập mới xem được)
+// Tại '~/routes/PrivateRoute'; sử dụng introspection để kiểm tra token để trả về isValid 
+// Nếu không có token thì sẽ chuyển hướng về trang login
+const privateRoutes = [{ path: config.routes.myCourse, component: MyCourse },
+    { path: config.routes.paymentResult, component: PaymentResult },
+    { path: config.routes.checkout, component: Checkout },
+    { path: config.routes.learning, component: Learning },
+    { path: config.routes.quiz, component: Quiz },
+];
 
 // Admin routes (phải là admin)
 const adminRoutes = [{ path: config.routes.courseManager, component: CourseManager, layout: AdminLayout }];

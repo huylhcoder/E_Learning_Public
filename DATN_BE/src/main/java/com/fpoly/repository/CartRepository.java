@@ -15,6 +15,9 @@ import jakarta.transaction.Transactional;
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Integer> {
 	
+//CourseDetail
+	boolean existsByUser_UserIdAndCourse_CourseId(int userId, int courseId);
+	
 	// Phần câu lệnh query của HBao
 	
 	// - hiển thị danh sách  khóa học trong giỏ hàng theo id khách hàng

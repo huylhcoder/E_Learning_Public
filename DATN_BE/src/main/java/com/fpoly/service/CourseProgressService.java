@@ -6,30 +6,117 @@ import java.util.Optional;
 import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import com.fpoly.dto.UpdateLessonRequest;
+import com.fpoly.dto.learning.CourseProgressDTO;
+import com.fpoly.dto.learning.LessonDTO;
 import com.fpoly.entity.Course;
 import com.fpoly.entity.CourseProgress;
+import com.fpoly.entity.Lesson;
 import com.fpoly.entity.User;
 import com.fpoly.entity.Voucher;
 import com.fpoly.repository.AnswerRepository;
 import com.fpoly.repository.CourseProgressRepository;
 import com.fpoly.repository.CourseRepository;
+import com.fpoly.repository.LessonRepository;
 import com.fpoly.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.fpoly.security.JwtTokenUtils;
 import com.fpoly.repository.CourseProgressRepository;
 
 @Service
 public class CourseProgressService {
+	
 	@Autowired
-	CourseProgressRepository courseProgressRepository;
+	private UserRepository userRepository;
+	@Autowired
+	private CourseRepository courseReponsitory;
+	@Autowired
+	private LessonRepository lessonRepository;
+	@Autowired
+	private CourseProgressRepository courseProgressRepository;
 
 	@Autowired
-	UserRepository userRepository;
+	private JwtTokenUtils jwtTokenUtil;
+	
+//Learning Page
+	public Lesson updateCurrentLesson(UpdateLessonRequest request) {
+		
+		Course course  = courseReponsitory.findByCourseId(request.getCourseId());
+        CourseProgress progress = courseProgressRepository.findByCourse(course)
+                .orElseGet(() -> createNewProgress(request.getCourseId()));
+        Lesson lesson = lessonRepository.findById(request.getLessonId())
+                .orElseThrow(() -> new RuntimeException("Lesson not found"));
+        progress.setCurrentLesson(lesson);
+        courseProgressRepository.save(progress);
+        return lesson;
+    }
 
-	@Autowired
-	CourseRepository courseReponsitory;
+	public LessonDTO getCurrentLessonDTO(int courseId, String token) {
+        Course course = courseReponsitory.findByCourseId(courseId);
+        CourseProgress progress = courseProgressRepository.findByCourse(course)
+                .orElseGet(() -> createNewProgress(courseId));
 
+        Lesson lesson = progress.getCurrentLesson();
+
+        boolean isComplete = false;
+        if (token != null && !token.isEmpty()) {
+            String email = jwtTokenUtil.extractEmail(token.replace("Bearer ", ""));
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            isComplete = lesson.getListLessonComplete().stream()
+                    .anyMatch(lc -> lc.getUser().equals(user));
+        }
+
+        // Gộp convertToDTO vào Service luôn
+        if (lesson == null) return null;
+        return new LessonDTO(
+                lesson.getLessonId(),
+                lesson.getName(),
+                lesson.getDescription(),
+                lesson.getContentDescription(),
+                lesson.getLessionDuration(),
+                lesson.getPathVideo(),
+                isComplete
+        );
+    }
+
+
+    private CourseProgress createNewProgress(int courseId) {
+        Lesson firstLesson = lessonRepository.findFirstBySection_Course_CourseIdOrderByLessonIdAsc(courseId)
+                .orElseThrow(() -> new RuntimeException("No lessons found for course"));
+        CourseProgress progress = new CourseProgress();
+        progress.setCourse(firstLesson.getSection().getCourse());
+        progress.setCurrentLesson(firstLesson);
+        return courseProgressRepository.save(progress);
+    }
+    
+    public CourseProgressDTO getCourseProgress(int courseId, String token) {
+        // Lấy userId từ token
+        String jwt = token != null && token.startsWith("Bearer ") ? token.substring(7) : null;
+        if (jwt == null) {
+            throw new RuntimeException("Token không hợp lệ hoặc thiếu");
+        }
+        String  email = jwtTokenUtil.extractEmail(jwt);
+        User user =  userRepository.timKiemUserTheoEmailToan(email);
+        // Tìm tiến độ trong DB
+        CourseProgress progress = courseProgressRepository.findByCourse_CourseIdAndUser_UserId(courseId, user.getUserId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tiến độ cho khóa học"));
+
+        return new CourseProgressDTO(
+                progress.getCourse().getCourseId(),
+                progress.getTotalLession(),
+                progress.getTotalQuiz(),
+                progress.getTotalLessionComplete(),
+                progress.getTotalTestComplete(),
+                progress.getProgressPercentage(),
+                progress.getProgressStatus()
+        );
+    }
+
+//Khác
 	public List<CourseProgress> FillCourseKhoa(int userId){
 		return courseProgressRepository.FillCourseKhoa(userId);
 	}

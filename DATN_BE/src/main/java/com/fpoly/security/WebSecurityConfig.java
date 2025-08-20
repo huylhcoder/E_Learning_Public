@@ -45,12 +45,15 @@ public class WebSecurityConfig {
 									// Category
 									String.format("%s/category/list-category", apiPrefix),
 									String.format("%s/category/tree", apiPrefix),
+									//User
+									String.format("%s/user/get-avatar", apiPrefix),
 									// Course
 									String.format("%s/course/fun-fact", apiPrefix),
 									String.format("%s/course/top-registered-course", apiPrefix),
 									String.format("%s/course/top-rated", apiPrefix),
 									String.format("%s/course/search", apiPrefix),
 									String.format("%s/course/suggestions", apiPrefix),
+									String.format("%s/course/course-detail/**", apiPrefix),
 									String.format("%s/course-manager-detail/**", apiPrefix),
 									String.format("%s/course-manager/draft-course", apiPrefix),
 									String.format("%s/course-manager/posted-course", apiPrefix),
@@ -60,7 +63,8 @@ public class WebSecurityConfig {
 									String.format("%s/course-level", apiPrefix),
 									String.format("%s/course-level/list-course-level", apiPrefix),
 									// Payment
-									String.format("%s/thanhtoanthanhcong", apiPrefix),
+									String.format("%s/vnpayreturn/**", apiPrefix),
+									String.format("%s/vnpayreturn", apiPrefix),
 									// Upload - Download file
 									String.format("%s/upload-file/download-video-on-server", apiPrefix),
 									String.format("%s/upload-file/download-video", apiPrefix),
@@ -69,11 +73,12 @@ public class WebSecurityConfig {
 							.permitAll()
 							// Post Public
 							.requestMatchers(POST,
-									// Auth
-									String.format("%s/users/register", apiPrefix),
-									String.format("%s/users/check-user", apiPrefix),
-									String.format("%s/users/send-verification-code", apiPrefix),
-									String.format("%s/users/login", apiPrefix),
+									// Auth 
+									String.format("%s/auth/register", apiPrefix),
+									String.format("%s/auth/check-user", apiPrefix),
+									String.format("%s/auth/send-verification-code", apiPrefix),
+									String.format("%s/auth/login", apiPrefix),
+									String.format("%s/auth/introspect", apiPrefix),
 									// Course
 									String.format("%s/course-manager/**", apiPrefix),
 									// Section
@@ -100,19 +105,33 @@ public class WebSecurityConfig {
 					// .anyRequest().permitAll(); //Cho phép tất cả Request được thông qua
 
 				}).csrf(AbstractHttpConfigurer::disable);
-		http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
-			@Override
-			public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {
-				CorsConfiguration configuration = new CorsConfiguration();
-				configuration.setAllowedOrigins(List.of("*"));
-				configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-				configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
-				configuration.setExposedHeaders(List.of("x-auth-token"));
-				UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-				source.registerCorsConfiguration("/**", configuration);
-				httpSecurityCorsConfigurer.configurationSource(source);
-			}
+//		http.cors(new Customizer<CorsConfigurer<HttpSecurity>>() {
+//			@Override
+//			public void customize(CorsConfigurer<HttpSecurity> httpSecurityCorsConfigurer) {
+//				CorsConfiguration configuration = new CorsConfiguration();
+//				configuration.setAllowedOrigins(List.of("*"));
+//				configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+//				configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token"));
+//				configuration.setExposedHeaders(List.of("x-auth-token"));
+//				UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//				source.registerCorsConfiguration("/**", configuration);
+//				httpSecurityCorsConfigurer.configurationSource(source);
+//			}
+//		});
+		
+		http.cors(cors -> {
+		    CorsConfiguration config = new CorsConfiguration();
+		    config.setAllowedOrigins(List.of("*"));
+		    config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+		    config.setAllowedHeaders(List.of("authorization", "content-type", "x-auth-token"));
+		    config.setExposedHeaders(List.of("x-auth-token"));
+
+		    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		    source.registerCorsConfiguration("/**", config);
+
+		    cors.configurationSource(source);
 		});
+
 
 		return http.build();
 	}

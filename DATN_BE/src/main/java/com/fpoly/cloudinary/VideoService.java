@@ -14,6 +14,9 @@ import com.cloudinary.EagerTransformation;
 import com.cloudinary.utils.ObjectUtils;
 import io.jsonwebtoken.io.IOException;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,7 +65,7 @@ public class VideoService {
 		}
 	}
 
-	//private final String UPLOAD_DIR = "src/main/webapp/uploads/";
+	// private final String UPLOAD_DIR = "src/main/webapp/uploads/";
 
 //	public String uploadVideo(MultipartFile file) throws IOException, java.io.IOException {
 //		if (!file.isEmpty()) {
@@ -78,21 +81,43 @@ public class VideoService {
 //		return null;
 //	}
 	private final String UPLOAD_DIR = "src/main/webapp/uploads/";
+
 	public String uploadVideo(MultipartFile file) throws IOException, java.io.IOException {
-	    if (!file.isEmpty()) {
-	        Date date = new Date();
-	        System.out.println("Video service - Date upload video: " + date);
-	        
-	        // Lấy tên tệp gốc và mã hóa nó
-	        String originalFileName = file.getOriginalFilename();
-	        String encodedFileName = URLEncoder.encode(originalFileName, "UTF-8") + "_" + date.getTime(); // Thêm timestamp để tránh trùng lặp
-	        
-	        Path path = Paths.get(UPLOAD_DIR + encodedFileName);
-	        Files.createDirectories(path.getParent());
-	        Files.write(path, file.getBytes());
-	        // Trả về đường dẫn video
-	        return path.toString();
-	    }
-	    return null;
+		if (!file.isEmpty()) {
+			Date date = new Date();
+			System.out.println("Video service - Date upload video: " + date);
+
+			// Lấy tên tệp gốc và mã hóa nó
+			String originalFileName = file.getOriginalFilename();
+			String encodedFileName = URLEncoder.encode(originalFileName, "UTF-8") + "_" + date.getTime(); // Thêm
+																											// timestamp
+																											// để tránh
+																											// trùng lặp
+
+			Path path = Paths.get(UPLOAD_DIR + encodedFileName);
+			Files.createDirectories(path.getParent());
+			Files.write(path, file.getBytes());
+			// Trả về đường dẫn video
+			return path.toString();
+		}
+		return null;
+	}
+
+	public byte[] downloadVideo(String videoUrl) throws IOException, java.io.IOException {
+
+		URL url = new URL(videoUrl);
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+		connection.setRequestMethod("GET");
+		connection.connect(); // Kết nối đến URL
+
+		System.out.println("Show video");
+		if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+			throw new IOException("HTTP error code: " + connection.getResponseCode());
+		}
+
+		try (InputStream inputStream = connection.getInputStream()) {
+			return inputStream.readAllBytes();
+		}
+
 	}
 }

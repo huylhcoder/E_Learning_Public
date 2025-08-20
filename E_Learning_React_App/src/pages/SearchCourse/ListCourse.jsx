@@ -37,7 +37,7 @@ function ListCourse({ loading, courses }) {
       {courses.map((course) => (
         <div className="col-12 col-sm-6 col-lg-4 mb-4" key={course.courseId}>
           <div className={cx('courses-item', 'position-relative', 'h-100')}>
-            <Link to={`/courses/detail/${course.courseId}`} className={cx('link')}>
+            <Link to={`/course/course-detail/${course.courseId}`} className={cx('link')}>
               <div className={cx('courses-item-inner')}>
                 <div className={cx('img-box')}>
                   <img

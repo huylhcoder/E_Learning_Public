@@ -118,7 +118,7 @@ function Footer() {
                 <div className={cx('footer-bottom', 'pb-5')}>
                     <div className="container">
                         <p className="m-0 py-4 text-center">
-                            copyright &copy;2024 <Link to="/">Revolutionary</Link>
+                            copyright &copy;2025 <Link to="/" className='text-primary'>Revolutionary</Link>
                         </p>
                     </div>
                 </div>

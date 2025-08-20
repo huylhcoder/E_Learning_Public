@@ -11,7 +11,7 @@ const cx = classNames.bind(styles);
 // Ví dụ trong menu:
 <FontAwesomeIcon icon={faAddressCard} className="me-2" />;
 
-export const ProfileDropdown = ({ avatar, isTokenValid, role, handleLogout }) => {
+export const ProfileDropdown = ({ avatar, isTokenValid, handleLogout }) => {
     return (
         <div className="nav-item dropdown mx-2">
             <button
@@ -43,6 +43,16 @@ export const ProfileDropdown = ({ avatar, isTokenValid, role, handleLogout }) =>
                         <li>
                             <Link to="/my-courses" className={cx('dropdown-item')}>
                                 Tiến độ khóa học
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="/payment-history" className={cx('dropdown-item')}>
+                                Lịch sử thanh toán
+                            </Link>
+                        </li>
+                         <li>
+                            <Link to="/my-promotions" className={cx('dropdown-item')}>
+                                Khuyến mãi của tôi
                             </Link>
                         </li>
                         <li>

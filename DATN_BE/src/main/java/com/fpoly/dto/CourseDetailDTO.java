@@ -6,6 +6,9 @@ import java.util.List;
 import com.fpoly.entity.Category;
 import com.fpoly.entity.CourseLevel;
 import com.fpoly.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;

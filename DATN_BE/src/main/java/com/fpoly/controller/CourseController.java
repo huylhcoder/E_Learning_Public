@@ -1,11 +1,10 @@
 package com.fpoly.controller;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -13,33 +12,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fpoly.dto.AnswerDTO;
-import com.fpoly.dto.CourseDetailDTO;
+import com.fpoly.dto.CourseDetailSearchDTO;
 import com.fpoly.dto.CourseNameSuggestionDTO;
-import com.fpoly.dto.CourseResponseDTO;
-import com.fpoly.dto.CourseSearchRequest;
 import com.fpoly.dto.CourseSearchResponseDTO;
 import com.fpoly.dto.FunFactDTO;
-import com.fpoly.dto.LessonCourseDetailDTO;
-import com.fpoly.dto.QuestionDTO;
-import com.fpoly.dto.SectionCourseDetailDTO;
-import com.fpoly.dto.TestDTO;
-import com.fpoly.entity.Answer;
+import com.fpoly.dto.learning.CourseDetailDTO;
 import com.fpoly.entity.Category;
 import com.fpoly.entity.Course;
-import com.fpoly.entity.HashTagOfCourse;
-import com.fpoly.entity.Lesson;
-import com.fpoly.entity.Question;
+import com.fpoly.entity.FavoriteCourse;
 import com.fpoly.entity.RegisteredCourse;
-import com.fpoly.entity.Section;
-import com.fpoly.entity.Test;
 import com.fpoly.entity.User;
 import com.fpoly.entity.Voucher;
 import com.fpoly.security.JwtTokenUtils;
 import com.fpoly.service.CourseService;
+import com.fpoly.service.FavoriteCourseService;
 import com.fpoly.service.LessonService;
 import com.fpoly.service.RegisteredCourseService;
 import com.fpoly.service.SectionService;
@@ -64,6 +52,8 @@ public class CourseController {
 	private TestService testService;
 	@Autowired
 	private UserService UserService;
+	@Autowired
+	private FavoriteCourseService favoriteCourseService;
 
 	@Autowired
 	private JwtTokenUtils jwtTokenUtils;
@@ -89,46 +79,72 @@ public class CourseController {
 	}
 
 //Header
-	//Gợi ý tên khóa học để tìm kiếm
+	// Gợi ý tên khóa học để tìm kiếm
 	@GetMapping("/suggestions")
-    public List<CourseNameSuggestionDTO> getCourseNameSuggestions(@RequestParam("query") String keyword) {
-        return courseService.getCourseNameSuggestions(keyword);
-    }
+	public List<CourseNameSuggestionDTO> getCourseNameSuggestions(@RequestParam("query") String keyword) {
+		return courseService.getCourseNameSuggestions(keyword);
+	}
 
 //Search Course Page
 	// Tìm kiếm khóa học với nhiều param và có phân trang
 	@GetMapping("/search")
-    public ResponseEntity<Page<CourseSearchResponseDTO>> searchCourses(
-            @RequestHeader(value = "Authorization", required = false) String token,
-            @RequestParam(value = "category", required = false) String categorySlug,
-            @RequestParam(value = "courseName", required = false) String courseName,
-            @RequestParam(value = "free", required = false) Boolean free,
-            @RequestParam(value = "minPrice", required = false) Float minPrice,
-            @RequestParam(value = "maxPrice", required = false) Float maxPrice,
-            @RequestParam(value = "ratedStar", required = false) Integer ratedStar,
-            @RequestParam(value = "levelId", required = false) Integer levelId,
-            @RequestParam(value = "priceASC", required = false) Boolean priceASC,
-            @RequestParam(value = "priceDESC", required = false) Boolean priceDESC,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "12") int size
-    ) {
-        String email = null;
-        if (token != null && !token.trim().isEmpty()) {
-            try {
-                String jwtToken = token.replace("Bearer ", "").trim();
-                email = jwtTokenUtils.extractEmail(jwtToken);
-            } catch (Exception e) {
-                return ResponseEntity.badRequest().build();
-            }
-        }
+	public ResponseEntity<Page<CourseSearchResponseDTO>> searchCourses(
+			@RequestHeader(value = "Authorization", required = false) String token,
+			@RequestParam(value = "category", required = false) String categorySlug,
+			@RequestParam(value = "courseName", required = false) String courseName,
+			@RequestParam(value = "free", required = false) Boolean free,
+			@RequestParam(value = "minPrice", required = false) Float minPrice,
+			@RequestParam(value = "maxPrice", required = false) Float maxPrice,
+			@RequestParam(value = "ratedStar", required = false) Integer ratedStar,
+			@RequestParam(value = "levelId", required = false) Integer levelId,
+			@RequestParam(value = "priceASC", required = false) Boolean priceASC,
+			@RequestParam(value = "priceDESC", required = false) Boolean priceDESC,
+			@RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "size", defaultValue = "12") int size) {
+		String email = null;
+		if (token != null && !token.trim().isEmpty()) {
+			try {
+				String jwtToken = token.replace("Bearer ", "").trim();
+				email = jwtTokenUtils.extractEmail(jwtToken);
+			} catch (Exception e) {
+				return ResponseEntity.badRequest().build();
+			}
+		}
 
-        return ResponseEntity.ok(
-            courseService.searchCoursesWithFilters(
-                email, categorySlug, courseName, free, minPrice, maxPrice, ratedStar, levelId, priceASC, priceDESC, page, size
-            )
-        );
-    }
+		return ResponseEntity.ok(courseService.searchCoursesWithFilters(email, categorySlug, courseName, free, minPrice,
+				maxPrice, ratedStar, levelId, priceASC, priceDESC, page, size));
+	}
 
+//Course Detail 
+	@GetMapping("/course-detail/{courseId}")
+	public CourseDetailSearchDTO getCourseDetailSearch(@PathVariable int courseId,
+			@RequestHeader(value = "Authorization", required = false) String token) {
+		return courseService.getCourseDetail(courseId, token);
+	}
+
+//MyCourse 
+	@GetMapping("/registered-course")
+	public ResponseEntity<List<RegisteredCourse>> getListRegisteredCourseOfUser(
+			@RequestHeader("Authorization") String token) {
+		System.out.println("Token: " + token);
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+		User user = UserService.getUserByEmailToan(email);
+		return ResponseEntity.ok(registeredCourseService.findRegisteredCourseByUserHao(user.getUserId()));
+	}
+
+	@GetMapping("/favorite-course")
+	public List<FavoriteCourse> fillListCourseFcByUserIDHao(@RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+		User user = UserService.getUserByEmailToan(email);
+		return favoriteCourseService.fillListCourseFcByUserID(user.getUserId());
+	}
+//Learning
+	@GetMapping("/learning/course-detail/{courseId}")
+	public CourseDetailDTO getCourseDetail(@PathVariable int courseId, 	@RequestHeader(value = "Authorization", required = false) String token) {
+	    return courseService.getCourseDetail(courseId);
+	}
+
+//Khác
 	// -- HBao code ----
 	// LOAD DANH MỤC KHÓA HỌC VỚI STATUS = 1
 	@GetMapping
@@ -612,65 +628,65 @@ public class CourseController {
 //    public Course getOneHao(@PathVariable("id") int id) {
 //        return courseService.getCourseID(id).get();
 //    }
-	@GetMapping("/course-detail/{id}")
-	public ResponseEntity<CourseDetailDTO> hienThiChiTietKhoaHoc(@PathVariable("id") int CourseId) {
-		Course CourseEntity = courseService.hienThiKhoaHocTheoIdHao(CourseId);
-		List<Section> listSectionEntity = sectionService.hienThiSectionTheoKhoaHocHao(CourseEntity);
+//	@GetMapping("/course-detail/{id}")
+//	public ResponseEntity<CourseDetailDTO> hienThiChiTietKhoaHoc(@PathVariable("id") int CourseId) {
+//		Course CourseEntity = courseService.hienThiKhoaHocTheoIdHao(CourseId);
+//		List<Section> listSectionEntity = sectionService.hienThiSectionTheoKhoaHocHao(CourseEntity);
+//
+//		List<SectionCourseDetailDTO> listSectionCourseDetailDTO = new ArrayList<>();
+//		for (Section sectionEntity : listSectionEntity) {
+//
+//			//
+//			List<Lesson> listLessonEntity = lessonService.hienThiLessonTheoSection(sectionEntity);
+//			List<LessonCourseDetailDTO> listLessonDTO = new ArrayList<>();
+//			for (Lesson lessonEntity : listLessonEntity) {
+//				LessonCourseDetailDTO lessonDTO = new LessonCourseDetailDTO();
+//				lessonDTO.setLessonId(lessonEntity.getLessonId());
+//				lessonDTO.setLessonName(lessonEntity.getName());
+//				lessonDTO.setDescription(lessonEntity.getDescription());
+//				lessonDTO.setPathVideo(lessonEntity.getPathVideo());
+//				listLessonDTO.add(lessonDTO);
+//
+//			}
+//
+//			//
+//			List<Test> listTestEntity = testService.hienThiTestTheoSection(sectionEntity);
+//			List<TestDTO> listTestDTO = new ArrayList<>();
+//			for (Test testEntity : listTestEntity) {
+//				TestDTO testDTO = new TestDTO();
+//				testDTO.setTestID(testEntity.getTestId());
+//				testDTO.setTitle(testEntity.getTitle());
+//				listTestDTO.add(testDTO);
+//
+//			}
+//
+//			SectionCourseDetailDTO sectionDTO = new SectionCourseDetailDTO();
+//			sectionDTO.setSectionId(sectionEntity.getSectionId());
+//			sectionDTO.setSectionName(sectionEntity.getName());
+//			sectionDTO.setListLesson(listLessonDTO);
+//			sectionDTO.setListTest(listTestDTO);
+//			listSectionCourseDetailDTO.add(sectionDTO);
+//
+//		}
+//		CourseDetailDTO coursedetailDTO = new CourseDetailDTO();
+//		coursedetailDTO.setCourseId(CourseEntity.getCourseId());
+//		coursedetailDTO.setAvatar(CourseEntity.getAvatar());
+////		coursedetailDTO.setCategoryName(CourseEntity.getCategory().getName());
+//		coursedetailDTO.setName(CourseEntity.getName());
+//		coursedetailDTO.setDescription(CourseEntity.getDescription());
+//		coursedetailDTO.setName(CourseEntity.getName());
+//		coursedetailDTO.setPrice(CourseEntity.getPrice());
+//		coursedetailDTO.setAverageRating(CourseEntity.getAverageRating());
+//		coursedetailDTO.setTotalRate(CourseEntity.getTotalRate());
+//		coursedetailDTO.setListSectionCourseDetailDTO(listSectionCourseDetailDTO);
+//		return ResponseEntity.ok(coursedetailDTO);
+//	}
 
-		List<SectionCourseDetailDTO> listSectionCourseDetailDTO = new ArrayList<>();
-		for (Section sectionEntity : listSectionEntity) {
-
-			//
-			List<Lesson> listLessonEntity = lessonService.hienThiLessonTheoSection(sectionEntity);
-			List<LessonCourseDetailDTO> listLessonDTO = new ArrayList<>();
-			for (Lesson lessonEntity : listLessonEntity) {
-				LessonCourseDetailDTO lessonDTO = new LessonCourseDetailDTO();
-				lessonDTO.setLessonId(lessonEntity.getLessonId());
-				lessonDTO.setLessonName(lessonEntity.getName());
-				lessonDTO.setDescription(lessonEntity.getDescription());
-				lessonDTO.setPathVideo(lessonEntity.getPathVideo());
-				listLessonDTO.add(lessonDTO);
-
-			}
-
-			//
-			List<Test> listTestEntity = testService.hienThiTestTheoSection(sectionEntity);
-			List<TestDTO> listTestDTO = new ArrayList<>();
-			for (Test testEntity : listTestEntity) {
-				TestDTO testDTO = new TestDTO();
-				testDTO.setTestID(testEntity.getTestId());
-				testDTO.setTitle(testEntity.getTitle());
-				listTestDTO.add(testDTO);
-
-			}
-
-			SectionCourseDetailDTO sectionDTO = new SectionCourseDetailDTO();
-			sectionDTO.setSectionId(sectionEntity.getSectionId());
-			sectionDTO.setSectionName(sectionEntity.getName());
-			sectionDTO.setListLesson(listLessonDTO);
-			sectionDTO.setListTest(listTestDTO);
-			listSectionCourseDetailDTO.add(sectionDTO);
-
-		}
-		CourseDetailDTO coursedetailDTO = new CourseDetailDTO();
-		coursedetailDTO.setCourseId(CourseEntity.getCourseId());
-		coursedetailDTO.setAvatar(CourseEntity.getAvatar());
-//		coursedetailDTO.setCategoryName(CourseEntity.getCategory().getName());
-		coursedetailDTO.setName(CourseEntity.getName());
-		coursedetailDTO.setDescription(CourseEntity.getDescription());
-		coursedetailDTO.setName(CourseEntity.getName());
-		coursedetailDTO.setPrice(CourseEntity.getPrice());
-		coursedetailDTO.setAverageRating(CourseEntity.getAverageRating());
-		coursedetailDTO.setTotalRate(CourseEntity.getTotalRate());
-		coursedetailDTO.setListSectionCourseDetailDTO(listSectionCourseDetailDTO);
-		return ResponseEntity.ok(coursedetailDTO);
-	}
-
-	@GetMapping("/course-detail1/{id}")
-	public ResponseEntity<Course> getCourseDetail(@PathVariable int id) {
-		Course course = courseService.hienThiKhoaHocTheoIdHao(id);
-		return ResponseEntity.ok(course);
-	}
+//	@GetMapping("/course-detail1/{id}")
+//	public ResponseEntity<Course> getCourseDetail(@PathVariable int id) {
+//		Course course = courseService.hienThiKhoaHocTheoIdHao(id);
+//		return ResponseEntity.ok(course);
+//	}
 
 	// API tìm kiếm các khóa học theo danh mục
 //    @GetMapping("/category/{categoryName}")
@@ -678,22 +694,6 @@ public class CourseController {
 //        List<Course> courses = courseService.findCoursesByCategory(categoryName);
 //        return ResponseEntity.ok(courses);
 //    }
-
-	@GetMapping("/regiteredCourse/{token}")
-	public ResponseEntity<List<RegisteredCourse>> GetRegisteredCourseByUserHao(@PathVariable("token") String token) {
-		System.out.println("Token received: " + token);
-
-		String email;
-
-		email = jwtTokenUtils.extractEmail(token);
-		System.out.println("Extracted email: " + jwtTokenUtils.extractEmail(token));
-		User user = UserService.getUserByEmailToan(email);
-
-//Copy khúc này
-		List<RegisteredCourse> registeredCourse = registeredCourseService
-				.findRegisteredCourseByUserHao(user.getUserId());
-		return ResponseEntity.ok(registeredCourse);
-	}
 
 	@GetMapping("/follow")
 	public ResponseEntity<List<Course>> getTopFollowCourses() {

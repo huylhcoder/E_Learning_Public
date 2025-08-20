@@ -1,0 +1,109 @@
+.login-container {
+  min-height: 100vh;
+  background-image: url('https://images.unsplash.com/photo-1600195077075-245f9c2b7b54');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 3rem 2rem;
+  border-radius: 1rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.divider {
+  text-align: center;
+  margin: 2rem 0 1rem;
+  position: relative;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #666;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #ccc;
+  }
+
+  &::before {
+    left: 0;
+  }
+
+  &::after {
+    right: 0;
+  }
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #fff;
+  transition: all 0.3s ease;
+
+  &.google {
+    background-color: #db4437;
+
+    &:hover {
+      background-color: #c1351d;
+    }
+  }
+
+  &.facebook {
+    background-color: #1877f2;
+
+    &:hover {
+      background-color: #145ecf;
+    }
+  }
+
+  &.github {
+    background-color: #333;
+
+    &:hover {
+      background-color: #000;
+    }
+  }
+
+  .icon {
+    font-size: 1.25rem;
+  }
+}
+
+// Tăng kích thước chữ trong input và label khi sử dụng form-floating
+.form-control {
+  font-size: 1rem !important;
+  padding: 1rem 0.75rem !important;
+
+  &::placeholder {
+    font-size: 1rem;
+  }
+}
+
+.form-floating > label {
+  font-size: 1rem;
+  color: #666;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  font-size: 0.875rem;
+  transform: translateY(-1.2rem) scale(0.85);
+}

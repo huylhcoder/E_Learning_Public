@@ -15,18 +15,41 @@ import com.fpoly.entity.User;
 import com.fpoly.entity.UserAnswerHistory;
 import com.fpoly.entity.Test;
 
-
 @Repository
 public interface UserAnswerHistoryRepository extends JpaRepository<UserAnswerHistory, Integer> {
-	@Query("SELECT u FROM UserAnswerHistory u WHERE u.user.id = :userId AND u.question.id = :questionId")
-	Optional<UserAnswerHistory> findByUserAndQuestion(@Param("userId") int userId, @Param("questionId") int questionId);
 
-	UserAnswerHistory findByUserAndQuestion(User user, Question question);
+// Quiz Page
+    List<UserAnswerHistory> findByTest_TestIdAndUser_UserId(Integer testId, Integer userId);
 
-	List<UserAnswerHistory> findByUserAndTest(User user, Test test);
+    void deleteByTest_TestIdAndUser_UserId(Integer testId, Integer userId);
 
-	@Modifying
+    // Lấy lịch sử trả lời của user cho test
+    List<UserAnswerHistory> findByUser_UserIdAndTest_TestId(int userId, int testId);
+
+    // Lấy đáp án user đã chọn cho 1 câu hỏi
+    Optional<UserAnswerHistory> findByUser_UserIdAndTest_TestIdAndQuestion_QuestionId(
+            int userId, int testId, int questionId);
+
+    // Xóa toàn bộ lịch sử làm bài của user cho test
+    void deleteByUser_UserIdAndTest_TestId(int userId, int testId);
+    
+   // Tìm kiếm đáp án người dùng đã chọn
+    Optional<UserAnswerHistory> findByUserAndTestAndQuestion(
+            User user,
+            Test test,
+            Question question
+    );
+    
+    List<UserAnswerHistory> findByUserAndTest(User user, Test test);
+
+// Khác
+    @Query("SELECT u FROM UserAnswerHistory u WHERE u.user.userId = :userId AND u.question.questionId = :questionId")
+    Optional<UserAnswerHistory> findByUserAndQuestion(@Param("userId") int userId, @Param("questionId") int questionId);
+
+    UserAnswerHistory findByUserAndQuestion(User user, Question question);
+
+    @Modifying
     @Transactional
-    @Query("DELETE FROM UserAnswerHistory u WHERE u.user.id = ?1 AND u.test.id = ?2")
+    @Query("DELETE FROM UserAnswerHistory u WHERE u.user.userId = ?1 AND u.test.testId = ?2")
     void deleteByUserAndTestId(int userId, int testId);
 }

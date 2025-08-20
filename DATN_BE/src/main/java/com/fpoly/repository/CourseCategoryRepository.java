@@ -15,7 +15,11 @@ import com.fpoly.entity.Voucher;
 
 @Repository
 public interface CourseCategoryRepository extends JpaRepository<CourseCategory, CourseCategoryId> {
-    List<CourseCategory> findByCourse(Course course);
+    
+//CourseDetailPage
+	List<CourseCategory> findByCourse_CourseId(int courseId);
+	
+	List<CourseCategory> findByCourse(Course course);
 }
 
 

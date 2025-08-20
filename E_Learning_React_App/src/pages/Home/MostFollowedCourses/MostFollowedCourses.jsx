@@ -46,7 +46,7 @@ const MostFollowedCourses = () => {
                     {courses.map((fl) => (
                         <div className="col-md-6 col-lg-3 mb-4" key={fl.courseId}>
                             <div className={cx('courses-item', 'position-relative')}>
-                                <Link to={`/courses/course-detail/${fl.courseId}`} className={cx('link')}>
+                                <Link to={`/course/course-detail/${fl.courseId}`} className={cx('link')}>
                                     <div className={cx('courses-item-inner')}>
                                         <div className={cx('img-box')}>
                                             <img src={fl.avatar} alt="courses img" className="img-fluid" />

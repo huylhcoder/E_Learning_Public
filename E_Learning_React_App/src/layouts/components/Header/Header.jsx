@@ -1,37 +1,70 @@
 //Thư viện
-import React, { useContext, useEffect, useRef } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCartShopping } from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
 
 //Components
 import styles from './Header.module.scss';
 import CategoryDropdown from './components/CategoryDropdown/CategoryDropdown';
 import Search from './components/Search/Search';
-import LoadingSpinner from '~/components/LoadingSpinner';
 import { ProfileDropdown } from './components/ProfileDropdown/ProfileDropdown';
 import avatarDefault from '~/assets/images/avatar-default.jpg';
 
 //Services
 import AuthContext from '~/context/AuthContext';
-import { HandleLogout } from '~/services/Oauth2/HandleLogout';
-import { useAuthData } from '~/hooks/useAuthData';
-import { useUserProfile } from '~/hooks/useUserProfile';
+import { CartContext } from '~/context/CartContext'; // Thêm dòng này
+import { getAvatar } from '~/services/ProfileService';
 
 const cx = classNames.bind(styles);
 
 function Header() {
+    const [avatar, setAvatar] = useState(null);
     const authContext = useContext(AuthContext);
+    const { cartItems } = useContext(CartContext); // Thêm dòng này
     const location = useLocation();
     const underlineRef = useRef(null);
+    const navigate = useNavigate();
     //const wsClient = useWebsocket();
-    const { handleLogout } = HandleLogout();
 
-    // Custom hook usage
-    const { role, loading: authLoading } = useAuthData();
-    const { avatar, loading: profileLoading } = useUserProfile();
-    const loading = authLoading || profileLoading;
+    // const avatar = getAvatar();
+    // console.log('Header avatar:', avatar);
+    // Code sai do getAvatar là async function
+    // không thể gán trực tiếp vào biến avatar
+    // 1 là customer hook
+    // , 2 là dùng useEffect để gọi hàm getAvatar
+    // useEffect(() => {
+    //     const fetchAvatar = async () => {
+    //         try {
+    //             const avatarUrl = await getAvatar(); // Đợi hàm trả kết quả
+    //             setAvatar(avatarUrl); // Lưu kết quả vào state
+    //         } catch (error) {
+    //             console.error('Lỗi lấy avatar:', error);
+    //         }
+    //     };
+
+    //     fetchAvatar();
+    // }, []);
+
+    useEffect(() => {
+        const fetchAvatar = async () => {
+            try {
+                if (authContext.authenticated) {
+                    // chỉ gọi khi đã đăng nhập
+                    const avatarUrl = await getAvatar();
+                    setAvatar(avatarUrl);
+                } else {
+                    setAvatar(null); // reset nếu chưa login
+                }
+            } catch (error) {
+                console.error('Lỗi lấy avatar:', error);
+            }
+        };
+
+        fetchAvatar();
+    }, [authContext.authenticated]); // 👈 thêm dependency
 
     useEffect(() => {
         const activeLink = document.querySelector(`.nav-item.active`);
@@ -41,11 +74,12 @@ function Header() {
         }
     }, [location.pathname]);
 
-    console.log('authContext.authenticated:', authContext.authenticated);
-
-    if (loading) {
-        return <LoadingSpinner />;
-    }
+    const handleLogout = () => {
+        localStorage.clear();
+        authContext.refresh();
+        navigate('/login');
+        toast.success('Đăng xuất thành công');
+    };
 
     return (
         <div className={cx('header-page')}>
@@ -70,30 +104,33 @@ function Header() {
                     <div className="collapse navbar-collapse justify-content-between px-lg-3" id="navbarCollapse">
                         <CategoryDropdown />
                         <Search />
-                        <NavLink to="/my-courses" className={cx('custom-my-course-btn')}>
+                        <NavLink to="/my-course" className={cx('custom-my-course-btn')}>
                             <span>Học tập của tôi</span>
                         </NavLink>
-                        <NavLink to="/my-cart" className={cx('custom-my-course-btn', 'position-relative')}>
+                        <NavLink to="/cart" className={cx('custom-my-course-btn', 'position-relative')}>
                             <span style={{ position: 'relative', display: 'inline-block' }}>
                                 <FontAwesomeIcon icon={faCartShopping} size="lg" />
-                                <span
-                                    className="position-absolute badge rounded-pill bg-danger"
-                                    style={{
-                                        top: '-6px',
-                                        right: '-10px',
-                                        fontSize: '0.75rem',
-                                        padding: '2px 6px',
-                                        minWidth: 18,
-                                        height: 18,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                    }}
-                                >
-                                    3
-                                </span>
+                                {cartItems?.length > 0 && (
+                                    <span
+                                        className="position-absolute badge rounded-pill bg-danger"
+                                        style={{
+                                            top: '-6px',
+                                            right: '-10px',
+                                            fontSize: '0.75rem',
+                                            padding: '2px 6px',
+                                            minWidth: 18,
+                                            height: 18,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        {cartItems?.length ?? 0}
+                                    </span>
+                                )}
                             </span>
                         </NavLink>
+
                         <div className="navbar-nav ml-auto d-flex align-items-center">
                             {!authContext.authenticated ? (
                                 <>
@@ -116,7 +153,6 @@ function Header() {
                                 <ProfileDropdown
                                     avatar={avatar || avatarDefault}
                                     isTokenValid={authContext.authenticated}
-                                    role={role}
                                     handleLogout={handleLogout}
                                 />
                             )}

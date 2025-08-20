@@ -23,54 +23,50 @@ import com.fpoly.service.UserService;
 
 @CrossOrigin("*") // cho phép bên ngoài truy xuất vào thoải mái k ngăn cản gì cả
 @RestController
-@RequestMapping("${api.prefix}/favorite_course")
+@RequestMapping("${api.prefix}/favorite-course")
 public class FavoriteCourseController {
-	
+
 	@Autowired
 	private FavoriteCourseService favoriteCourseService;
-	
+
 	@Autowired
-    private JwtTokenUtils jwtTokenUtils;
-	
+	private JwtTokenUtils jwtTokenUtils;
+
 	@Autowired
 	private UserService UserService;
+
+//MyCoursePage
 	
-	//code của hào
-	@GetMapping("/user/{token}")
-	public List<FavoriteCourse> fillListCourseFcByUserIDHao(@PathVariable("token") String token) {
-		
-		String email;
-        
-            email = jwtTokenUtils.extractEmail(token);
-            
-//Copy khúc này
-        User user = UserService.getUserByEmailToan(email);
-       
-		List<FavoriteCourse> listYeuThich = favoriteCourseService.fillListCourseFcByUserID(user.getUserId());
-		return listYeuThich;
+	//Danh sách khóa học yêu thích
+	@GetMapping("")
+	public List<FavoriteCourse> fillListCourseFcByUserIDHao(@RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+		User user = UserService.getUserByEmailToan(email);
+		return favoriteCourseService.fillListCourseFcByUserID(user.getUserId());
 	}
-	
+
 	@PostMapping("/add/{courseId}")
-	public ResponseEntity<Map<String, String>> addCourseToFavoriteCourse(@PathVariable int courseId, @RequestHeader("Authorization") String token) {
-	    Map<String, String> response = new HashMap<>();
-	    try {
-	        // Lấy userId từ token
-	        String email = jwtTokenUtils.extractEmail(token.substring(7));  // Loại bỏ "Bearer " khỏi token
-	        User user = UserService.getUserByEmailToan(email);
-	        int userId = user.getUserId();  // Lấy userId từ User object
-	        
-	        // Thực hiện thêm khóa học vào danh sách yêu thích
-	        favoriteCourseService.addCourseToFavoriteCourse(courseId, userId);
-	        
-	        response.put("message", "Course added to favorite successfully.");
-	        return ResponseEntity.ok(response);
-	    } catch (RuntimeException e) {
-	        response.put("error", e.getMessage());
-	        return ResponseEntity.status(400).body(response);  // Trả về thông báo lỗi nếu khóa học đã tồn tại
-	    } catch (Exception e) {
-	        response.put("error", "Error adding course to favorite: " + e.getMessage());
-	        return ResponseEntity.status(500).body(response);
-	    }
+	public ResponseEntity<Map<String, String>> addCourseToFavoriteCourse(@PathVariable int courseId,
+			@RequestHeader("Authorization") String token) {
+		Map<String, String> response = new HashMap<>();
+		try {
+			// Lấy userId từ token
+			String email = jwtTokenUtils.extractEmail(token.substring(7)); // Loại bỏ "Bearer " khỏi token
+			User user = UserService.getUserByEmailToan(email);
+			int userId = user.getUserId(); // Lấy userId từ User object
+
+			// Thực hiện thêm khóa học vào danh sách yêu thích
+			favoriteCourseService.addCourseToFavoriteCourse(courseId, userId);
+
+			response.put("message", "Course added to favorite successfully.");
+			return ResponseEntity.ok(response);
+		} catch (RuntimeException e) {
+			response.put("error", e.getMessage());
+			return ResponseEntity.status(400).body(response); // Trả về thông báo lỗi nếu khóa học đã tồn tại
+		} catch (Exception e) {
+			response.put("error", "Error adding course to favorite: " + e.getMessage());
+			return ResponseEntity.status(500).body(response);
+		}
 	}
 
 	@DeleteMapping("/delete/{id}")
@@ -82,5 +78,5 @@ public class FavoriteCourseController {
 		}
 		return ResponseEntity.ok(kiemTraTonTai);
 	}
-	//end code hào
+	// end code hào
 }

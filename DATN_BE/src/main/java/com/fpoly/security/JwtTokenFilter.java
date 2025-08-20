@@ -61,7 +61,8 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 			// Những cái request khác cần header mới vào được trong postman
 			// Nó có một cái thẻ là Authorization
 			// Nếu mà nó có giá trị
-			if (authHeader != null || authHeader.startsWith("Bearer ")) {
+//			if (authHeader != null || authHeader.startsWith("Bearer ")) {
+			if (authHeader != null && authHeader.startsWith("Bearer ")) {
 				// Kiểm tra token của anh có hợp lệ chưa
 				// Bearer_ có 7 ký tự mình cắt nó đi thì mình sẽ được cái Token
 				final String token = authHeader.substring(7);
@@ -107,16 +108,22 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 				// Mình truyền thẳng "${api.prefix}/course"), "GET" nó không hiểu
 				// Khởi tạo biến và sử dụng nối chuỗi để fix
 				// Cho qua thoải mái
-				Pair.of(String.format("%s/users/register", apiPrefix), "POST"),
-				Pair.of(String.format("%s/users/check-user", apiPrefix), "POST"),
-				Pair.of(String.format("%s/users/send-verification-code", apiPrefix), "POST"),
-				Pair.of(String.format("%s/users/login", apiPrefix), "POST"),
+				//Auth
+				Pair.of(String.format("%s/auth/register", apiPrefix), "POST"),
+				Pair.of(String.format("%s/auth/check-user", apiPrefix), "POST"),
+				Pair.of(String.format("%s/auth/send-verification-code", apiPrefix), "POST"),
+				Pair.of(String.format("%s/auth/login", apiPrefix), "POST"),
+				Pair.of(String.format("%s/auth/introspect", apiPrefix), "POST"),
+				//User
+				Pair.of(String.format("%s/user/get-avatar", apiPrefix), "GET"), // Thêm vào đây
 				Pair.of(String.format("%s/thanhtoanthanhcong", apiPrefix), "GET"), // Thêm vào đây
 				Pair.of(String.format("%s/upload-file/download-video-on-server", apiPrefix), "GET"), // Thêm vào đây
+				//Payment
+				Pair.of(String.format("%s/vnpayreturn", apiPrefix), "GET"), // Thêm vào đây
 				// Test cho public
 				Pair.of(String.format("%s/course-level", apiPrefix), "GET"),
 				Pair.of(String.format("api/cart/user/**"), "GET"), Pair.of(String.format("api/category"), "GET"),
-				Pair.of(String.format("%s/course", apiPrefix), "GET"),
+//				Pair.of(String.format("%s/course", apiPrefix), "GET"),
 				Pair.of(String.format("%s/category", apiPrefix), "GET"),
 				Pair.of(String.format("%s/course-manager-detail/**", apiPrefix), "GET"),
 				Pair.of(String.format("%s/course-manager-detail/", apiPrefix), "PUT"),

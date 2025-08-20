@@ -1,109 +1,39 @@
 1. Lệnh 
     cd D:\E_Leaning_Public\E_Learning_React_App
+
+2. _.module.scss 
     
-1.1 Làm giao diện Header cho DefaultLayout
-    Logo
-
-    dropdown multiple select bootstrap
-    -Tạo danh mục menu cho phép hiển thị thêm children 
-    -Hover vào sẽ hiển thị ra children
-    -Khi nhấp vào cha hoặc con thì nó điều link qua search?category = ?
-    -Mình sử dụng Tippy + ul>li 
-
-    search
-    -Tìm kiếm khóa học theo tên khóa học
-    -Khi có 
-
-    my course
-    -Tạo một cái NavLink để link qua trang my course là được rồi
-
-    Giỏ hàng
-    -Chắc phải có thêm một context || Lưu vào local storage
-
-    avatar + Login + Sign in
-    -Khi chưa đăng nhập thì authenticated tại context sẽ là false
-    -False thì hiển thị 2 nút log in + sign in
-    -True thì hiển thị avatar khi nhấp vào sẽ hiển thị menu 
-
-2. Trang home 
-
-    carousel + banner section + funfact + top courses + voucher section + videoe intro + most follower courses
-    -Thực hiện giao diện mẫu với Github Copilot + Json mẫu 
-    -Viết API bằng Spring Boot trả về JSon hợp lý 
-
-    Nên đặt state và gọi API ở component cha truyền xuống cho con sử dụng hay mỗi component con tự quản lý state riêng
-    -Phụ thuộc vào mối quan hệ và mức độ chia sẻ dữ liệu giữa các component
-    -TH 1: Các component con dùng chung 1 dữ liệu đặt ở thư mục lớn nhất như Home
-    -TH 2: Các component con sử dụng dữ liệu riêng khi đó mỗi component tự quản lý state và gọi API riêng 
-    -Dùng thêm React Query hoặc Zustand nếu muốn nâng cao hiệu quả quản lý dữ liệu 
-
-    Get data với state cố định
-
-    Cài đặt axios
-    -Customize Axios
-
-    Sử dụng
-    - import { useEffect, useState } from 'react';
-    - import axios from '~/utils/CustomizeAxios';
-
-    const [funFactsData, setFunFactsData] = useState({
-        totalUsers: 0,
-        totalCourses: 0,
-        totalCategories: 0,
-        averageRating: 0,
-    });
-
-    useEffect(() => {
-        const fetchFunFacts = async () => {
-            try {
-                const res = await axios.get('/api/v1/course/fun-fact');
-                setFunFactsData(res.data);
-                console.log(res.data);
-            } catch (error) {
-                console.error('Lỗi khi lấy dữ liệu fun-fact:', error);
-            }
-        };
-
-        fetchFunFacts();
-    }, []);
-
-3. _.module.scss 
-    
-    chỉ hoạt động ở component có import 
+    Chỉ hoạt động ở component có import 
     -Ví dụ Cha là Home chứa _.module.scss  con sẽ không bị ảnh hưởng
     -Con chỉ có thể nhận được nếu như được cha truyền xuống cho sài
 
-    Th muốn khai báo dùng chung thì bỏ module đi _.scss 
+    TH muốn khai báo dùng chung thì bỏ module đi _.scss 
 
-4. Chỉnh sửa lại code dropdown của header 
+3. Chỉnh sửa lại code dropdown của header 
 
     Chỉnh link lại
     -to="something" (không có /) → Relative path -> Nếu bạn đang ở /home, thì to="course/search" sẽ thành /home/course/search (không đúng).
     to="/something" (có /) → Absolute path -> Dùng to="/course/search" thì luôn đúng, vì nó luôn dẫn về gốc /.
 
-5. Trang tìm kiếm khóa học có dạng: http://localhost:3000/courses/search thì config như thế nào cho route hiểu và hiển thị trang
-
-    Quy tắc đặc tên cho param
+4. Quy tắc đặc tên cho param
     -FE ReactJS: ?sortBy=date&categoryId=123
     -BE Spring Boot: ?sort_by=date&category_id=123
 
-    Tìm kiếm bằng Header
-    -Trả về danh sách Name có logo tìm kiếm -> Link sang trang tìm kiếm khóa học
-    -Trả về tối đa 4 khóa học có tên tương ứng -> Link sang trang detail course
-    -Vậy BE cần tạo ra một DTO chứa list name search + list Course được đánh giá và có người tham gia đông nhất
-    -Nó như tiktok vậy sễ trả về danh sách từ khóa được tìm kiếm nhiều + 4 account có chứa từ khóa đó
+5. Tạo một Component mới + khai báo Routes
 
+    Vào config/route
+    -Khai báo url 
+    -paymentResult: '/payment-result'
 
-    TH: Chỉ có danh mục hoặc tên khóa học
-    -http://localhost:3000/courses/search?category=frontend //Tìm kiếm theo danh mục -> Header
-    -http://localhost:3000/courses/search?courseName=Java //Tìm kiếm theo tên khóa học -> Header
+    Vào route/routes 
+    -Khai báo layout, component
 
-    TH: Tìm kiếm và có lọc 
-    -Lọc theo danh mục 
-    -http://localhost:3000/courses/search?category=frontend &minPrice=0 &maxPrice &star=4 &pageIdex=0
+6.  Một số class bootstrap 5 hứu  ít
 
-    
+    In Hoa Mỗi Chữ Cái Đầu
+    -text-capitalize
 
+7. Một số JS thường dùng để fomat 
 
-
-
+    Cắt bớt phần thập phân
+    -{maxScore.toFixed(1)} (10.0)

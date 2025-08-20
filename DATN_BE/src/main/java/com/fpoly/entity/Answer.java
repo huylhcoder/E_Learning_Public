@@ -14,8 +14,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "answer")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class Answer {
@@ -38,45 +44,4 @@ public class Answer {
 	@OneToMany(mappedBy = "answer")
 	List<UserAnswerHistory> listUserAnswerHistory;
 
-	public int getAnswerId() {
-		return answerId;
-	}
-
-	public void setAnswerId(int answerId) {
-		this.answerId = answerId;
-	}
-
-	public Question getQuestion() {
-		return question;
-	}
-
-	public void setQuestion(Question question) {
-		this.question = question;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public boolean isCorrect() {
-		return isCorrect;
-	}
-
-	public void setCorrect(boolean isCorrect) {
-		this.isCorrect = isCorrect;
-	}
-
-	public List<UserAnswerHistory> getListUserAnswerHistory() {
-		return listUserAnswerHistory;
-	}
-
-	public void setListUserAnswerHistory(List<UserAnswerHistory> listUserAnswerHistory) {
-		this.listUserAnswerHistory = listUserAnswerHistory;
-	}
-	
-	
 }

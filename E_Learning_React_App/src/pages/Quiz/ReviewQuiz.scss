@@ -1,0 +1,18 @@
+.review-quiz-container {
+    padding: 20px;
+
+    .question-block {
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: #fff;
+    }
+
+    ul.list-group {
+        margin-top: 10px;
+    }
+
+    .list-group-item {
+        cursor: default;
+    }
+}

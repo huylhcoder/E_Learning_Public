@@ -1,9 +1,11 @@
 import { toast } from 'react-toastify';
+
 import axios from '../utils/CustomizeAxios';
+
 
 export const login = async (email, password) => {
     try {
-        const response = await axios.post(`api/v1/auth/token`, {
+        const response = await axios.post(`/auth/login`, {
             email,
             password,
         });
@@ -11,6 +13,7 @@ export const login = async (email, password) => {
             toast.error('Email or Password incorrect');
             return;
         }
+        toast.success('Đăng nhập thành công');
         return response.data;
     } catch (error) {
         throw new Error(error);
@@ -24,7 +27,7 @@ export const introspect = async () => {
             throw new Error('Token is missing');
         }
 
-        const response = await axios.post(`api/v1/auth/introspect`, {
+        const response = await axios.post(`/auth/introspect`, {
             token: token,
         });
 
@@ -39,7 +42,7 @@ export const introspect = async () => {
     }
 };
 
-export const logout = async (token) => {
-    const response = await axios.post(`api/v1/auth/logout`, { token: token });
-    return response;
-};
+// export const logout = async (token) => {
+//     const response = await axios.post(`api/v1/auth/logout`, { token: token });
+//     return response;
+// };

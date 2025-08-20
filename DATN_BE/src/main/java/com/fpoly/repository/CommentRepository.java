@@ -14,6 +14,9 @@ import com.fpoly.entity.User;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
+	
+//CourseDetailPage
+	int countByCourse_CourseId(int courseId);
 
 //	@Query("SELECT u FROM Comment u WHERE u.course = :course")
 //	Comment findByCourseId(@Param("course") int course);

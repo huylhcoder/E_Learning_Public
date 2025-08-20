@@ -11,11 +11,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "video_progress")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class VideoProgress {
@@ -41,79 +46,6 @@ public class VideoProgress {
 
     @Column(name = "video_progress", nullable = false)
     private int videoProgress;
-
-
-    // Constructors
-    public VideoProgress() {
-    }
-
-    public VideoProgress(int userId, int registeredCourseId, int lessonId, String pathVideo, 
-                         LocalDateTime update_at, int videoProgress) {
-        this.userId = userId;
-        this.registeredCourseId = registeredCourseId;
-        this.lessonId = lessonId;
-        this.pathVideo = pathVideo;
-        this.update_at = update_at;
-        this.videoProgress = videoProgress;
-        
-    }
-
-    // Getters and Setters
-    public int getVideoProgressId() {
-        return videoProgressId;
-    }
-
-    public void setVideoProgressId(int videoProgressId) {
-        this.videoProgressId = videoProgressId;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
-
-    public int getRegisteredCourseId() {
-        return registeredCourseId;
-    }
-
-    public void setRegisteredCourseId(int registeredCourseId) {
-        this.registeredCourseId = registeredCourseId;
-    }
-
-    public int getLessonId() {
-        return lessonId;
-    }
-
-    public void setLessonId(int lessonId) {
-        this.lessonId = lessonId;
-    }
-
-    public String getPathVideo() {
-        return pathVideo;
-    }
-
-    public void setPathVideo(String pathVideo) {
-        this.pathVideo = pathVideo;
-    }
-
-    public LocalDateTime getUpdate_at() {
-        return update_at;
-    }
-
-    public void setUpdate_at(LocalDateTime update_at) {
-        this.update_at = update_at;
-    }
-
-    public int getVideoProgress() {
-        return videoProgress;
-    }
-
-    public void setVideoProgress(int videoProgress) {
-        this.videoProgress = videoProgress;
-    }
 
     @Override
     public String toString() {

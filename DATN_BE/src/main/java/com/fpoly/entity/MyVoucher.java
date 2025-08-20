@@ -14,8 +14,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "my_voucher")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class MyVoucher {
@@ -33,41 +41,5 @@ public class MyVoucher {
 	Voucher voucher;
 
 	@Column(name = "status")
-	private boolean status;
-
-	public int getMyVoucherId() {
-		return myVoucherId;
-	}
-
-	public void setMyVoucherId(int myVoucherId) {
-		this.myVoucherId = myVoucherId;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public Voucher getVoucher() {
-		return voucher;
-	}
-
-	public void setVoucher(Voucher voucher) {
-		this.voucher = voucher;
-	}
-
-	public boolean isStatus() {
-		return status;
-	}
-
-	public void setStatus(boolean status) {
-		this.status = status;
-	}
-	
-	
-	
-	
+	private boolean status;	
 }

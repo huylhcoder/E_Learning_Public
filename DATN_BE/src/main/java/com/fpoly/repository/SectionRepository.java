@@ -16,6 +16,12 @@ import com.fpoly.entity.User;
 @Repository
 public interface SectionRepository extends JpaRepository<Section, Integer> {
 
+//CourseDetailPage
+	List<Section> findByCourse_CourseId(int courseId);
+	
+	
+//Các method v1
+
 	List<Section> findByCourse(Course course);
 
 	// Tìm kiếm khóa học mới vừa tạo để hiển thị sang trang chi tiết

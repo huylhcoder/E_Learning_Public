@@ -1,0 +1,26 @@
+.secure-video-container {
+    position: relative;
+    width: 100%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+
+    .secure-video {
+        width: 100%;
+        max-height: 600px;
+        object-fit: contain;
+    }
+
+    .video-loading {
+        padding: 2rem;
+        text-align: center;
+        background: #f8f9fa;
+    }
+
+    .video-error {
+        padding: 2rem;
+        text-align: center;
+        color: #dc3545;
+        background: #f8f9fa;
+    }
+}

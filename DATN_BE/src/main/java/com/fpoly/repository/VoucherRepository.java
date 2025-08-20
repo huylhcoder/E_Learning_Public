@@ -14,16 +14,14 @@ import com.fpoly.entity.Voucher;
 
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
-	Voucher findByVoucherId(int voucherId);
-
 	@Query(value = "SELECT v.* " + "FROM my_voucher mv " + "JOIN voucher v ON mv.voucher_id = v.voucher_id "
-			+ "JOIN users u ON mv.users_id = u.users_id " + "WHERE u.email = :email " + "AND mv.status = 1 ", nativeQuery = true)
+			+ "JOIN users u ON mv.users_id = u.users_id " + "WHERE u.email = :email " + "AND mv.status = 1 "+ "AND v.status = 1 ", nativeQuery = true)
 	List<Voucher> findVouchersByEmail(@Param("email") String email);
+	
+	Voucher findByVoucherId(int voucherId);	
 
 	// @Query(value = "SELECT * FROM voucher WHERE status = 1 ORDER BY quantity Desc", nativeQuery = true)
 	// List<Voucher> findRandomVouchers();
-
-	// Voucher findByVoucherCode(String voucherCode);
 	
 	 @Query(value = "SELECT * FROM voucher WHERE status = 1 ORDER BY quantity Desc", nativeQuery = true)
 	 List<Voucher> findRandomVouchers();

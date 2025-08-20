@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fpoly.entity.Payment;
 import com.fpoly.entity.RegisteredCourse;
@@ -19,7 +21,20 @@ public interface RegisteredCourseRepository extends JpaRepository<RegisteredCour
 	@Query("SELECT CASE WHEN COUNT(rc) > 0 THEN true ELSE false END FROM RegisteredCourse rc WHERE rc.course.courseId = :courseId AND rc.user.userId = :userId")
 	boolean existsByCourseIdAndUserId(@Param("courseId") int courseId, @Param("userId") int userId);
 
-	// Các method khác...
+//CourseDetail
+	// Đếm số lượng học viên của khóa học
+	int countByCourse_CourseIdAndStatusPaymentTrue(int courseId);
+
+	// Kiểm tra học viên đã đăng ký khóa học này chưa
+	boolean existsByUser_UserIdAndCourse_CourseIdAndStatusPaymentTrue(Integer userId, Integer courseId);
+
+	//Hỗ trợ cho hàm xóa Payment chưa được thanh toán
+	@Modifying
+	@Transactional
+	@Query("DELETE FROM RegisteredCourse rc WHERE rc.payment.paymentId IN :paymentIds")
+	void deleteByPaymentIds(@Param("paymentIds") List<Integer> paymentIds);
+
+// Các method khác...
 	@Query("SELECT rc FROM RegisteredCourse rc WHERE rc.user.userId = :userId")
 	List<RegisteredCourse> findByUser(@Param("userId") int userId);
 

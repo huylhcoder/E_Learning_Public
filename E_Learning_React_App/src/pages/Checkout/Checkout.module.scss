@@ -1,0 +1,20 @@
+.voucher-list {
+  .voucher-item {
+    width: 100%; // Chiếm 100% chiều ngang
+    padding: 15px; // Thêm padding
+    background-color: #c3e6cb; // Màu xanh nhạt mặc định
+    border: 1px solid #28a745; // Border màu xanh
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &.selected {
+      background-color: #28a745; // Màu xanh đậm khi được chọn
+      color: #fff;
+    }
+  }
+}

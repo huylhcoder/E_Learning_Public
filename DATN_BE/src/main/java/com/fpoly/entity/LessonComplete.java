@@ -10,8 +10,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "lesson_complete")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public class LessonComplete {
@@ -27,29 +33,4 @@ public class LessonComplete {
 	@ManyToOne
 	@JoinColumn(name = "users_id")
 	User user;
-
-	public int getLessionCompleteId() {
-		return lessionCompleteId;
-	}
-
-	public void setLessionCompleteId(int lessionCompleteId) {
-		this.lessionCompleteId = lessionCompleteId;
-	}
-
-	public Lesson getLesson() {
-		return lesson;
-	}
-
-	public void setLesson(Lesson lesson) {
-		this.lesson = lesson;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-	
 }

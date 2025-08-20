@@ -48,7 +48,7 @@ const BannerSection = () => {
                     {topCourses.map((kh) => (
                         <div className="col-md-6 col-lg-3 mb-4 mt-4" key={kh.courseId}>
                             <div className={cx('courses-item', 'position-relative')}>
-                                <Link to={`/courses/${kh.courseId}`} className={cx('link')}>
+                                <Link to={`/course/course-detail/${kh.courseId}`} className={cx('link')}>
                                     <div className={cx('courses-item-inner')}>
                                         <div className={cx('img-box')}>
                                             <img src={kh.avatar} alt="courses img" className="img-fluid" />
