@@ -180,10 +180,10 @@ const Quiz = () => {
 
     return (
         <div className="quiz-container container">
-            <div className="quiz-header mt-3 mb-3">
+            <div className="quiz-header mt-4 mb-3">
                 <button 
                     type="button" 
-                    className="btn btn-outline-secondary fs-4"
+                    className="btn btn-outline-primary fs-4 fw-bold"
                     onClick={() => window.history.back()}
                 >
                     <FontAwesomeIcon icon={faArrowLeft} /> Quay lại trang học bài

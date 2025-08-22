@@ -31,6 +31,8 @@ export const introspect = async () => {
             token: token,
         });
 
+        console.log("Introspect response:", response.data);
+
         if (response.data && response.data.result) {
             return response.data.result;
         } else {

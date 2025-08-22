@@ -1,17 +1,47 @@
 .wrapper {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    min-height: 100vh;
+    width: 100%;
 }
 
 .container {
-    width: var(--default-layout-width); //Lay gia tri tu bien cua GlobalStye neu them (..,gia tri mac dinh)
-    max-width: 100%;
-    padding: 0 var(--default-layout-horizontal-spacer);
-    margin-top: var(--default-layout-header-height);
     display: flex;
+    flex: 1;
+    position: relative;
+    
+    &.collapsed {
+        .content {
+            margin-left: 70px;
+        }
+    }
 }
 
 .content {
     flex: 1;
+    padding: 2rem;
+    background: #f3f4f6;
+    min-height: 100vh;
+    margin-left: 250px;
+    transition: margin-left 0.3s ease;
+}
+
+.toggle-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 100;
+    background: none;
+    border: none;
+    color: #374151;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+
+    &:hover {
+        background: #e5e7eb;
+    }
 }

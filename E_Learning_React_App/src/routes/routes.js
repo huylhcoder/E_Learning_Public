@@ -15,6 +15,9 @@ import PaymentResult from '~/pages/PaymentResult/PaymentResult';
 import Cart from '~/pages/Cart/Cart';
 import Learning from '~/pages/Learning/Learning';
 import Quiz from '~/pages/Quiz/Quiz';
+//Admin Page
+import Dashboard from '~/pages/Dashboard/Dashboard';
+import CategoryManager from '~/pages/CategoryManager/CategoryManager';
 
 //config.routes.myCourse => myCourse: '/my-course'
 
@@ -28,9 +31,10 @@ const publicRoutes = [
 ];
 
 // Private routes (đăng nhập mới xem được)
-// Tại '~/routes/PrivateRoute'; sử dụng introspection để kiểm tra token để trả về isValid 
+// Tại '~/routes/PrivateRoute'; sử dụng introspection để kiểm tra token để trả về isValid
 // Nếu không có token thì sẽ chuyển hướng về trang login
-const privateRoutes = [{ path: config.routes.myCourse, component: MyCourse },
+const privateRoutes = [
+    { path: config.routes.myCourse, component: MyCourse },
     { path: config.routes.paymentResult, component: PaymentResult },
     { path: config.routes.checkout, component: Checkout },
     { path: config.routes.learning, component: Learning },
@@ -38,7 +42,12 @@ const privateRoutes = [{ path: config.routes.myCourse, component: MyCourse },
 ];
 
 // Admin routes (phải là admin)
-const adminRoutes = [{ path: config.routes.courseManager, component: CourseManager, layout: AdminLayout }];
+const adminRoutes = [
+    { path: config.routes.admin, component: Dashboard, layout: AdminLayout },
+    { path: config.routes.dashboard, component: Dashboard, layout: AdminLayout },
+    { path: config.routes.categoryManager, component: CategoryManager, layout: AdminLayout },
+    { path: config.routes.courseManager, component: CourseManager, layout: AdminLayout },
+];
 
 //Do no co 2 thang nen minh phai export tung cai le ra
 export { publicRoutes, privateRoutes, adminRoutes };
