@@ -175,23 +175,6 @@ public class TestService {
 	}
 
 	
-
-//	public void saveUserAnswer(Integer testId, SaveAnswerRequest request, String email) {
-//		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-//
-//		Answer answer = answerRepository.getReferenceById(request.getAnswerId());
-//
-//		UserAnswerHistory userAnswerHistory = new UserAnswerHistory();
-//		userAnswerHistory.setUser(user);
-//		userAnswerHistory.setTest(testRepository.getReferenceById(testId));
-//		userAnswerHistory.setQuestion(questionRepository.getReferenceById(request.getQuestionId()));
-//		userAnswerHistory.setAnswer(answer);
-//		userAnswerHistory.setCorrect(answer.isCorrect());
-//		userAnswerHistory.setCreateAt(new Date());
-//
-//		userAnswerHistoryRepository.save(userAnswerHistory);
-//	}
-	
 	@Transactional
 	public void saveUserAnswer(Integer testId, SaveAnswerRequest request, String email) {
 	    User user = userRepository.findByEmail(email)

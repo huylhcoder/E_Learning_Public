@@ -481,6 +481,7 @@ public class CourseService {
 		courseEntity.setName(courseDTO.getName());
 		courseEntity.setStatus(courseDTO.getStatus());
 		courseEntity.setDescription(courseDTO.getDescription());
+		courseEntity.setContentDescription(courseDTO.getContentDescription());
 		courseEntity.setAvatar(courseDTO.getAvatar());
 		courseEntity.setPrice(courseDTO.getPrice());
 		courseEntity.setTopic(courseDTO.getTopic());

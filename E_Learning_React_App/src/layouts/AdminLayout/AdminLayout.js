@@ -1,6 +1,11 @@
+//Thư viện
 import PropTypes from 'prop-types';
 import classNames from 'classnames/bind';
 import { useState } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Cũng bắt buộc
+
+//Component 
 import Sidebar from './component/Sidebar';
 import styles from './AdminLayout.module.scss';
 
@@ -18,6 +23,7 @@ function AdminLayout({ children }) {
             <div className={cx('container', { collapsed: isCollapsed })}>
                 <Sidebar isCollapsed={isCollapsed} onToggle={toggleSidebar} />
                 <div className={cx('content')}>{children}</div>
+                <ToastContainer position="top-right" autoClose={3000} />
             </div>
         </div>
     );

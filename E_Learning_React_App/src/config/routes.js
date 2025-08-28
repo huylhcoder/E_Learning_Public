@@ -1,4 +1,3 @@
-
 const routes = {
     // Public routes
     home: '/',
@@ -22,7 +21,7 @@ const routes = {
     dashboard: '/admin/dashboard',
     categoryManager: '/admin/categories',
     courseManager: '/admin/course-manager',
-
+    courseDetailManager: '/admin/course-detail-manager/:courseId',
 };
 
 export default routes;

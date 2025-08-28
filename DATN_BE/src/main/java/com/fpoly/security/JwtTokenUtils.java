@@ -9,11 +9,15 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.fpoly.entity.Role;
+import com.fpoly.entity.User;
 import com.fpoly.exceptions.InvalidParamException;
 import java.security.Key;
 import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -36,36 +40,51 @@ public class JwtTokenUtils {
 	// Đầu vào User => Token
 	// Tránh nhầm lẫn đối tượng User đâu đó trong Spring thì mình khai báo như thế
 	// này
-	public String generateToken(com.fpoly.entity.User user) throws Exception {
-		// properties => claims
-		// Thuộc tính đưa vào thì chúng ta gọi nó là Claim
-		// Key là String và Value là object
-		// HashMap bởi vì nó có nhiều Key - Value
+	public String generateToken(User user) throws Exception {
 		Map<String, Object> claims = new HashMap<>();
-		// Đưa thuộc tính vào Claim
 		claims.put("email", user.getEmail());
-		// Nó hay bị lỗi nên chúng ta phải bắt lỗi nó
-		try {
+		// Vì User chỉ có 1 role (ManyToOne)
+		claims.put("roles", List.of(user.getRole().getName()));
 
-			String token = Jwts.builder().
-			// Làm thể nào để trích xuất Claim ra (2)
-					setClaims(claims) // how to extract claims from this ?
-					.setSubject(user.getEmail())
-					// Từ số giây chúng ta sẽ tính được cái ngày
-					// 100 là đổi từ s => ms , L kiểu Long
+		try {
+			return Jwts.builder().setClaims(claims).setSubject(user.getEmail()) // dùng email để extract
+					.setIssuedAt(new Date(System.currentTimeMillis()))
 					.setExpiration(new Date(System.currentTimeMillis() + expiration * 1000L))
-					// Khi sinh ra token này thì chúng ta cần có câu hỏi bảo mật
-					// Từ cái Key đó nó mới dịch cái Token => Claim (1)
-					// Truyền thêm thuật toán Signature
 					.signWith(getSignInKey(), SignatureAlgorithm.HS256).compact();
-			return token;
 		} catch (Exception e) {
-			// System.err.println("Không thể tạo JWT Token vì: " + e.getMessage());// Sau
-			// này có thể dùng Logger
-			// you can "inject" Logger, instead System.out.println
 			throw new InvalidParamException("JWT Token Utils - Không thể tạo Token err: " + e.getMessage());
 		}
 	}
+//	public String generateToken(com.fpoly.entity.User user) throws Exception {
+//		// properties => claims
+//		// Thuộc tính đưa vào thì chúng ta gọi nó là Claim
+//		// Key là String và Value là object
+//		// HashMap bởi vì nó có nhiều Key - Value
+//		Map<String, Object> claims = new HashMap<>();
+//		// Đưa thuộc tính vào Claim
+//		claims.put("email", user.getEmail());
+//		// Nó hay bị lỗi nên chúng ta phải bắt lỗi nó
+//		try {
+//
+//			String token = Jwts.builder().
+//			// Làm thể nào để trích xuất Claim ra (2)
+//					setClaims(claims) // how to extract claims from this ?
+//					.setSubject(user.getEmail())
+//					// Từ số giây chúng ta sẽ tính được cái ngày
+//					// 100 là đổi từ s => ms , L kiểu Long
+//					.setExpiration(new Date(System.currentTimeMillis() + expiration * 1000L))
+//					// Khi sinh ra token này thì chúng ta cần có câu hỏi bảo mật
+//					// Từ cái Key đó nó mới dịch cái Token => Claim (1)
+//					// Truyền thêm thuật toán Signature
+//					.signWith(getSignInKey(), SignatureAlgorithm.HS256).compact();
+//			return token;
+//		} catch (Exception e) {
+//			// System.err.println("Không thể tạo JWT Token vì: " + e.getMessage());// Sau
+//			// này có thể dùng Logger
+//			// you can "inject" Logger, instead System.out.println
+//			throw new InvalidParamException("JWT Token Utils - Không thể tạo Token err: " + e.getMessage());
+//		}
+//	}
 
 	// Viết riêng cho nó một cái hàm (1)
 	// Mã hóa String => Đối tượng Key
@@ -119,7 +138,7 @@ public class JwtTokenUtils {
 	// Có quyền đề thực hiện API nào
 	// Đầu vào Token
 	// Sử dụng tham chiếu để lấy ra thuộc tính của từng đối tượng
-	public  String extractEmail(String token) {
+	public String extractEmail(String token) {
 		return extractClaim(token, Claims::getSubject);
 	}
 

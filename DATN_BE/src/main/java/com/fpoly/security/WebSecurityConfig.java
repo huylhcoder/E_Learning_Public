@@ -40,11 +40,12 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(requests -> {
 
 					requests
-							// Get Public
+							// Mấy cái request không cần token nên để qua bên JWTTokenFilter
+							// Do khi nhận request nó qua bên đó trước
 							.requestMatchers(GET,
 									// Category
 									String.format("%s/category/list-category", apiPrefix),
-									String.format("%s/category/tree", apiPrefix),
+									String.format("%s/category/tree/**", apiPrefix),
 									//User
 									String.format("%s/user/get-avatar", apiPrefix),
 									// Course
@@ -92,13 +93,15 @@ public class WebSecurityConfig {
 									String.format("%s/course-manager-detail/**", apiPrefix),
 									String.format("%s/category/update-category/**", apiPrefix))
 							.permitAll()
-
 							// Post With Role Admin
-							.requestMatchers(POST, String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN)
+							.requestMatchers(GET, String.format("%s/category-manager/tree", apiPrefix)).hasAnyRole(Role.ADMIN)
+							.requestMatchers(GET, String.format("%s/category-manager/list-category", apiPrefix)).hasAnyRole(Role.ADMIN)
+							// Post With Role Admin
+							.requestMatchers(POST, String.format("%s/category-manager/**", apiPrefix)).hasAnyRole(Role.ADMIN)
 							// Put With Role Admin
-							.requestMatchers(PUT, String.format("%s/categories/**", apiPrefix)).hasAnyRole(Role.ADMIN)
+							.requestMatchers(PUT, String.format("%s/category-manager/**", apiPrefix)).hasAnyRole(Role.ADMIN)
 							// Delete With Role Admin
-							.requestMatchers(DELETE, String.format("%s/categories/**", apiPrefix))
+							.requestMatchers(DELETE, String.format("%s/category-manager/**", apiPrefix))
 							.hasAnyRole(Role.ADMIN)
 							// Tất cả request còn lại phải xác thực
 							.anyRequest().authenticated();

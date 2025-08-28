@@ -18,12 +18,12 @@ public class CourseDetailManagerDTO {
     private String name;
     private int status;
     private String description;
+    private String contentDescription; // Quill Editor
     private String avatar;
     private float price;
     private String topic;
-//    private int categoryId;
-    private List<Integer> categoryIds;
+    private List<Integer> categoryIds; // Nhiều danh mục
     private int levelId;
     private String updateAt;
-    
 }
+

@@ -1,0 +1,62 @@
+.dropdownCard {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 300px;
+
+  .header {
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fa;
+    border-radius: 0.5rem 0.5rem 0 0;
+
+    input {
+      font-size: 0.9rem;
+    }
+  }
+
+  .body {
+    max-height: 250px;
+    overflow-y: auto;
+    padding: 0.5rem;
+
+    /* Thanh scroll gọn */
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: #999;
+    }
+  }
+
+  .empty {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1rem 0;
+  }
+}
+
+
+.closeBtn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+/* Badge tròn hơn */
+.badge {
+  border-radius: 999px !important; // full pill shape
+}
+
+

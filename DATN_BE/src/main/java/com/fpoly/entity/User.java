@@ -143,7 +143,7 @@ public class User extends BaseEntity implements UserDetails {
 	@JsonIgnore
 	@OneToMany(mappedBy = "user")
 	List<UserAnswerHistory> listUserAnswerHistory;
-	
+
 	@JsonIgnore
 	@OneToMany(mappedBy = "user")
 	List<MyVoucher> listMyVoucher;
@@ -154,14 +154,21 @@ public class User extends BaseEntity implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
-		// Phát hiện coi mình có cái Role gì
-		// authorityList.add(new SimpleGrantedAuthority("ROLE_" + getRole().getName()));
-
-//		Mình cũng có thể Fake quyền để Test JWT Filter
-//		authorityList.add(new SimpleGrantedAuthority("ADMIN"));
-		authorityList.add(new SimpleGrantedAuthority("USER"));
+		authorityList.add(new SimpleGrantedAuthority("ROLE_" + getRole().getName()));
 		return authorityList;
 	}
+
+//	@Override
+//	public Collection<? extends GrantedAuthority> getAuthorities() {
+//		List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
+//		// Phát hiện coi mình có cái Role gì
+//		// authorityList.add(new SimpleGrantedAuthority("ROLE_" + getRole().getName()));
+//
+////		Mình cũng có thể Fake quyền để Test JWT Filter
+////		authorityList.add(new SimpleGrantedAuthority("ADMIN"));
+//		authorityList.add(new SimpleGrantedAuthority("USER"));
+//		return authorityList;
+//	}
 
 	// Spring Security nếu để nó bằng null thì nó sẽ hiểu
 	// Trường duy nhất chính là Username

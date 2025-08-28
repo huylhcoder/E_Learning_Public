@@ -6,7 +6,6 @@ import { AdminLayout } from '~/layouts';
 // Pages
 import Home from '~/pages/Home';
 import CourseDetail from '~/pages/CourseDetail';
-import CourseManager from '~/pages/CourseManager';
 import MyCourse from '~/pages/MyCourse';
 import Login from '~/pages/Login';
 import SearchCourse from '~/pages/SearchCourse';
@@ -18,6 +17,8 @@ import Quiz from '~/pages/Quiz/Quiz';
 //Admin Page
 import Dashboard from '~/pages/Dashboard/Dashboard';
 import CategoryManager from '~/pages/CategoryManager/CategoryManager';
+import CourseManager from '~/pages/CourseManager';
+import CourseDetailManager from '~/pages/CourseDetailManager/CourseDetailManager';
 
 //config.routes.myCourse => myCourse: '/my-course'
 
@@ -47,6 +48,7 @@ const adminRoutes = [
     { path: config.routes.dashboard, component: Dashboard, layout: AdminLayout },
     { path: config.routes.categoryManager, component: CategoryManager, layout: AdminLayout },
     { path: config.routes.courseManager, component: CourseManager, layout: AdminLayout },
+    { path: config.routes.courseDetailManager, component: CourseDetailManager, layout: AdminLayout },
 ];
 
 //Do no co 2 thang nen minh phai export tung cai le ra

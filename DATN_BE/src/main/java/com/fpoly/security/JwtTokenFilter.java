@@ -108,32 +108,24 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 				// Mình truyền thẳng "${api.prefix}/course"), "GET" nó không hiểu
 				// Khởi tạo biến và sử dụng nối chuỗi để fix
 				// Cho qua thoải mái
-				//Auth
+				// Auth
 				Pair.of(String.format("%s/auth/register", apiPrefix), "POST"),
 				Pair.of(String.format("%s/auth/check-user", apiPrefix), "POST"),
 				Pair.of(String.format("%s/auth/send-verification-code", apiPrefix), "POST"),
 				Pair.of(String.format("%s/auth/login", apiPrefix), "POST"),
 				Pair.of(String.format("%s/auth/introspect", apiPrefix), "POST"),
-				//User
+				// User
 				Pair.of(String.format("%s/user/get-avatar", apiPrefix), "GET"), // Thêm vào đây
 				Pair.of(String.format("%s/thanhtoanthanhcong", apiPrefix), "GET"), // Thêm vào đây
 				Pair.of(String.format("%s/upload-file/download-video-on-server", apiPrefix), "GET"), // Thêm vào đây
-				//Payment
+				// Category
+				Pair.of(String.format("%s/category/tree", apiPrefix), "GET"),
+				Pair.of(String.format("%s/category/list-category", apiPrefix), "GET"),
+				Pair.of(String.format("%s/category/dropdown", apiPrefix), "GET"),
+				// Payment
 				Pair.of(String.format("%s/vnpayreturn", apiPrefix), "GET"), // Thêm vào đây
 				// Test cho public
-				Pair.of(String.format("%s/course-level", apiPrefix), "GET"),
-				Pair.of(String.format("api/cart/user/**"), "GET"), Pair.of(String.format("api/category"), "GET"),
-//				Pair.of(String.format("%s/course", apiPrefix), "GET"),
-				Pair.of(String.format("%s/category", apiPrefix), "GET"),
-				Pair.of(String.format("%s/course-manager-detail/**", apiPrefix), "GET"),
-				Pair.of(String.format("%s/course-manager-detail/", apiPrefix), "PUT"),
-				Pair.of(String.format("%s/course-manager/draft-course", apiPrefix), "GET"),
-				Pair.of(String.format("%s/course-manager/posted-course", apiPrefix), "GET"),
-				Pair.of(String.format("%s/course-manager", apiPrefix), "POST"),
-				Pair.of(String.format("%s/section-manager/**", apiPrefix), "GET"),
-				Pair.of(String.format("%s/section-manager/**", apiPrefix), "POST")
-		//
-		);
+				Pair.of(String.format("%s/course-level", apiPrefix), "GET"));
 		for (Pair<String, String> bypassToken : bypassTokens) {
 			if (request.getServletPath().contains(bypassToken.getFirst())
 					&& request.getMethod().equals(bypassToken.getSecond())) {

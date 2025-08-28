@@ -48,21 +48,40 @@ public class CategoryService {
 
 	// List danh sách danh mục + số sản phẩm của từng danh mục
 	public List<CategoryResponseDto> getAllWithCourseCount() {
-		List<Category> categories = categoryRepository.findAllWithParent();
+	    List<Category> categories = categoryRepository.findAllWithParent();
 
-		Map<Integer, Long> courseCountMap = categoryRepository.countCoursesByCategory().stream()
-				.collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
+	    // Map categoryId -> số lượng course
+	    Map<Integer, Long> courseCountMap = categoryRepository.countCoursesByCategory().stream()
+	            .collect(Collectors.toMap(row -> (Integer) row[0], row -> (Long) row[1]));
 
-		return categories.stream().map(c -> {
-			CategoryResponseDto dto = new CategoryResponseDto();
-			dto.setCategoryId(c.getCategoryId());
-			dto.setName(c.getName());
-			dto.setSlug(c.getSlug());
-			dto.setParentName(c.getParent() != null ? c.getParent().getName() : null);
-			dto.setCourseCount(courseCountMap.getOrDefault(c.getCategoryId(), 0L).intValue());
-			return dto;
-		}).collect(Collectors.toList());
+	    return categories.stream().map(c -> {
+	        CategoryResponseDto dto = new CategoryResponseDto();
+	        dto.setCategoryId(c.getCategoryId());
+	        dto.setName(c.getName());
+	        dto.setSlug(c.getSlug());
+
+	        // set parent object (chỉ map thông tin cơ bản tránh vòng lặp)
+	        if (c.getParent() != null) {
+	            CategoryResponseDto parentDto = new CategoryResponseDto();
+	            parentDto.setCategoryId(c.getParent().getCategoryId());
+	            parentDto.setName(c.getParent().getName());
+	            parentDto.setSlug(c.getParent().getSlug());
+	            parentDto.setParent(null); // không set tiếp để tránh đệ quy vô hạn
+	            parentDto.setCourseCount(0); // có thể bỏ qua
+	            parentDto.setChildrenCount(0); // có thể bỏ qua
+	            dto.setParent(parentDto);
+	        }
+
+	        // set course count
+	        dto.setCourseCount(courseCountMap.getOrDefault(c.getCategoryId(), 0L).intValue());
+
+	        // set children count
+	        dto.setChildrenCount(c.getChildren() != null ? c.getChildren().size() : 0);
+
+	        return dto;
+	    }).collect(Collectors.toList());
 	}
+
 
 	// Chi tiết danh muc khóa học + Tên danh mục cha
 	public CategoryDetailDto getCategoryDetailById(Integer categoryId) {
@@ -126,6 +145,34 @@ public class CategoryService {
 
 		return categoryRepository.save(category);
 	}
+	
+	//Viết hàm mapper Entity → DTO
+	public CategoryResponseDto toDto(Category entity) {
+	    if (entity == null) return null;
+
+	    CategoryResponseDto dto = new CategoryResponseDto();
+	    dto.setCategoryId(entity.getCategoryId());
+	    dto.setName(entity.getName());
+	    dto.setSlug(entity.getSlug());
+
+	    // Đếm course gắn với category
+	    dto.setCourseCount(entity.getCourseCategories() != null ? entity.getCourseCategories().size() : 0);
+
+	    // Đếm children
+	    dto.setChildrenCount(entity.getChildren() != null ? entity.getChildren().size() : 0);
+
+	    // Map parent nhưng chỉ lấy 1 cấp, tránh vòng lặp
+	    if (entity.getParent() != null) {
+	        CategoryResponseDto parentDto = new CategoryResponseDto();
+	        parentDto.setCategoryId(entity.getParent().getCategoryId());
+	        parentDto.setName(entity.getParent().getName());
+	        parentDto.setSlug(entity.getParent().getSlug());
+	        dto.setParent(parentDto);
+	    }
+
+	    return dto;
+	}
+
 
 	/**
 	 * Kiểm tra xem category con/cháu có phải là cha đang được chọn không (tức là

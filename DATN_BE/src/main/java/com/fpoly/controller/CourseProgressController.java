@@ -61,16 +61,16 @@ public class CourseProgressController {
 	private JwtTokenUtils jwtTokenUtils;
 
 //Learning Page
-	//Hiển thị tiến độ
+	// Hiển thị tiến độ
 	@GetMapping("/progress")
-    public ResponseEntity<CourseProgressDTO> getCourseProgress(
-            @RequestHeader(value = "Authorization", required = false) String token,
-            @RequestParam("courseId") int courseId) {
+	public ResponseEntity<CourseProgressDTO> getCourseProgress(
+			@RequestHeader(value = "Authorization", required = false) String token,
+			@RequestParam("courseId") int courseId) {
 
-        CourseProgressDTO dto = courseProgressService.getCourseProgress(courseId, token);
-        return ResponseEntity.ok(dto);
-    }
-	
+		CourseProgressDTO dto = courseProgressService.getCourseProgress(courseId, token);
+		return ResponseEntity.ok(dto);
+	}
+
 	// Hiển thị bài học hiện taị
 	@GetMapping("/current-lesson")
 	public ResponseEntity<LessonDTO> getCurrentLesson(
@@ -88,11 +88,26 @@ public class CourseProgressController {
 		return ResponseEntity.ok(updatedLesson);
 	}
 
-//Khác
-	@GetMapping("/userAdmin")
+//Dashboard Page
+
+	@GetMapping("/user-admin")
 	public List<User> fillAllUserRole2() {
 		return userService.fillAllUserRole2();
 	}
+
+	// số khóa học hoàn thành để phát chứng chỉ
+	@GetMapping("/total-complete")
+	public List<CourseProgress> FillTotalCourseComplete() {
+		return courseProgressService.FillTotalCourseComplete();
+	}
+
+	// Tổng Doanh Thu
+	@GetMapping("/total-revenue")
+	public List<RegisteredCourse> GetRegisteredCourse() {
+		return userService.GetRegisteredCourse();
+	}
+
+//Khác
 
 //	@GetMapping("/{userId}")
 //	public List<CourseProgress> getCourseProgressByUserId(@PathVariable int userId) {
@@ -116,8 +131,10 @@ public class CourseProgressController {
 
 	// CODE của HBao
 	// Khóa học đã đăng ký theo userid
+
 //	@GetMapping("/courseRegister/{userId}")
-//	public ResponseEntity<?> getRegisteredCoursesByUserId(@PathVariable int userId, @RequestHeader("Authorization") String token) {
+//	public ResponseEntity<?> getRegisteredCoursesByUserId(@PathVariable int userId,
+//			@RequestHeader("Authorization") String token) {
 //		String FToken = token.replace("Bearer ", "").trim();
 //		System.out.println("Token: " + token);
 //		String email = "";
@@ -132,14 +149,14 @@ public class CourseProgressController {
 //		Integer userID = user.getUserId();
 //		if (userID == null) {
 //			return ResponseEntity.ok(registeredCourseService.findRegisterCourseByUserId(userId));
-//		} 
+//		}
 //		if (userID != null) {
 //			return ResponseEntity.ok(registeredCourseService.findRegisterCourseByUserId(userId));
 //		} else {
 //			return ResponseEntity.badRequest().body(null);
 //		}
-//        //return registeredCourseService.findRegisterCourseByUserId(userId);
-//    }
+//		// return registeredCourseService.findRegisterCourseByUserId(userId);
+//	}
 
 	// Danh sách khóa học đã bán và số lượt bán
 	@GetMapping("/listRegisteredCourse")
@@ -150,18 +167,6 @@ public class CourseProgressController {
 	@GetMapping("/courseRegister/{userId}")
 	public List<RegisteredCourse> getRegisteredCoursesByUserId(@PathVariable int userId) {
 		return registeredCourseService.findRegisterCourseByUserId(userId);
-	}
-
-	// số khóa học hoàn thành để phát chứng chỉ
-	@GetMapping("/TotalComplete")
-	public List<CourseProgress> FillTotalCourseComplete() {
-		return courseProgressService.FillTotalCourseComplete();
-	}
-
-	// Tổng Doanh Thu
-	@GetMapping("/totalRevenue")
-	public List<RegisteredCourse> GetRegisteredCourse() {
-		return userService.GetRegisteredCourse();
 	}
 
 	// Biểu đồ người dùng theo tháng
