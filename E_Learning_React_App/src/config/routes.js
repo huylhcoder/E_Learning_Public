@@ -22,6 +22,7 @@ const routes = {
     categoryManager: '/admin/categories',
     courseManager: '/admin/course-manager',
     courseDetailManager: '/admin/course-detail-manager/:courseId',
+    sectionDetailManager: '/admin/course-detail-manager/:courseId/section/:sectionId',
 };
 
 export default routes;

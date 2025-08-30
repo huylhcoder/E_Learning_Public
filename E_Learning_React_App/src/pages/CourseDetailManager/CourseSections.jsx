@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
-function CourseSections({ listSection, handleAddSection, handleDeleteSection }) {
+function CourseSections({ courseId, listSection, handleAddSection, handleDeleteSection }) {
+    
     return (
         <div>
             <div className="d-flex justify-content-between mb-3">
@@ -36,7 +37,7 @@ function CourseSections({ listSection, handleAddSection, handleDeleteSection }) 
                                 <td>{section.totalDuration || '0'} phút</td>
                                 <td>
                                     <Link
-                                        to={`/admin/course-detail-manager/${section.courseId}/section/${section.sectionId}`}
+                                        to={`/admin/course-detail-manager/${courseId}/section/${section.sectionId}`}
                                         className="btn btn-sm btn-warning me-2"
                                     >
                                         Sửa

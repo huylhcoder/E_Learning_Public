@@ -216,6 +216,7 @@ function CourseManagerDetail() {
                 }
                 detailsTab={
                     <CourseSections
+                        courseId={course.courseId}
                         listSection={listSection}
                         handleAddSection={handleAddSection}
                         handleDeleteSection={handleDeleteSection}

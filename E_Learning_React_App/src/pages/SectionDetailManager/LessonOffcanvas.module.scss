@@ -1,0 +1,43 @@
+.uploadBox {
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+    &:hover {
+        border-color: #0d6efd;
+        color: #0d6efd;
+    }
+}
+
+.previewBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.changeBtn {
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 0.5rem 1.2rem;
+    border-radius: 0.75rem;
+
+    // màu xám nhạt mặc định
+    border: 1px solid #ccc;
+    color: #555;
+    background-color: #f9f9f9;
+
+    transition: all 0.25s ease-in-out;
+
+    &:hover {
+        background-color: #e0e0e0;
+        color: #222;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+        transform: scale(0.96);
+    }
+}

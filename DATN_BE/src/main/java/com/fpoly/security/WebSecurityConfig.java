@@ -55,11 +55,11 @@ public class WebSecurityConfig {
 									String.format("%s/course/search", apiPrefix),
 									String.format("%s/course/suggestions", apiPrefix),
 									String.format("%s/course/course-detail/**", apiPrefix),
-									String.format("%s/course-manager-detail/**", apiPrefix),
-									String.format("%s/course-manager/draft-course", apiPrefix),
-									String.format("%s/course-manager/posted-course", apiPrefix),
+//									String.format("%s/course-manager-detail/**", apiPrefix),
+//									String.format("%s/course-manager/draft-course", apiPrefix),
+//									String.format("%s/course-manager/posted-course", apiPrefix),
 									// Section
-									String.format("%s/section-manager/**", apiPrefix),
+//									String.format("%s/section-manager/**", apiPrefix),
 									// Course Level
 									String.format("%s/course-level", apiPrefix),
 									String.format("%s/course-level/list-course-level", apiPrefix),

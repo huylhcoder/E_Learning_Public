@@ -37,3 +37,10 @@
 
     Cắt bớt phần thập phân
     -{maxScore.toFixed(1)} (10.0)
+
+8. Fomat thời lượng: h m s 
+    import {fomatDuration} from '~/utils/fomat'
+
+7. Quy định kích thướt
+    input: fs-4
+    title: fs-3 fw-bold
