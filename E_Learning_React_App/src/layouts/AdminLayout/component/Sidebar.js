@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-    FaTachometerAlt,
-    FaBook,
-    FaList,
-    FaUserCircle,
-    FaSignOutAlt,
-    FaChevronDown,
-    FaChevronRight,
-    FaBars,
-} from 'react-icons/fa';
+    LuLayoutDashboard,
+    LuBookOpen,
+    LuListTree,
+    LuUserRound,
+    LuLogOut,
+    LuChevronDown,
+    LuChevronRight,
+    LuPanelLeftClose,
+    LuPercent,
+} from 'react-icons/lu';
 import classNames from 'classnames/bind';
 import PropTypes from 'prop-types';
 import styles from './Sidebar.module.scss';
@@ -18,7 +19,6 @@ const cx = classNames.bind(styles);
 
 function Sidebar({ isCollapsed, onToggle }) {
     const [openMenus, setOpenMenus] = useState({});
-
     const location = useLocation();
 
     const toggleSubmenu = (menuId) => {
@@ -32,28 +32,29 @@ function Sidebar({ isCollapsed, onToggle }) {
         <div className={cx('sidebar', { collapsed: isCollapsed })}>
             <div className={cx('menu')}>
                 <button className={cx('toggle-btn')} onClick={onToggle}>
-                    <FaBars className={cx('icon')} />
+                    <LuPanelLeftClose className={cx('icon')} />
                     <span className={cx('menu-text')}>Thu gọn menu</span>
                 </button>
 
                 <NavLink to="/admin/dashboard" className={({ isActive }) => cx('menu-item', { active: isActive })}>
-                    <FaTachometerAlt className={cx('icon')} />
+                    <LuLayoutDashboard className={cx('icon')} />
                     <span className={cx('menu-text')}>Dashboard</span>
                 </NavLink>
 
+                {/* Quản lý khóa học */}
                 <div className={cx('menu-group')}>
                     <div
                         className={cx('menu-parent', { active: location.pathname.startsWith('/admin/course') })}
                         onClick={() => toggleSubmenu('courses')}
                     >
                         <div className={cx('parent-content')}>
-                            <FaBook className={cx('icon')} />
+                            <LuBookOpen className={cx('icon')} />
                             <span className={cx('menu-text')}>Quản lý khóa học</span>
                         </div>
                         {openMenus['courses'] ? (
-                            <FaChevronDown className={cx('icon')} />
+                            <LuChevronDown className={cx('icon')} />
                         ) : (
-                            <FaChevronRight className={cx('icon')} />
+                            <LuChevronRight className={cx('icon')} />
                         )}
                     </div>
                     <div className={cx('submenu', { open: openMenus['courses'] })}>
@@ -61,19 +62,47 @@ function Sidebar({ isCollapsed, onToggle }) {
                             to="/admin/categories"
                             className={({ isActive }) => cx('submenu-item', { active: isActive })}
                         >
-                            <FaList className={cx('icon')} />
+                            <LuListTree className={cx('icon')} />
                             <span className={cx('menu-text')}>Quản lý danh mục</span>
                         </NavLink>
                         <NavLink
                             to="/admin/course-manager"
                             className={({ isActive }) =>
                                 cx('submenu-item', {
-                                    active: isActive || location.pathname.startsWith('/admin/course-detail-manager' ),
+                                    active: isActive || location.pathname.startsWith('/admin/course-detail-manager'),
                                 })
                             }
                         >
-                            <FaBook className={cx('icon')} />
+                            <LuBookOpen className={cx('icon')} />
                             <span className={cx('menu-text')}>Quản lý khóa học</span>
+                        </NavLink>
+                    </div>
+                </div>
+
+                {/* Khuyến mãi */}
+                <div className={cx('menu-group')}>
+                    <div
+                        className={cx('menu-parent', { active: location.pathname.startsWith('/admin/discount') })}
+                        onClick={() => toggleSubmenu('discount')}
+                    >
+                        <div className={cx('parent-content')}>
+                            <LuPercent className={cx('icon')} />
+                            <span className={cx('menu-text')}>Khuyến mãi</span>
+                        </div>
+                        {openMenus['discount'] ? (
+                            <LuChevronDown className={cx('icon')} />
+                        ) : (
+                            <LuChevronRight className={cx('icon')} />
+                        )}
+                    </div>
+
+                    <div className={cx('submenu', { open: openMenus['discount'] })}>
+                        <NavLink
+                            to="/admin/discount-manager"
+                            className={({ isActive }) => cx('submenu-item', { active: isActive })}
+                        >
+                            <LuListTree className={cx('icon')} />
+                            <span className={cx('menu-text')}>Mã giảm giá</span>
                         </NavLink>
                     </div>
                 </div>
@@ -81,7 +110,7 @@ function Sidebar({ isCollapsed, onToggle }) {
 
             <div className={cx('bottom')}>
                 <NavLink to="/admin/profile" className={({ isActive }) => cx('menu-item', { active: isActive })}>
-                    <FaUserCircle className={cx('icon')} />
+                    <LuUserRound className={cx('icon')} />
                     <span className={cx('menu-text')}>Profile</span>
                 </NavLink>
                 <button
@@ -91,7 +120,7 @@ function Sidebar({ isCollapsed, onToggle }) {
                         window.location.href = '/login';
                     }}
                 >
-                    <FaSignOutAlt className={cx('icon')} />
+                    <LuLogOut className={cx('icon')} />
                     <span className={cx('menu-text')}>Đăng xuất</span>
                 </button>
             </div>

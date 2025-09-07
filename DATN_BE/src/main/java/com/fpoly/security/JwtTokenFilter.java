@@ -114,6 +114,16 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 				Pair.of(String.format("%s/auth/send-verification-code", apiPrefix), "POST"),
 				Pair.of(String.format("%s/auth/login", apiPrefix), "POST"),
 				Pair.of(String.format("%s/auth/introspect", apiPrefix), "POST"),
+				// Default Layout
+				Pair.of(String.format("%s/course/suggestions", apiPrefix), "GET"),
+				// Home
+				Pair.of(String.format("%s/course/top-rated", apiPrefix), "GET"),
+				Pair.of(String.format("%s/course/fun-fact", apiPrefix), "GET"),
+				Pair.of(String.format("%s/course/top-registered-course", apiPrefix), "GET"),
+				//Search Course
+				Pair.of(String.format("%s/course/search", apiPrefix), "GET"),
+				// Course Detail
+				Pair.of(String.format("%s/course/course-detail", apiPrefix), "GET"),
 				// User
 				Pair.of(String.format("%s/user/get-avatar", apiPrefix), "GET"), // Thêm vào đây
 				Pair.of(String.format("%s/thanhtoanthanhcong", apiPrefix), "GET"), // Thêm vào đây

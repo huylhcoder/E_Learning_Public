@@ -82,61 +82,115 @@ public class VoucherController {
 	// Check Voucher
 	@GetMapping("/check-voucher/{voucherCode}")
 	public ResponseEntity<?> checkVoucherCode(@PathVariable("voucherCode") String voucherCode) {
-	    try {
-	        // Tìm kiếm mã khuyến mãi
-	        Voucher voucher = voucherService.findVoucherByCode_Huy(voucherCode.trim());
+		try {
+			// Tìm kiếm mã khuyến mãi
+			Voucher voucher = voucherService.findVoucherByCode_Huy(voucherCode.trim());
 
-	        // Không tìm thấy
-	        if (voucher == null) {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                    .body(Collections.singletonMap("message", "Không tìm thấy khuyến mãi!"));
-	        }
+			// Không tìm thấy
+			if (voucher == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND)
+						.body(Collections.singletonMap("message", "Không tìm thấy khuyến mãi!"));
+			}
 
-	        // Hết số lượng
-	        if (voucher.getQuantity() == 0) {
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-	                    .body(Collections.singletonMap("message", "Số lượng khuyến mãi đã giới hạn!"));
-	        }
+			// Hết số lượng
+			if (voucher.getQuantity() == 0) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body(Collections.singletonMap("message", "Số lượng khuyến mãi đã giới hạn!"));
+			}
 
-	        // Kiểm tra hiệu lực
-	        Date currentDate = new Date();
-	        if (!voucher.isStatus()
-	                || currentDate.before(voucher.getStartDate())
-	                || currentDate.after(voucher.getEndDate())) {
-	            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-	                    .body(Collections.singletonMap("message", "Khuyến mãi không còn hiệu lực!"));
-	        }
+			// Kiểm tra hiệu lực
+			Date currentDate = new Date();
+			if (!voucher.isStatus() || currentDate.before(voucher.getStartDate())
+					|| currentDate.after(voucher.getEndDate())) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+						.body(Collections.singletonMap("message", "Khuyến mãi không còn hiệu lực!"));
+			}
 
-	        // Chuyển về DTO để trả ra FE
-	        VoucherResponseDTO voucherDTO = new VoucherResponseDTO(
-	                voucher.getVoucherId(),
-	                voucher.getName(),
-	                voucher.getDescription(),
-	                voucher.getVoucherCode(),
-	                voucher.getPercentSale(),
-	                voucher.getStartDate(),
-	                voucher.getEndDate()
-	        );
+			// Chuyển về DTO để trả ra FE
+			VoucherResponseDTO voucherDTO = new VoucherResponseDTO(voucher.getVoucherId(), voucher.getName(),
+					voucher.getDescription(), voucher.getVoucherCode(), voucher.getPercentSale(),
+					voucher.getStartDate(), voucher.getEndDate());
 
-	        return ResponseEntity.ok(voucherDTO);
+			return ResponseEntity.ok(voucherDTO);
 
-	    } catch (RuntimeException e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body(Collections.singletonMap("message", "Đã xảy ra lỗi ở server!"));
-	    }
+		} catch (RuntimeException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Collections.singletonMap("message", "Đã xảy ra lỗi ở server!"));
+		}
 	}
 
-
-//Khác
-
-	@GetMapping
+//Discount Manager
+	@GetMapping("voucher-manager")
 	public List<Voucher> getAllSales() {
-		Voucher vc = new Voucher();
-		if (vc.getQuantity() == 0) {
-			vc.setStatus(false);
-		}
 		return voucherService.getAllVoucher();
 	}
+
+	// Hiển thị chi tiết voucher
+	@GetMapping("/voucher-manager/{id}")
+	public Voucher viewVoucher(@PathVariable("id") int id) {
+		return voucherService.findVoucherByIdToan(id);
+	}
+
+	@PostMapping
+	public ResponseEntity<?> addSaleToan(@RequestBody Voucher a) {
+		try {
+			if (voucherService.existsByVoucherCode(a.getVoucherCode())) {
+				return ResponseEntity.status(HttpStatus.CONFLICT).body("Mã khuyến mãi đã tồn tại");
+			}
+			if (a.getPercentSale() > 90) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phần trăm giảm giá không được vượt quá 90%");
+			}
+			a.setStatus(true);
+			if (a.getQuantity() == 0) {
+				a.setStatus(false);
+			}
+			if (a.getStartDate().after(new Date())) {
+				a.setStatus(false);
+			}
+			a.setCreateAt(new Date());
+			a.setUpdateAt(new Date());
+			voucherService.addVoucherToan(a);
+			return ResponseEntity.ok(a);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không thể thêm mã khuyến mãi");
+		}
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<?> updateSaleToan(@PathVariable("id") int id, @RequestBody Voucher voucher) {
+		Voucher kiemTraTonTai = voucherService.findVoucherByIdToan(id);
+		if (voucher.getPercentSale() > 90) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phần trăm giảm giá không được vượt quá 90%");
+		}
+		if (kiemTraTonTai != null) {
+			if (voucher.getQuantity() == 0) {
+				voucher.setStatus(false);
+			} else {
+				voucher.setStatus(true);
+			}
+
+			if (voucher.getEndDate().before(new Date()) || voucher.getStartDate().after(new Date())) {
+				voucher.setStatus(false);
+			}
+			voucher.setUpdateAt(new Date());
+			voucher.setVoucherId(id);
+			voucherService.updateSaleToan(voucher);
+			return ResponseEntity.ok(voucher);
+		}
+		return ResponseEntity.ok(voucher);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Voucher> deleteSaleToan(@PathVariable("id") int id) {
+		Voucher kiemTraTonTai = voucherService.findVoucherByIdToan(id);
+		if (kiemTraTonTai != null) {
+			voucherService.deleteVoucherToan(id);
+			return ResponseEntity.ok(kiemTraTonTai);
+		}
+		return ResponseEntity.ok(kiemTraTonTai);
+	}
+
+//Khác
 
 	@GetMapping("/user/vouchers")
 	public ResponseEntity<?> getMyVouchersByToken(@RequestHeader("Authorization") String authorizationHeader) {
@@ -225,65 +279,6 @@ public class VoucherController {
 		myVoucherService.save(myVoucher);
 
 		return ResponseEntity.ok("Thu thập voucher thành công.");
-	}
-
-	@PostMapping
-	public ResponseEntity<?> addSaleToan(@RequestBody Voucher a) {
-		try {
-			if (voucherService.existsByVoucherCode(a.getVoucherCode())) {
-				return ResponseEntity.status(HttpStatus.CONFLICT).body("Mã khuyến mãi đã tồn tại");
-			}
-			if (a.getPercentSale() > 90) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phần trăm giảm giá không được vượt quá 90%");
-			}
-			a.setStatus(true);
-			if (a.getQuantity() == 0) {
-				a.setStatus(false);
-			}
-			if (a.getStartDate().after(new Date())) {
-				a.setStatus(false);
-			}
-			a.setCreateAt(new Date());
-			a.setUpdateAt(new Date());
-			voucherService.addVoucherToan(a);
-			return ResponseEntity.ok(a);
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi không thể thêm mã khuyến mãi");
-		}
-	}
-
-	@PutMapping("/{id}")
-	public ResponseEntity<?> updateSaleToan(@PathVariable("id") int id, @RequestBody Voucher voucher) {
-		Voucher kiemTraTonTai = voucherService.findVoucherByIdToan(id);
-		if (voucher.getPercentSale() > 90) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phần trăm giảm giá không được vượt quá 90%");
-		}
-		if (kiemTraTonTai != null) {
-			if (voucher.getQuantity() == 0) {
-				voucher.setStatus(false);
-			} else {
-				voucher.setStatus(true);
-			}
-
-			if (voucher.getEndDate().before(new Date()) || voucher.getStartDate().after(new Date())) {
-				voucher.setStatus(false);
-			}
-			voucher.setUpdateAt(new Date());
-			voucher.setVoucherId(id);
-			voucherService.updateSaleToan(voucher);
-			return ResponseEntity.ok(voucher);
-		}
-		return ResponseEntity.ok(voucher);
-	}
-
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Voucher> deleteSaleToan(@PathVariable("id") int id) {
-		Voucher kiemTraTonTai = voucherService.findVoucherByIdToan(id);
-		if (kiemTraTonTai != null) {
-			voucherService.deleteVoucherToan(id);
-			return ResponseEntity.ok(kiemTraTonTai);
-		}
-		return ResponseEntity.ok(kiemTraTonTai);
 	}
 
 }

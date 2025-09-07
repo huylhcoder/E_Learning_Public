@@ -15,7 +15,7 @@ function CourseSidebar({ price, isInCart, setIsInCart, paymentStatus, courseId, 
     const { refreshCart } = useContext(CartContext);
 
     const handleGoToLearning = () => {
-        navigate(`/learning/${courseId}`);
+        navigate(`/learning/?courseId=${courseId}`);
     };
 
     const handleBuyNow = () => {

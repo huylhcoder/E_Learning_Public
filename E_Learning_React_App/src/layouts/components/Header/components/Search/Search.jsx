@@ -4,7 +4,7 @@ import { FaSearch } from 'react-icons/fa';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import HeadlessTippy from '@tippyjs/react/headless';
 import classNames from 'classnames/bind';
-import { Link, useNavigate  } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import * as searchServices from '~/services/searchService';
 import { Wrapper as PopperWrapper } from '~/components/Popper';
@@ -59,17 +59,17 @@ function Search() {
         }
     };
 
-     const handleSearch = (searchText) => {
-    if (!searchText) return;
-    navigate(`/course/search?courseName=${encodeURIComponent(searchText)}`);
-    showResult(false);
-  };
+    const handleSearch = (searchText) => {
+        if (!searchText) return;
+        navigate(`/course/search?courseName=${encodeURIComponent(searchText)}`);
+        showResult(false);
+    };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch(searchValue);
-    }
-  };
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch(searchValue);
+        }
+    };
 
     return (
         <div className={cx('search-wrapper')} ref={wrapperRef}>
@@ -126,7 +126,7 @@ function Search() {
                         className={cx('search-btn')}
                         type="button"
                         tabIndex={-1}
-                        onMouseDown={(e) => e.preventDefault()}
+                        onMouseDown={() => handleSearch(searchValue)}
                     >
                         <SearchIcon />
                     </button>

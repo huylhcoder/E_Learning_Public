@@ -68,7 +68,7 @@ export const Login = () => {
     const handleGoogleLogin = () => {
         const { authUri, clientId, redirectUri } = OAuthConfig.google;
         const url = `${authUri}?redirect_uri=${encodeURIComponent(
-            redirectUri
+            redirectUri,
         )}&response_type=code&client_id=${clientId}&scope=openid%20email%20profile`;
         window.location.href = url;
     };
@@ -102,7 +102,6 @@ export const Login = () => {
                     handleFacebookLogin={handleFacebookLogin}
                     handleGithubLogin={handleGithubLogin}
                 />
-                <ToastContainer position="top-right" autoClose={3000} />
             </section>
         </motion.div>
     );

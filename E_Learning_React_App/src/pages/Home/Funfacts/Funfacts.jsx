@@ -37,7 +37,7 @@ const Funfacts = () => {
         },
         {
             value: funFactsData.totalCourses,
-            label: 'Khóa học CNTT',
+            label: 'Khóa học',
             style: 'style-2',
         },
         {

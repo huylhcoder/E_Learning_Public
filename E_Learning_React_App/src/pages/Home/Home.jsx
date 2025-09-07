@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import Carousel from './Carousel/Carousel';
 import BannerSection from './BannerSection/BannerSection';
 import TopCourses from './TopCourses/TopCourses';
-import VoucherSection from './VoucherSection/VoucherSection';
 import MostFollowedCourses from './MostFollowedCourses/MostFollowedCourses';
 import videoIntro from '~/assets/videos/about_us.mp4';
 import Funfacts from './Funfacts/Funfacts';
@@ -27,7 +26,7 @@ const Home = () => {
             <TopCourses />
 
             {/* Voucher section */}
-            <VoucherSection />
+            {/* <VoucherSection /> */}
 
             {/* Video + text */}
             <div className="container mt-5 mb-5">
@@ -59,7 +58,7 @@ const Home = () => {
             <div className="col-12 text-center mt-3">
                 <Link
                     className="btn btn-theme btn-primary fs-3 fw-bold mb-5 mt-5"
-                    to="/courses"
+                    to="/course/search"
                     onClick={() => window.scrollTo(0, 0)}
                 >
                     Xem tất cả khóa học

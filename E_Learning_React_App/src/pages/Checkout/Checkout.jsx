@@ -38,9 +38,9 @@ const Checkout = () => {
                     // Trường hợp không có query param
                     const resp = await axios.get('/payment/payment-latest', { headers });
                     console.log('Kết quả thanh toán:', resp);
-                    // if (resp.data.paymentStatus) {
-                    //     navigate('/payment-result?vnPaymentStatus=true');
-                    // }
+                    if (resp.data.paymentStatus) {
+                        navigate('/payment-result?vnPaymentStatus=true');
+                    }
                     setCourses(resp.data.courses);
                     setPaymentStatus(resp.data.paymentStatus);
                 }

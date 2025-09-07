@@ -20,6 +20,7 @@ import CategoryManager from '~/pages/CategoryManager/CategoryManager';
 import CourseManager from '~/pages/CourseManager';
 import CourseDetailManager from '~/pages/CourseDetailManager/CourseDetailManager';
 import SectionDetailManager from '~/pages/SectionDetailManager/SectionDetailManager';
+import DiscountManager from '~/pages/DiscountManager/DiscountManager';
 
 //config.routes.myCourse => myCourse: '/my-course'
 
@@ -51,6 +52,7 @@ const adminRoutes = [
     { path: config.routes.courseManager, component: CourseManager, layout: AdminLayout },
     { path: config.routes.courseDetailManager, component: CourseDetailManager, layout: AdminLayout },
     { path: config.routes.sectionDetailManager, component: SectionDetailManager, layout: AdminLayout },
+    { path: config.routes.discountManager, component: DiscountManager, layout: AdminLayout },
 ];
 
 //Do no co 2 thang nen minh phai export tung cai le ra

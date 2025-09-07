@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from '~/utils/CustomizeAxios';
 import { FaFire, FaFileExport, FaChevronDown, FaChevronUp, FaCircleInfo } from 'react-icons/fa';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 const Dashboard = () => {
     const tokenLogin = localStorage.getItem('token');
@@ -147,14 +147,14 @@ const Dashboard = () => {
                         <div className="text-center">
                             {itemsToShow < listKhoaHoc.length ? (
                                 <button
-                                    className="btn btn-outline-success"
+                                    className="btn btn-outline-primary fs-5 p-2"
                                     onClick={() => setItemsToShow(listKhoaHoc.length)}
                                 >
                                     Xem thêm <FaChevronDown />
                                 </button>
                             ) : (
                                 listKhoaHoc.length > 10 && (
-                                    <button className="btn btn-secondary" onClick={() => setItemsToShow(10)}>
+                                    <button className="btn btn-secondary fs-5 p-2" onClick={() => setItemsToShow(10)}>
                                         Thu gọn <FaChevronUp />
                                     </button>
                                 )

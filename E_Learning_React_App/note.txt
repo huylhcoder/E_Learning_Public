@@ -42,5 +42,59 @@
     import {fomatDuration} from '~/utils/fomat'
 
 7. Quy định kích thướt
-    input: fs-4
+    input: fs-4 ~ 1.5rem
     title: fs-3 fw-bold
+
+8. Cách  truyền file từ assets
+    import
+    - import videoIntro from '~/assets/videos/about_us.mp4';
+
+    Sử dụng
+    - <video src={videoIntro} width="100%" height="300" controls />
+
+9. Thư mục /services
+
+    Thực hiện call api 
+    - Tăng khả năng tái sử dụng code
+    - Dễ gỡ đổi và tái cấu hình
+    - Phân tách call API và logic UI
+
+    Bình thường mình sẽ Call API trực tiếp
+    - Viết hàm
+    - Gọi tại API tại Component luôn
+    
+    export const search = async (q, type = 'less') => {
+        try {
+            const res = await httpRequest.get('users/search', {
+                params: {
+                    q,
+                    type,
+                },
+            });
+            return res.data;
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+10. Thư mục /utils
+    Tái cấu trúc gọi API 
+    - Công cụ tạo request 
+
+
+11. .env.development
+    Theo quy ước của React nó sẽ hiểu này là file môi trường 
+
+12. config-override.js
+    .babelrc sẽ không được tự động cài vào webpack
+    - Nên cần phải ghi đè trong config-override.js
+
+    import bình thường khi không có babelrc
+    - import Header from '../layouts/components/Header/Header';
+
+    import khi có babelrc
+    - import Header from '~/layouts/components/Header/Header';
+    - Customize có dấu ~ hoặc @ để phân biệt với khai báo thư viện import React from '...'
+
+13. Mở SQL Server Config để start
+    Win + R →  dán vào: SQLServerManager16.msc → Enter

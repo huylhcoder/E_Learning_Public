@@ -13,3 +13,7 @@ export const formatDuration = (seconds) => {
         return `${secs}s`;
     }
 };
+
+export const formatCurrency = (value) => {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' VND';
+};
