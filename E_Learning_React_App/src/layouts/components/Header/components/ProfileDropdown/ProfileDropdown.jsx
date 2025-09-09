@@ -36,22 +36,22 @@ export const ProfileDropdown = ({ avatar, isTokenValid, handleLogout }) => {
                 {isTokenValid && (
                     <>
                         <li>
-                            <Link to="/profile" className={cx('dropdown-item')}>
+                            <Link to="/user/profile" className={cx('dropdown-item')}>
                                 Thông tin
                             </Link>
                         </li>
                         <li>
-                            <Link to="/my-courses" className={cx('dropdown-item')}>
+                            <Link to="/my-course" className={cx('dropdown-item')}>
                                 Tiến độ khóa học
                             </Link>
                         </li>
                         <li>
-                            <Link to="/payment-history" className={cx('dropdown-item')}>
-                                Lịch sử thanh toán
+                            <Link to="/user/password" className={cx('dropdown-item')}>
+                                Đổi mật khẩu
                             </Link>
                         </li>
                          <li>
-                            <Link to="/my-promotions" className={cx('dropdown-item')}>
+                            <Link to="/user/promotions" className={cx('dropdown-item')}>
                                 Khuyến mãi của tôi
                             </Link>
                         </li>

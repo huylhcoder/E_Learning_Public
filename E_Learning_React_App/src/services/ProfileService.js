@@ -1,42 +1,47 @@
-import axios from "../utils/CustomizeAxios";
+import axios from '../utils/CustomizeAxios';
 
 export const getAvatar = async () => {
-    const response = await axios.get(`/user/get-avatar`)
-    return response.data
-}
+    const response = await axios.get(`/user/get-avatar`);
+    return response.data;
+};
 
 export const getProfileInfo = async () => {
-    const response = await axios.get(`/user/info-user`)
+    const token = localStorage.getItem('token'); // hoặc sessionStorage
+    const response = await axios.get('/user/profile', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
     return response.data;
-}
+};
 
 export const updateAvatar = async (formData) => {
     try {
-        const response = await axios.post(`/user/update-avatar`, formData)
-        console.log(response)
+        const response = await axios.post(`/user/update-avatar`, formData);
+        console.log(response);
         return response.data;
     } catch (error) {
-        console.log('Fail to update Avatar', error)
+        console.log('Fail to update Avatar', error);
         throw error;
     }
 };
 
 export const removeAvatar = async () => {
     try {
-        const response = await axios.delete(`/user/remove-avatar`)
+        const response = await axios.delete(`/user/remove-avatar`);
         return response.data;
     } catch (error) {
-        console.log('Fail to remove Avatar', error)
+        console.log('Fail to remove Avatar', error);
         throw error;
     }
-}
+};
 
 export const updateProfile = async (profileData) => {
     try {
         const response = await axios.put('/user/update-profile', profileData);
         return response.data;
     } catch (error) {
-        console.log('Fail to update profile', error)
+        console.log('Fail to update profile', error);
         throw error;
     }
 };

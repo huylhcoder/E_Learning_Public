@@ -125,7 +125,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 				// Course Detail
 				Pair.of(String.format("%s/course/course-detail", apiPrefix), "GET"),
 				// User
-				Pair.of(String.format("%s/user/get-avatar", apiPrefix), "GET"), // Thêm vào đây
 				Pair.of(String.format("%s/thanhtoanthanhcong", apiPrefix), "GET"), // Thêm vào đây
 				Pair.of(String.format("%s/upload-file/download-video-on-server", apiPrefix), "GET"), // Thêm vào đây
 				// Category

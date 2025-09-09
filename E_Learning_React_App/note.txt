@@ -98,3 +98,26 @@
 
 13. Mở SQL Server Config để start
     Win + R →  dán vào: SQLServerManager16.msc → Enter
+
+14. Video DATN cũ
+    https://www.youtube.com/watch?v=d4iet6-XFQQ
+
+15. 
+    // const avatar = getAvatar();
+    // console.log('Header avatar:', avatar);
+    // Code sai do getAvatar là async function
+    // không thể gán trực tiếp vào biến avatar
+    // 1 là customer hook
+    // 2 là dùng useEffect để gọi hàm getAvatar
+    // useEffect(() => {
+    //     const fetchAvatar = async () => {
+    //         try {
+    //             const avatarUrl = await getAvatar(); // Đợi hàm trả kết quả
+    //             setAvatar(avatarUrl); // Lưu kết quả vào state
+    //         } catch (error) {
+    //             console.error('Lỗi lấy avatar:', error);
+    //         }
+    //     };
+
+    //     fetchAvatar();
+    // }, []);

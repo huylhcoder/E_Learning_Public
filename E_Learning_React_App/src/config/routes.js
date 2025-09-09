@@ -1,3 +1,5 @@
+import ChangePassword from "~/pages/ChangePassword/ChangPassword";
+
 const routes = {
     // Public routes
     home: '/',
@@ -15,6 +17,9 @@ const routes = {
     paymentResult: '/payment-result', // paymentResult?vnPaymentStatus=true || false
     learning: '/learning', //courseId=1 & sectionId=1
     quiz: '/quiz', // quiz?quizId=1
+    profile: '/user/profile',
+    changePassword: '/user/password',
+    promotions: '/user/promotions',
 
     //Admin routes
     admin: '/admin',

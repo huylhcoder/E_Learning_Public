@@ -50,23 +50,22 @@ public class UserController {
 
 	@Autowired
 	private JwtTokenUtils jwtTokenUtils;
-	
+
 //Header - DefaultLayout
-	//Lấy Avatar
+	// Lấy Avatar
 	@GetMapping("/get-avatar")
 	public ResponseEntity<String> getAvatar(@RequestHeader("Authorization") String token) {
-	    try {
-	        String cleanToken = token.replace("Bearer ", "").trim();
-	        String email = jwtTokenUtils.extractEmail(cleanToken);
-	        User user = userService.getUserByEmailToan(email);
-	        
-	        return ResponseEntity.ok(user.getUrlProfileImage());
-	    } catch (Exception e) {
-	        System.err.println("Lỗi trích xuất Email từ token: " + e.getMessage());
-	        return ResponseEntity.badRequest().body(null);
-	    }
-	}
+		try {
+			String cleanToken = token.replace("Bearer ", "").trim();
+			String email = jwtTokenUtils.extractEmail(cleanToken);
+			User user = userService.getUserByEmailToan(email);
 
+			return ResponseEntity.ok(user.getUrlProfileImage());
+		} catch (Exception e) {
+			System.err.println("Lỗi trích xuất Email từ token: " + e.getMessage());
+			return ResponseEntity.badRequest().body(null);
+		}
+	}
 
 	// Lấy Tác giả
 	@GetMapping("/email/{user_email}")
@@ -74,13 +73,16 @@ public class UserController {
 		return userService.getUserByEmailToan(user_email);
 	}
 
-	@GetMapping("/profile/{token}")
-	public ResponseEntity<?> getUserTheoEmail(@PathVariable("token") String token) {
+//UserProfile Layout
+	// Lấy thông tin user
+	@GetMapping("/profile")
+	public ResponseEntity<?> getUserTheoEmail(@RequestHeader(value = "Authorization", required = false) String token) {
 		String email = "";
 		try {
-			email = jwtTokenUtils.extractEmail(token);
+			email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
 			System.out.println("Email: " + email);
 		} catch (Exception e) {
+			System.out.println("Token không hợp lệ: " + token);
 			return ResponseEntity.status(400).body("Token không hợp lệ.");
 		}
 		User user = userService.getUserByEmailToan(email);

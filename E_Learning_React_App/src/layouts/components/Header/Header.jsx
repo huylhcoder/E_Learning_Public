@@ -15,56 +15,37 @@ import avatarDefault from '~/assets/images/avatar-default.jpg';
 
 //Services
 import AuthContext from '~/context/AuthContext';
-import { CartContext } from '~/context/CartContext'; // Thêm dòng này
+import { CartContext } from '~/context/CartContext';
+import { UserContext } from '~/context/UserContext';
 import { getAvatar } from '~/services/ProfileService';
 
 const cx = classNames.bind(styles);
 
 function Header() {
-    const [avatar, setAvatar] = useState(null);
+    const { userProfile, avatar: contextAvatar } = useContext(UserContext) || {}; // 👈 lấy avatar từ Context nếu có
+    const [localAvatar, setLocalAvatar] = useState(null); // 👈 avatar local fallback
     const authContext = useContext(AuthContext);
-    const { cartItems } = useContext(CartContext); // Thêm dòng này
+    const { cartItems } = useContext(CartContext);
     const location = useLocation();
     const underlineRef = useRef(null);
     const navigate = useNavigate();
-    //const wsClient = useWebsocket();
 
-    // const avatar = getAvatar();
-    // console.log('Header avatar:', avatar);
-    // Code sai do getAvatar là async function
-    // không thể gán trực tiếp vào biến avatar
-    // 1 là customer hook
-    // , 2 là dùng useEffect để gọi hàm getAvatar
-    // useEffect(() => {
-    //     const fetchAvatar = async () => {
-    //         try {
-    //             const avatarUrl = await getAvatar(); // Đợi hàm trả kết quả
-    //             setAvatar(avatarUrl); // Lưu kết quả vào state
-    //         } catch (error) {
-    //             console.error('Lỗi lấy avatar:', error);
-    //         }
-    //     };
-
-    //     fetchAvatar();
-    // }, []);
-
+    // fallback: nếu không có contextAvatar thì fetch từ API
     useEffect(() => {
         const fetchAvatar = async () => {
             try {
-                if (authContext.authenticated) {
-                    // chỉ gọi khi đã đăng nhập
+                if (authContext.authenticated && !contextAvatar) {
                     const avatarUrl = await getAvatar();
-                    setAvatar(avatarUrl);
-                } else {
-                    setAvatar(null); // reset nếu chưa login
+                    setLocalAvatar(avatarUrl);
+                } else if (!authContext.authenticated) {
+                    setLocalAvatar(null);
                 }
             } catch (error) {
                 console.error('Lỗi lấy avatar:', error);
             }
         };
-
         fetchAvatar();
-    }, [authContext.authenticated]); // 👈 thêm dependency
+    }, [authContext.authenticated, contextAvatar]);
 
     useEffect(() => {
         const activeLink = document.querySelector(`.nav-item.active`);
@@ -80,6 +61,9 @@ function Header() {
         navigate('/login');
         toast.success('Đăng xuất thành công');
     };
+
+    // Ưu tiên contextAvatar > localAvatar > avatarDefault
+    const avatarToShow = contextAvatar || localAvatar || avatarDefault;
 
     return (
         <div className={cx('header-page')}>
@@ -151,7 +135,7 @@ function Header() {
                                 </>
                             ) : (
                                 <ProfileDropdown
-                                    avatar={avatar || avatarDefault}
+                                    avatar={avatarToShow}
                                     isTokenValid={authContext.authenticated}
                                     handleLogout={handleLogout}
                                 />

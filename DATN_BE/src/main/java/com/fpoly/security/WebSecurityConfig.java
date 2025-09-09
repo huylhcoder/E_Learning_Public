@@ -46,8 +46,6 @@ public class WebSecurityConfig {
 									// Category
 									String.format("%s/category/list-category", apiPrefix),
 									String.format("%s/category/tree/**", apiPrefix),
-									//User
-									String.format("%s/user/get-avatar", apiPrefix),
 									// Course
 									String.format("%s/course/fun-fact", apiPrefix),
 									String.format("%s/course/top-registered-course", apiPrefix),
@@ -55,8 +53,6 @@ public class WebSecurityConfig {
 									String.format("%s/course/search", apiPrefix),
 									String.format("%s/course/suggestions", apiPrefix),
 									String.format("%s/course/course-detail/**", apiPrefix),
-									// Section
-//									String.format("%s/section-manager/**", apiPrefix),
 									// Course Level
 									String.format("%s/course-level", apiPrefix),
 									String.format("%s/course-level/list-course-level", apiPrefix),

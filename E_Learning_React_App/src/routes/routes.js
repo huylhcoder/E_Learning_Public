@@ -1,7 +1,7 @@
 import config from '~/config';
 
 // Layouts
-import { AdminLayout } from '~/layouts';
+import { AdminLayout, UserProfileLayout } from '~/layouts';
 
 // Pages
 import Home from '~/pages/Home';
@@ -21,8 +21,9 @@ import CourseManager from '~/pages/CourseManager';
 import CourseDetailManager from '~/pages/CourseDetailManager/CourseDetailManager';
 import SectionDetailManager from '~/pages/SectionDetailManager/SectionDetailManager';
 import DiscountManager from '~/pages/DiscountManager/DiscountManager';
-
-//config.routes.myCourse => myCourse: '/my-course'
+import Profile from '~/pages/UserProfile/UserProfile';
+import ChangePassword from '~/pages/ChangePassword/ChangPassword';
+import MyVoucher from '~/pages/MyVoucher/MyVoucher';
 
 const publicRoutes = [
     { path: config.routes.home, component: Home },
@@ -42,6 +43,9 @@ const privateRoutes = [
     { path: config.routes.checkout, component: Checkout },
     { path: config.routes.learning, component: Learning },
     { path: config.routes.quiz, component: Quiz },
+    { path: config.routes.profile, component: Profile, layout: UserProfileLayout },
+    { path: config.routes.changePassword, component: ChangePassword, layout: UserProfileLayout },
+    { path: config.routes.promotions, component: MyVoucher, layout: UserProfileLayout },
 ];
 
 // Admin routes (phải là admin)
