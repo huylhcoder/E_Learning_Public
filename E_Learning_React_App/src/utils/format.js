@@ -17,3 +17,17 @@ export const formatDuration = (seconds) => {
 export const formatCurrency = (value) => {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' VND';
 };
+
+// Thêm utils format ngày
+export const formatDate = (dateString) => {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString; // nếu không parse được thì trả lại string gốc
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // tháng tính từ 0
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+};

@@ -29,6 +29,9 @@ public interface CourseProgressRepository extends JpaRepository<CourseProgress, 
 
 	List<CourseProgress> findAllByCourse_CourseId(int courseId);
 
+//MyCourse Page 
+	CourseProgress findByUserAndCourse(User user, Course course);
+
 //Khác
 	@Query("SELECT cp FROM CourseProgress cp JOIN cp.course ce JOIN cp.user u WHERE	 u.userId = :userId")
 	List<CourseProgress> FillCourseKhoa(int userId);
@@ -42,8 +45,6 @@ public interface CourseProgressRepository extends JpaRepository<CourseProgress, 
 	@Query("SELECT c FROM CourseProgress c WHERE c.progressPercentage = 100 AND c.progressStatus = 1")
 	List<CourseProgress> FillTotalCourseCompleteCuaBao();
 	//
-
-	CourseProgress findByUserAndCourse(User user, Course course);
 
 	//
 	@Query("SELECT cp FROM CourseProgress cp WHERE cp.user.userId = :userId AND cp.course.courseId = :courseId")

@@ -1,19 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
-
 import axios from '~/utils/CustomizeAxios';
-import styles from './MyCourse.module.scss'; // SCSS module
+import styles from './MyCourse.module.scss';
+
+import CourseCard from './CourseCard';
+import FavoriteCard from './FavoriteCard';
+import Pagination from './Pagination';
 
 const MyCourse = () => {
     const token = localStorage.getItem('token');
-    const [itemsPerPage] = useState(5);
+    const [itemsPerPage] = useState(8);
     const [currentPage, setCurrentPage] = useState(1);
     const [registeredCourses, setRegisteredCourses] = useState([]);
     const [filteredCourses, setFilteredCourses] = useState([]);
     const [listYeuThich, setListYeuThich] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        if (!token) {
+            window.location.href = '/login';
+        } else {
+            loadCuaToi();
+            loadYeuThich();
+        }
+    }, []);
+
+    useEffect(() => {
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            const filtered = registeredCourses.filter((c) => (c.courseName || '').toLowerCase().includes(query));
+            setFilteredCourses(filtered);
+            setTotalPages(Math.ceil(filtered.length / itemsPerPage));
+            setCurrentPage(1);
+        } else {
+            setFilteredCourses(registeredCourses);
+            setTotalPages(Math.ceil(registeredCourses.length / itemsPerPage));
+            setCurrentPage(1);
+        }
+    }, [searchQuery, registeredCourses, itemsPerPage]);
 
     const loadCuaToi = async () => {
         try {
@@ -40,42 +66,17 @@ const MyCourse = () => {
     };
 
     const deleteItem = async (favoriteCourseId) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa khỏi yêu thích?')) {
-            try {
-                await axios.delete(`/favorite-course/delete/${favoriteCourseId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                loadYeuThich();
-            } catch (err) {
-                console.error('Lỗi khi xóa khóa học', err);
-            }
+        if (!window.confirm('Bạn có chắc chắn muốn xóa khỏi yêu thích?')) return;
+
+        try {
+            await axios.delete(`/favorite-course/delete/${favoriteCourseId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            loadYeuThich();
+        } catch (err) {
+            console.error('Lỗi khi xóa khóa học', err);
         }
     };
-
-    useEffect(() => {
-        if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase();
-            setFilteredCourses(
-                registeredCourses.filter((c) => {
-                    const name = c.course.name?.toLowerCase() || '';
-                    const desc = c.course.description?.toLowerCase() || '';
-                    const category = c.course.category?.name?.toLowerCase() || '';
-                    return name.includes(query) || desc.includes(query) || category.includes(query);
-                }),
-            );
-        } else {
-            setFilteredCourses(registeredCourses);
-        }
-    }, [searchQuery, registeredCourses]);
-
-    useEffect(() => {
-        if (!token) {
-            window.location.href = '/login';
-        } else {
-            loadCuaToi();
-            loadYeuThich();
-        }
-    }, []);
 
     const goToPage = (page) => {
         if (page >= 1 && page <= totalPages) {
@@ -84,40 +85,13 @@ const MyCourse = () => {
         }
     };
 
-    const getPages = () => Array.from({ length: totalPages }, (_, i) => i + 1);
-
-    const CourseCard = ({ course, date, actionBtn, linkTo }) => (
-        <a href={linkTo} className={`card mb-3 text-decoration-none text-dark ${styles.courseCard}`}>
-            <div className="row g-0">
-                <div className="col-md-4">
-                    <img src={course.avatar} className={styles.courseImage} alt={course.name} />
-                </div>
-                <div className="col-md-8">
-                    <div className="card-body">
-                        <h5 className="card-title fw-bold">{course.name}</h5>
-                        <p className="card-text text-truncate">Ghi chú ngắn: {course.description}</p>
-                        <p className="card-text fw-semibold text-success">
-                            {course.price === 0 ? 'Miễn phí' : course.price.toLocaleString('vi-VN') + ' VND'}
-                        </p>
-                        {date && (
-                            <small className="text-muted">
-                                Ngày đăng ký: {new Date(date).toLocaleDateString('vi-VN')}
-                            </small>
-                        )}
-                        {actionBtn && <div className="mt-2">{actionBtn}</div>}
-                    </div>
-                </div>
-            </div>
-        </a>
-    );
-
     return (
         <main>
             <div className={`position-relative ${styles.headerBanner}`}>
                 <div className={styles.overlay}></div>
-                <div className="container position-relative text-white py-5">
+                <div className="position-relative text-white py-5 px-5">
                     <h1 className="fw-bold">Khóa học của tôi</h1>
-                    <p>Quản lý các khóa học bạn đã đăng ký và yêu thích</p>
+                    <p>Các khóa học bạn đã đăng ký và yêu thích</p>
                 </div>
             </div>
 
@@ -138,58 +112,33 @@ const MyCourse = () => {
                 <div className="tab-content">
                     {/* TAB 1 */}
                     <div className="tab-pane fade show active" id="myCourses">
-                        <div className="input-group mb-4">
+                        <div className="input-group mt-5 mb-3">
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Tìm kiếm khóa học..."
-                                className="form-control"
+                                placeholder="Tên khóa học..."
+                                className="fs-4 form-control"
                             />
-                            <button className="btn btn-outline-secondary">
+                            <button className="btn btn-outline-secondary fs-4">
                                 <FontAwesomeIcon icon={faSearch} size="lg" />
                             </button>
                         </div>
 
-                        {filteredCourses.length === 0 ? (
-                            <div className="alert alert-info">Bạn chưa đăng ký khóa học nào.</div>
-                        ) : (
-                            filteredCourses
+                        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-3">
+                            {filteredCourses
                                 .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
                                 .map((c) => (
                                     <CourseCard
                                         key={c.registeredCourseId}
-                                        course={c.course}
+                                        dto={c}
                                         date={c.createAt}
-                                        linkTo={`/learning?courseId=${c.course.courseId}`}
+                                        linkTo={`/learning?courseId=${c.courseId}`}
                                     />
-                                ))
-                        )}
+                                ))}
+                        </div>
 
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <nav className="d-flex justify-content-center mt-4">
-                                <ul className="pagination">
-                                    <li className={`page-item ${currentPage === 1 && 'disabled'}`}>
-                                        <button className="page-link" onClick={() => goToPage(currentPage - 1)}>
-                                            ‹
-                                        </button>
-                                    </li>
-                                    {getPages().map((p) => (
-                                        <li key={p} className={`page-item ${p === currentPage ? 'active' : ''}`}>
-                                            <button className="page-link" onClick={() => goToPage(p)}>
-                                                {p}
-                                            </button>
-                                        </li>
-                                    ))}
-                                    <li className={`page-item ${currentPage === totalPages && 'disabled'}`}>
-                                        <button className="page-link" onClick={() => goToPage(currentPage + 1)}>
-                                            ›
-                                        </button>
-                                    </li>
-                                </ul>
-                            </nav>
-                        )}
+                        <Pagination currentPage={currentPage} totalPages={totalPages} goToPage={goToPage} />
                     </div>
 
                     {/* TAB 2 */}
@@ -197,26 +146,33 @@ const MyCourse = () => {
                         {listYeuThich.length === 0 ? (
                             <div className="alert alert-info">Danh sách yêu thích của bạn đang trống.</div>
                         ) : (
-                            listYeuThich
-                                .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-                                .map((item) => (
-                                    <CourseCard
-                                        key={item.favoriteCourseId}
-                                        course={item.course}
-                                        linkTo={`/course/course-detail/${item.course.courseId}`}
-                                        actionBtn={
-                                            <button
-                                                className="btn btn-outline-danger btn-sm"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    deleteItem(item.favoriteCourseId);
-                                                }}
-                                            >
-                                                <i className="fa-solid fa-trash-can me-1"></i> Xóa
-                                            </button>
-                                        }
-                                    />
-                                ))
+                            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                                {listYeuThich
+                                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                                    .map((item) => (
+                                        <FavoriteCard
+                                            key={item.favoriteCourseId}
+                                            dto={{
+                                                courseName: item.course.name,
+                                                avatar: item.course.avatar,
+                                                price: item.course.price,
+                                                description: item.course.description,
+                                            }}
+                                            linkTo={`/course/course-detail/${item.course.courseId}`}
+                                            actionBtn={
+                                                <button
+                                                    className="btn btn-outline-danger btn-sm"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        deleteItem(item.favoriteCourseId);
+                                                    }}
+                                                >
+                                                    <i className="fa-solid fa-trash-can me-1"></i> Xóa
+                                                </button>
+                                            }
+                                        />
+                                    ))}
+                            </div>
                         )}
                     </div>
                 </div>

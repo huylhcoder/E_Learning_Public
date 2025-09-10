@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fpoly.entity.CourseProgress;
 import com.fpoly.entity.Payment;
 import com.fpoly.entity.RegisteredCourse;
 
@@ -21,6 +22,10 @@ public interface RegisteredCourseRepository extends JpaRepository<RegisteredCour
 	@Query("SELECT CASE WHEN COUNT(rc) > 0 THEN true ELSE false END FROM RegisteredCourse rc WHERE rc.course.courseId = :courseId AND rc.user.userId = :userId")
 	boolean existsByCourseIdAndUserId(@Param("courseId") int courseId, @Param("userId") int userId);
 
+//My Course
+	@Query("SELECT cp FROM CourseProgress cp WHERE cp.user.userId = :userId AND cp.course.courseId = :courseId")
+	CourseProgress findByUserAndCourse(@Param("userId") int userId, @Param("courseId") int courseId);
+
 //CourseDetail
 	// Đếm số lượng học viên của khóa học
 	int countByCourse_CourseIdAndStatusPaymentTrue(int courseId);
@@ -28,7 +33,7 @@ public interface RegisteredCourseRepository extends JpaRepository<RegisteredCour
 	// Kiểm tra học viên đã đăng ký khóa học này chưa
 	boolean existsByUser_UserIdAndCourse_CourseIdAndStatusPaymentTrue(Integer userId, Integer courseId);
 
-	//Hỗ trợ cho hàm xóa Payment chưa được thanh toán
+	// Hỗ trợ cho hàm xóa Payment chưa được thanh toán
 	@Modifying
 	@Transactional
 	@Query("DELETE FROM RegisteredCourse rc WHERE rc.payment.paymentId IN :paymentIds")

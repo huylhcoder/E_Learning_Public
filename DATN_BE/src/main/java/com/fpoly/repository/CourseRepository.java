@@ -23,14 +23,34 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 	@Query("SELECT c FROM Course c WHERE c.status = 1 AND c.follow IS NOT NULL ORDER BY c.follow DESC")
 	List<Course> getTopRegisteredCourses(Pageable pageable);
 
+//Course Detail
+
+	// 1. Tìm khóa học theo danh mục
+	@Query("SELECT DISTINCT c FROM Course c " + "JOIN c.courseCategories cc " + "WHERE cc.category.id IN :categoryIds "
+			+ "AND c.courseId <> :courseId " + "AND c.status = 1")
+	List<Course> findRelatedByCategories(@Param("categoryIds") List<Integer> categoryIds,
+			@Param("courseId") int courseId);
+
+	// 2. Tìm khóa học theo tên tương tự
+	@Query("SELECT c FROM Course c " + "WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')) "
+			+ "AND c.courseId <> :courseId " + "AND c.status = 1")
+	List<Course> findByNameLike(@Param("name") String name, @Param("courseId") int courseId);
+
+	// 3. Lấy danh sách khóa học nhiều đăng ký và rating cao nhất (fallback)
+	@Query("SELECT c FROM Course c " + "WHERE c.status = 1 "
+			+ "ORDER BY SIZE(c.listRegisteredCourse) DESC, c.averageRating DESC")
+	List<Course> findTopPopularCourses(Pageable pageable);
+
 //Tìm kiếm  khóa học theo ID
 	Course findByCourseId(int CourseId);
+
 //Header
 	// Gợi ý tên khóa học + chỉ gợi ý khóa học với trạng thái công khai
 	@Query("SELECT new com.fpoly.dto.CourseNameSuggestionDTO(c.name) " + "FROM Course c "
 			+ "WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " + "AND c.status = 1")
 	List<CourseNameSuggestionDTO> findCourseNamesByKeyword(@Param("keyword") String keyword);
 
+//Khác
 	// ------------ CÂU TRUY VẤN SQL CỦA HBảo ----------------------------------
 	// 1. LẤY DANH SÁCH KHÓA HỌC CÓ TRẠNG THÁI Status = 1
 	// LẤY DANH SÁCH KHÓA TẤT CẢ KHÓA HỌC KHI NGƯỜI DÙNG "CHƯA ĐĂNG NHẬP"
@@ -193,8 +213,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
 	// Cái này của thằng nào làm coi lại ở trên trùng tên nha
 	// List<Course> findCoursesByAverageRatingDesc();
-
-
 
 	List<Course> findByStatusIn(List<Integer> statuses);
 

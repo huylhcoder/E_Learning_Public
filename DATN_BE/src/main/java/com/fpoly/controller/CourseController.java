@@ -18,6 +18,7 @@ import com.fpoly.dto.CourseDetailSearchDTO;
 import com.fpoly.dto.CourseNameSuggestionDTO;
 import com.fpoly.dto.CourseSearchResponseDTO;
 import com.fpoly.dto.FunFactDTO;
+import com.fpoly.dto.RegisteredCourseDTO;
 import com.fpoly.dto.learning.CourseDetailDTO;
 import com.fpoly.entity.Category;
 import com.fpoly.entity.Course;
@@ -43,13 +44,7 @@ public class CourseController {
 	@Autowired
 	private CourseService courseService;
 	@Autowired
-	private SectionService sectionService;
-	@Autowired
-	private LessonService lessonService;
-	@Autowired
 	private RegisteredCourseService registeredCourseService;
-	@Autowired
-	private TestService testService;
 	@Autowired
 	private UserService UserService;
 	@Autowired
@@ -122,14 +117,22 @@ public class CourseController {
 		return courseService.getCourseDetail(courseId, token);
 	}
 
+	// Khóa học liên quan
+	@GetMapping("/{courseId}/related")
+	public ResponseEntity<List<Course>> getRelatedCourses(@PathVariable int courseId) {
+		List<Course> relatedCourses = courseService.getRelatedCourses(courseId);
+		return ResponseEntity.ok(relatedCourses);
+	}
+
 //MyCourse 
 	@GetMapping("/registered-course")
-	public ResponseEntity<List<RegisteredCourse>> getListRegisteredCourseOfUser(
-			@RequestHeader("Authorization") String token) {
-		System.out.println("Token: " + token);
-		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
-		User user = UserService.getUserByEmailToan(email);
-		return ResponseEntity.ok(registeredCourseService.findRegisteredCourseByUserHao(user.getUserId()));
+	public ResponseEntity<List<RegisteredCourseDTO>> getListRegisteredCourseOfUser(
+	        @RequestHeader("Authorization") String token) {
+	    String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+	    User user = UserService.getUserByEmailToan(email);
+
+	    List<RegisteredCourseDTO> list = registeredCourseService.getRegisteredCoursesWithProgress(user.getUserId());
+	    return ResponseEntity.ok(list);
 	}
 
 	@GetMapping("/favorite-course")
@@ -138,10 +141,12 @@ public class CourseController {
 		User user = UserService.getUserByEmailToan(email);
 		return favoriteCourseService.fillListCourseFcByUserID(user.getUserId());
 	}
+
 //Learning
 	@GetMapping("/learning/course-detail/{courseId}")
-	public CourseDetailDTO getCourseDetail(@PathVariable int courseId, 	@RequestHeader(value = "Authorization", required = false) String token) {
-	    return courseService.getCourseDetail(courseId);
+	public CourseDetailDTO getCourseDetail(@PathVariable int courseId,
+			@RequestHeader(value = "Authorization", required = false) String token) {
+		return courseService.getCourseDetail(courseId);
 	}
 
 //Khác

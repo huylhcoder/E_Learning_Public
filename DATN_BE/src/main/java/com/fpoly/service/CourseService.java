@@ -1,5 +1,6 @@
 package com.fpoly.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -197,13 +198,51 @@ public class CourseService {
 
 	}
 
+	// Tìm kiếm khóa học liên quan
+	   public List<Course> getRelatedCourses(int courseId) {
+	        Course currentCourse = courseRepository.findById(courseId)
+	                .orElseThrow(() -> new RuntimeException("Course not found"));
+
+	        List<Course> result = new ArrayList<>();
+	        int limit = 10;
+
+	        // 1. Lấy theo danh mục
+	        List<Integer> categoryIds = currentCourse.getCourseCategories()
+	                .stream()
+	                .map(cc -> cc.getCategory().getCategoryId())
+	                .collect(Collectors.toList());
+
+	        if (!categoryIds.isEmpty()) {
+	            result.addAll(courseRepository.findRelatedByCategories(categoryIds, courseId));
+	        }
+
+	        // 2. Nếu chưa đủ -> tìm theo tên
+	        if (result.size() < limit) {
+	            List<Course> byName = courseRepository.findByNameLike(currentCourse.getName(), courseId);
+	            // Loại bỏ trùng
+	            byName.removeAll(result);
+	            result.addAll(byName);
+	        }
+
+	        // 3. Nếu vẫn chưa đủ -> fallback: lấy top popular
+	        if (result.size() < limit) {
+	            List<Course> popular = courseRepository.findTopPopularCourses(PageRequest.of(0, limit * 2));
+	            // Loại bỏ trùng
+	            popular.removeAll(result);
+	            result.addAll(popular);
+	        }
+
+	        // Trả về đúng 10 hoặc ít hơn nếu DB không còn
+	        return result.stream().limit(limit).collect(Collectors.toList());
+	    }
+
 //Learning
 	public CourseDetailDTO getCourseDetail(int courseId) {
 		Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Not found"));
 
 		List<SectionDTO> sectionDTOs = course.getListSection().stream().map(section -> {
-			List<LessonDTO> lessons = section.getListLesson().stream()
-					.map(l -> new LessonDTO(l.getLessonId(), l.getName(), l.getDescription(), null, l.getLessionDuration(), null, false)).toList();
+			List<LessonDTO> lessons = section.getListLesson().stream().map(l -> new LessonDTO(l.getLessonId(),
+					l.getName(), l.getDescription(), null, l.getLessionDuration(), null, false)).toList();
 
 			List<TestDTO> tests = section.getListTest().stream()
 					.map(t -> new TestDTO(t.getTestId(), t.getTitle(), null, null, 0)).toList();

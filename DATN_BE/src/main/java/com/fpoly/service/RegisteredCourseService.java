@@ -2,11 +2,13 @@ package com.fpoly.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fpoly.dto.RegisteredCourseDTO;
 import com.fpoly.entity.Course;
 import com.fpoly.entity.CourseProgress;
 import com.fpoly.entity.Payment;
@@ -27,22 +29,59 @@ public class RegisteredCourseService {
 	@Autowired
 	CourseRepository courseRepository;
 	@Autowired
+	CourseProgressRepository courseProgressRepository;
+	@Autowired
 	UserRepository userRepository;
+
+//MyCourse Page
+	public List<RegisteredCourseDTO> getRegisteredCoursesWithProgress(int userId) {
+		List<RegisteredCourse> registeredCourses = registeredCourseRepository.findByUser(userId);
+
+		return registeredCourses.stream().map(rc -> {
+			RegisteredCourseDTO dto = new RegisteredCourseDTO();
+			dto.setRegisteredCourseId(rc.getRegisteredCourseId());
+			dto.setCreateAt(rc.getCreateAt());
+
+			// Lấy thông tin khóa học
+			Course c = rc.getCourse();
+			dto.setCourseId(c.getCourseId());
+			dto.setCourseName(c.getName());
+			dto.setAvatar(c.getAvatar());
+			dto.setPrice(c.getPrice());
+			dto.setAverageRating(c.getAverageRating());
+			dto.setNumberOfLesson(c.getNumberOfLesson());
+			dto.setCourseDuration(c.getCourseDuration());
+
+			// Lấy tiến độ
+			CourseProgress cp = courseProgressRepository.findByUserAndCourse(rc.getUser(), c);
+			if (cp != null) {
+				dto.setTotalLession(cp.getTotalLession());
+				dto.setTotalQuiz(cp.getTotalQuiz());
+				dto.setTotalLessionComplete(cp.getTotalLessionComplete());
+				dto.setTotalTestComplete(cp.getTotalTestComplete());
+				dto.setProgressPercentage(cp.getProgressPercentage());
+				dto.setProgressStatus(cp.getProgressStatus());
+			}
+
+			return dto;
+		}).collect(Collectors.toList());
+	}
 
 	public List<RegisteredCourse> findRegisteredCourseByUserHao(int userId) {
 		return registeredCourseSv.findByUser(userId);
 	}
 
+//Khác
 	// Code của HBao
 	// Danh sách khóa học đã đăng ký
 	public List<RegisteredCourse> findRegisterCourseByUserId(int userId) {
 		return registeredCourseSv.findActiveCoursesByUser(userId);
 	}
-	
+
 	// Danh sách khóa học đã bán
 	public List<Object[]> getRegisteredCourses() {
-        return registeredCourseSv.findRegisteredCourses();
-    }
+		return registeredCourseSv.findRegisteredCourses();
+	}
 
 	// thêm khóa học vào khóa học của tôi
 	public RegisteredCourse addRegisteredCourse(int courseId, int userId) {
@@ -59,8 +98,8 @@ public class RegisteredCourseService {
 				throw new RuntimeException("Course already registered");
 			}
 		}
-		 Payment payment = new Payment();
-		    payment.setPaymentId(1); 
+		Payment payment = new Payment();
+		payment.setPaymentId(1);
 
 		// Nếu không có, thêm khóa học vào bảng đăng ký
 		RegisteredCourse registeredCourse = new RegisteredCourse();

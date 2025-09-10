@@ -7,7 +7,7 @@ function CourseCurriculum({ sections }) {
           <div className="accordion-item" key={idx}>
             <h2 className="accordion-header" id={`heading-${idx}`}>
               <button
-                className="accordion-button collapsed h5 fw-bold"
+                className="accordion-button collapsed fs-4 fw-bold"
                 type="button"
                 data-bs-toggle="collapse"
                 data-bs-target={`#collapse-${idx}`}

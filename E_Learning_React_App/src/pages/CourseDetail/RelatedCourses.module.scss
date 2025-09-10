@@ -1,0 +1,30 @@
+.slider {
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE
+    &::-webkit-scrollbar {
+        display: none; // Chrome, Safari
+    }
+}
+
+.card {
+    flex: 0 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    img {
+        min-width: 220px;
+        height: 130px;
+        object-fit: cover;
+    }
+
+    .card-body {
+        padding: 0.75rem;
+    }
+}

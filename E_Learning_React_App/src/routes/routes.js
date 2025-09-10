@@ -5,7 +5,7 @@ import { AdminLayout, UserProfileLayout } from '~/layouts';
 
 // Pages
 import Home from '~/pages/Home';
-import CourseDetail from '~/pages/CourseDetail';
+import CourseDetail from '~/pages/CourseDetail/CourseDetail';
 import MyCourse from '~/pages/MyCourse';
 import Login from '~/pages/Login';
 import SearchCourse from '~/pages/SearchCourse';
@@ -17,7 +17,7 @@ import Quiz from '~/pages/Quiz/Quiz';
 //Admin Page
 import Dashboard from '~/pages/Dashboard/Dashboard';
 import CategoryManager from '~/pages/CategoryManager/CategoryManager';
-import CourseManager from '~/pages/CourseManager';
+import CourseManager from '~/pages/CourseManager/CourseManager';
 import CourseDetailManager from '~/pages/CourseDetailManager/CourseDetailManager';
 import SectionDetailManager from '~/pages/SectionDetailManager/SectionDetailManager';
 import DiscountManager from '~/pages/DiscountManager/DiscountManager';

@@ -7,6 +7,10 @@ import CourseHeader from './CourseHeader';
 import CourseSidebar from './CourseSidebar';
 import CourseOverview from './CourseOverview';
 import CourseCurriculum from './CourseCurriculum';
+import LoadingSpinner from '~/components/LoadingSpinner';
+import Comments from './Comments';
+import RelatedCourses from './RelatedCourses'; // 👈 import mới
+import images from '~/assets/images';
 
 import './CourseDetail.module.scss';
 
@@ -14,19 +18,30 @@ function CourseDetail() {
     const { courseId } = useParams();
     const { authenticated } = useContext(AuthContext);
     const [course, setCourse] = useState(null);
-    const [isInCart, setIsInCart] = useState(false); // ← tạo state từ props
+    const [comments, setComments] = useState([]);
+    const [relatedCourses, setRelatedCourses] = useState([]); // 👈 thêm state
+    const [isInCart, setIsInCart] = useState(false);
+
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         const fetchDetail = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const res = await axios.get(`/course/course-detail/${courseId}`, {
+                const courseRes = await axios.get(`/course/course-detail/${courseId}`, {
                     headers: token ? { Authorization: `Bearer ${token}` } : {},
                 });
-                console.log(res.data);
-                setIsInCart(res.data.inCart); // ← cập nhật state từ response
-                setCourse(res.data);
+                const commentsRes = await axios.get(`/comment/course/${courseId}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const relatedRes = await axios.get(`/course/${courseId}/related`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                setIsInCart(courseRes.data.inCart);
+                setCourse(courseRes.data);
+                setComments(commentsRes.data);
+                setRelatedCourses(relatedRes.data); // 👈 set data
             } catch (error) {
                 console.error('Error loading course detail', error);
             }
@@ -35,7 +50,7 @@ function CourseDetail() {
         fetchDetail();
     }, [courseId]);
 
-    if (!course) return <div>Loading...</div>;
+    if (!course) return <LoadingSpinner />;
 
     const {
         name,
@@ -48,7 +63,6 @@ function CourseDetail() {
         totalComments,
         totalRegistered,
         paymentStatus,
-        inCart,
         categories,
         sections,
     } = course;
@@ -59,7 +73,6 @@ function CourseDetail() {
 
             <div className="container my-4 row">
                 <div className="col-md-8">
-                    {/* Tách riêng phần overview */}
                     <CourseOverview
                         levelName={levelName}
                         categories={categories}
@@ -67,8 +80,8 @@ function CourseDetail() {
                         description={description}
                     />
 
-                    {/* Tách riêng phần curriculum */}
                     <CourseCurriculum sections={sections} />
+                    <Comments images={images} comments={comments} />
                 </div>
 
                 <div className="col-md-4">
@@ -81,6 +94,10 @@ function CourseDetail() {
                         avatar={avatar}
                         authenticated={authenticated}
                     />
+                </div>
+                <div className="col-12">
+                    {/* 👇 Thêm Related Courses */}
+                    {relatedCourses.length > 0 && <RelatedCourses courses={relatedCourses} />}
                 </div>
             </div>
         </div>
