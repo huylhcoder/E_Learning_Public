@@ -90,6 +90,7 @@ public class CourseProgressController {
 
 //Dashboard Page
 
+	//Hiển thị danh sách người dùng
 	@GetMapping("/user-admin")
 	public List<User> fillAllUserRole2() {
 		return userService.fillAllUserRole2();
@@ -109,14 +110,14 @@ public class CourseProgressController {
 
 //Khác
 
-//	@GetMapping("/{userId}")
-//	public List<CourseProgress> getCourseProgressByUserId(@PathVariable int userId) {
-//		List<CourseProgress> listCourseProgress = courseProgressService.FillCourseKhoa(userId);
-//		if (listCourseProgress == null || listCourseProgress.isEmpty()) {
-//			return new ArrayList<>(); // Trả về danh sách rỗng thay vì null
-//		}
-//		return listCourseProgress;
-//	}
+	@GetMapping("/{userId}")
+	public List<CourseProgress> getCourseProgressByUserId(@PathVariable int userId) {
+		List<CourseProgress> listCourseProgress = courseProgressService.FillCourseKhoa(userId);
+		if (listCourseProgress == null || listCourseProgress.isEmpty()) {
+			return new ArrayList<>(); // Trả về danh sách rỗng thay vì null
+		}
+		return listCourseProgress;
+	}
 
 	@PutMapping("/{userId}")
 	public ResponseEntity<User> updateStatusKhoa(@PathVariable("userId") int userId, @RequestBody User user) {

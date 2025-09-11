@@ -134,31 +134,21 @@ public class UserController {
 		return ResponseEntity.ok(updatedUser);
 	}
 
+//User Manager
 	@GetMapping("/userAdmin")
 	public List<User> getAllUserAdmin() {
 		return userService.getAllUser();
 	}
-
-//	@PutMapping("/unblockUser/{userId}")
-//	public ResponseEntity<User> unblockStatusKhoa(@PathVariable("userId") int userId) {
-//		User kiemTraTonTai = userService.getUserById(userId);
-//		if (kiemTraTonTai != null) {
-//			kiemTraTonTai.setActive(false);
-//			userService.saveUser(kiemTraTonTai);
-//			return ResponseEntity.ok(kiemTraTonTai);
-//		}
-//		return ResponseEntity.ok(kiemTraTonTai);
-//	}
-	// Phương thức lấy ngày giờ hiện tại
-	public class DateTimeUtils {
-		// Định dạng ngày giờ theo yêu cầu
-		private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
-
-		// Phương thức lấy ngày giờ hiện tại dưới dạng chuỗi
-		public static String getCurrentDateTime() {
-			LocalDateTime now = LocalDateTime.now();
-			return now.format(DATE_TIME_FORMATTER);
+	
+	@PutMapping("/blockUser/{userId}")
+	public ResponseEntity<User> blockStatusKhoa(@PathVariable("userId") int userId) {
+		User kiemTraTonTai = userService.getUserById(userId);
+		if (kiemTraTonTai != null) {
+			kiemTraTonTai.setActive(true);
+			userService.saveUser(kiemTraTonTai);
+			return ResponseEntity.ok(kiemTraTonTai);
 		}
+		return ResponseEntity.ok(kiemTraTonTai);
 	}
 
 	@PutMapping("/unblockUser/{userId}")
@@ -211,17 +201,31 @@ public class UserController {
 		}
 
 	}
+//Khác
 
-	@PutMapping("/blockUser/{userId}")
-	public ResponseEntity<User> blockStatusKhoa(@PathVariable("userId") int userId) {
-		User kiemTraTonTai = userService.getUserById(userId);
-		if (kiemTraTonTai != null) {
-			kiemTraTonTai.setActive(true);
-			userService.saveUser(kiemTraTonTai);
-			return ResponseEntity.ok(kiemTraTonTai);
+//	@PutMapping("/unblockUser/{userId}")
+//	public ResponseEntity<User> unblockStatusKhoa(@PathVariable("userId") int userId) {
+//		User kiemTraTonTai = userService.getUserById(userId);
+//		if (kiemTraTonTai != null) {
+//			kiemTraTonTai.setActive(false);
+//			userService.saveUser(kiemTraTonTai);
+//			return ResponseEntity.ok(kiemTraTonTai);
+//		}
+//		return ResponseEntity.ok(kiemTraTonTai);
+//	}
+	// Phương thức lấy ngày giờ hiện tại
+	public class DateTimeUtils {
+		// Định dạng ngày giờ theo yêu cầu
+		private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy");
+
+		// Phương thức lấy ngày giờ hiện tại dưới dạng chuỗi
+		public static String getCurrentDateTime() {
+			LocalDateTime now = LocalDateTime.now();
+			return now.format(DATE_TIME_FORMATTER);
 		}
-		return ResponseEntity.ok(kiemTraTonTai);
 	}
+
+	
 
 //	
 //	@GetMapping("/userAdmin/{userId}")

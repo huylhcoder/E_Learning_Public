@@ -41,18 +41,13 @@ export const ProfileDropdown = ({ avatar, isTokenValid, handleLogout }) => {
                             </Link>
                         </li>
                         <li>
-                            <Link to="/my-course" className={cx('dropdown-item')}>
-                                Tiến độ khóa học
+                            <Link to="/user/roadmap" className={cx('dropdown-item')}>
+                                Roadmap
                             </Link>
                         </li>
                         <li>
                             <Link to="/user/password" className={cx('dropdown-item')}>
                                 Đổi mật khẩu
-                            </Link>
-                        </li>
-                         <li>
-                            <Link to="/user/promotions" className={cx('dropdown-item')}>
-                                Khuyến mãi của tôi
                             </Link>
                         </li>
                         <li>

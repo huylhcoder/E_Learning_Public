@@ -2,6 +2,8 @@
 import { NavLink } from 'react-router-dom';
 import { useContext } from 'react';
 import { LuUser, LuLock, LuTicketPercent } from 'react-icons/lu';
+import { RiRoadMapLine } from 'react-icons/ri';
+import { FaCreditCard } from "react-icons/fa";
 import classNames from 'classnames/bind';
 
 //Components
@@ -35,7 +37,14 @@ function UserSidebar() {
                     <LuLock className={cx('icon')} />
                     Đổi mật khẩu
                 </NavLink>
-
+                <NavLink to="/user/roadmap" className={({ isActive }) => cx('menu-item', { active: isActive })}>
+                    <RiRoadMapLine className={cx('icon')} />
+                    Roadmap
+                </NavLink>
+                <NavLink to="/user/payment-history" className={({ isActive }) => cx('menu-item', { active: isActive })}>
+                    <FaCreditCard  className={cx('icon')} />
+                    Lịch sử thanh toán
+                </NavLink>
                 <NavLink to="/user/promotions" className={({ isActive }) => cx('menu-item', { active: isActive })}>
                     <LuTicketPercent className={cx('icon')} />
                     Khuyến mãi của tôi

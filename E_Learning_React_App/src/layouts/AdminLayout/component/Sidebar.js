@@ -11,6 +11,7 @@ import {
     LuPanelLeftClose,
     LuPercent,
 } from 'react-icons/lu';
+import { FaUsers, FaComments } from 'react-icons/fa';
 import classNames from 'classnames/bind';
 import PropTypes from 'prop-types';
 import styles from './Sidebar.module.scss';
@@ -39,6 +40,21 @@ function Sidebar({ isCollapsed, onToggle }) {
                 <NavLink to="/admin/dashboard" className={({ isActive }) => cx('menu-item', { active: isActive })}>
                     <LuLayoutDashboard className={cx('icon')} />
                     <span className={cx('menu-text')}>Dashboard</span>
+                </NavLink>
+
+                {/* Quản lý user */}
+                <NavLink to="/admin/user-manager" className={({ isActive }) => cx('menu-item', { active: isActive })}>
+                    <FaUsers className={cx('icon')} />
+                    <span className={cx('menu-text')}>Quản lý người dùng</span>
+                </NavLink>
+
+                {/* Quản lý bình luận */}
+                <NavLink
+                    to="/admin/comment-manager"
+                    className={({ isActive }) => cx('menu-item', { active: isActive })}
+                >
+                    <FaComments className={cx('icon')} />
+                    <span className={cx('menu-text')}>Quản lý bình luận</span>
                 </NavLink>
 
                 {/* Quản lý khóa học */}

@@ -3,17 +3,25 @@ import config from '~/config';
 // Layouts
 import { AdminLayout, UserProfileLayout } from '~/layouts';
 
-// Pages
+// Public Pages
 import Home from '~/pages/Home';
-import CourseDetail from '~/pages/CourseDetail/CourseDetail';
-import MyCourse from '~/pages/MyCourse';
 import Login from '~/pages/Login';
 import SearchCourse from '~/pages/SearchCourse';
+import CourseDetail from '~/pages/CourseDetail/CourseDetail';
+import Cart from '~/pages/Cart/Cart';
+
+//Private Pages
 import Checkout from '~/pages/Checkout/Checkout';
 import PaymentResult from '~/pages/PaymentResult/PaymentResult';
-import Cart from '~/pages/Cart/Cart';
+import MyCourse from '~/pages/MyCourse';
 import Learning from '~/pages/Learning/Learning';
 import Quiz from '~/pages/Quiz/Quiz';
+import Profile from '~/pages/UserProfile/UserProfile';
+import ChangePassword from '~/pages/ChangePassword/ChangPassword';
+import MyVoucher from '~/pages/MyVoucher/MyVoucher';
+import Roadmap from '~/pages/Roadmap/Roadmap';
+import PaymentHistory from '~/pages/PaymentHistory/PaymentHistory';
+
 //Admin Page
 import Dashboard from '~/pages/Dashboard/Dashboard';
 import CategoryManager from '~/pages/CategoryManager/CategoryManager';
@@ -21,9 +29,8 @@ import CourseManager from '~/pages/CourseManager/CourseManager';
 import CourseDetailManager from '~/pages/CourseDetailManager/CourseDetailManager';
 import SectionDetailManager from '~/pages/SectionDetailManager/SectionDetailManager';
 import DiscountManager from '~/pages/DiscountManager/DiscountManager';
-import Profile from '~/pages/UserProfile/UserProfile';
-import ChangePassword from '~/pages/ChangePassword/ChangPassword';
-import MyVoucher from '~/pages/MyVoucher/MyVoucher';
+import UserManager from '~/pages/UserManager/UserManager';
+import CommentManager from '~/pages/CommentManager/CommentManager';
 
 const publicRoutes = [
     { path: config.routes.home, component: Home },
@@ -46,6 +53,8 @@ const privateRoutes = [
     { path: config.routes.profile, component: Profile, layout: UserProfileLayout },
     { path: config.routes.changePassword, component: ChangePassword, layout: UserProfileLayout },
     { path: config.routes.promotions, component: MyVoucher, layout: UserProfileLayout },
+    { path: config.routes.roadmap, component: Roadmap, layout: UserProfileLayout },
+    { path: config.routes.paymentHistory, component: PaymentHistory, layout: UserProfileLayout },
 ];
 
 // Admin routes (phải là admin)
@@ -57,6 +66,8 @@ const adminRoutes = [
     { path: config.routes.courseDetailManager, component: CourseDetailManager, layout: AdminLayout },
     { path: config.routes.sectionDetailManager, component: SectionDetailManager, layout: AdminLayout },
     { path: config.routes.discountManager, component: DiscountManager, layout: AdminLayout },
+    { path: config.routes.userManager, component: UserManager, layout: AdminLayout },
+    { path: config.routes.commentManager, component: CommentManager, layout: AdminLayout },
 ];
 
 //Do no co 2 thang nen minh phai export tung cai le ra

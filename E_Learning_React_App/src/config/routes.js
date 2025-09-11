@@ -1,4 +1,5 @@
-import ChangePassword from "~/pages/ChangePassword/ChangPassword";
+import ChangePassword from '~/pages/ChangePassword/ChangPassword';
+import PaymentHistory from '~/pages/PaymentHistory/PaymentHistory';
 
 const routes = {
     // Public routes
@@ -20,6 +21,8 @@ const routes = {
     profile: '/user/profile',
     changePassword: '/user/password',
     promotions: '/user/promotions',
+    roadmap: '/user/roadmap',
+    paymentHistory: '/user/payment-history',
 
     //Admin routes
     admin: '/admin',
@@ -29,6 +32,8 @@ const routes = {
     courseDetailManager: '/admin/course-detail-manager/:courseId',
     sectionDetailManager: '/admin/course-detail-manager/:courseId/section/:sectionId',
     discountManager: '/admin/discount-manager',
+    userManager: '/admin/user-manager',
+    commentManager: '/admin/comment-manager',
 };
 
 export default routes;
