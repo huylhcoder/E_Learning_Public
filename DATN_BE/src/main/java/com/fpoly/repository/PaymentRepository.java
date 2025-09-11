@@ -24,6 +24,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
 		return payments.isEmpty() ? Optional.empty() : Optional.of(payments.get(0));
 	}
 
+//Payment History Page
+	// Lấy tất cả Payment thành công theo userId
+	List<Payment> findByUser_UserIdAndTransactionStatusTrue(int userId);
+
 //Checkout + Payment return
 	// Tìm kiếm payment mới nhất thôi
 	Optional<Payment> findTopByUserEmailOrderByPaymentIdDesc(String email);
@@ -33,7 +37,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
 	@Transactional
 	@Query("DELETE FROM Payment p WHERE p.user.email = :email AND p.transactionStatus = false")
 	void deleteAllUnpaidPaymentsByUserEmail(@Param("email") String email);
-	
+
 	List<Payment> findByUserEmailAndTransactionStatusFalse(String email);
 
 }
