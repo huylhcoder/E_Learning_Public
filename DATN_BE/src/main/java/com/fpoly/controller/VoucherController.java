@@ -45,7 +45,6 @@ public class VoucherController {
 	JwtTokenUtils jwtTokenUtils;
 
 // Checkout Page
-
 	// List My Voucher
 	@GetMapping("/myvoucher")
 	public ResponseEntity<?> getMyVouchers(@RequestHeader("Authorization") String authHeader) {
@@ -189,7 +188,12 @@ public class VoucherController {
 		}
 		return ResponseEntity.ok(kiemTraTonTai);
 	}
-
+//MyVoucher Page
+	@GetMapping("/rdVoucher")
+	public ResponseEntity<List<Voucher>> getRDVoucher() {
+		List<Voucher> voucher = voucherService.getRDVoucher();
+		return ResponseEntity.ok(voucher);
+	}
 //Khác
 
 	@GetMapping("/user/vouchers")

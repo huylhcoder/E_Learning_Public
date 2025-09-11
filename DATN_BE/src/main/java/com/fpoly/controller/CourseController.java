@@ -706,9 +706,5 @@ public class CourseController {
 		return ResponseEntity.ok(courses);
 	}
 
-	@GetMapping("/rdVoucher")
-	public ResponseEntity<List<Voucher>> getRDVoucher() {
-		List<Voucher> voucher = courseService.getRDVoucher();
-		return ResponseEntity.ok(voucher);
-	}
+	
 }

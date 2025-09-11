@@ -4,6 +4,8 @@ import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import { Offcanvas, Button } from 'react-bootstrap';
 
+import { formatDate } from '~/utils/format';
+
 const DiscountManager = () => {
     const [vouchers, setVouchers] = useState([]);
     const [voucher, setVoucher] = useState({});
@@ -214,8 +216,8 @@ const DiscountManager = () => {
                             <td>{sale.voucherCode}</td>
                             <td className="text-success fw-bold">{sale.percentSale}%</td>
                             <td>{sale.quantity}</td>
-                            <td>{sale.startDate}</td>
-                            <td>{sale.endDate}</td>
+                            <td>{formatDate(sale.startDate)}</td>
+                            <td>{formatDate(sale.endDate)}</td>
                             <td>
                                 <span
                                     className={sale.status ? 'text-success fw-bold fs-6' : 'text-danger fw-bold fs-6'}

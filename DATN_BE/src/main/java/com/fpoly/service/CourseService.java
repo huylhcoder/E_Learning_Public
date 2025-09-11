@@ -572,13 +572,6 @@ public class CourseService {
 		return courseRepository.findTop4ByStatusOrderByFollowDesc(1);
 	}
 
-	@Autowired
-	VoucherRepository voucherRepository;
-
-	public List<Voucher> getRDVoucher() {
-		return voucherRepository.findRandomVouchers();
-	}
-
 	// Xóa khóa học nháp
 	@Transactional
 	public void removeDraftCourse(int courseId) {

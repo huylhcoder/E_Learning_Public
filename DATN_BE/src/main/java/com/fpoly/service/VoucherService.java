@@ -13,7 +13,16 @@ import com.fpoly.repository.VoucherRepository;
 public class VoucherService {
 	@Autowired
 	VoucherRepository saleRepository;
+	@Autowired
+	VoucherRepository voucherRepository;
 
+//MyVoucher Page
+	public List<Voucher> getRDVoucher() {
+		return voucherRepository.findRandomVouchers();
+	}
+
+
+//Khác
 	public List<Voucher> getAllVoucher() {
 		return saleRepository.findAll();
 	}
