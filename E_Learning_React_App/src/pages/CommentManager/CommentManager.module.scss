@@ -1,0 +1,16 @@
+.star {
+    font-size: 20px;
+    color: black;
+}
+
+.starFilled {
+    font-size: 20px;
+    color: #f6c343;
+}
+
+.textTruncateCell {
+    max-width: 70px;
+    // white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
