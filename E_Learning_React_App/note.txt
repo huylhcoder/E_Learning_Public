@@ -121,3 +121,9 @@
 
     //     fetchAvatar();
     // }, []);
+
+16. Chạy riêng Redis để làm chức năng đăng ký 
+    
+    Mở Docker Desktop
+    - CD tới thư mục cần chạy Docker
+    - docker run -d --name redis -p 6379:6379 redis:7.2

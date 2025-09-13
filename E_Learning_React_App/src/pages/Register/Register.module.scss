@@ -1,0 +1,180 @@
+.login-container {
+    min-height: 100vh;
+    background-image: url('https://images.unsplash.com/photo-1600195077075-245f9c2b7b54');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 3rem 2rem;
+    border-radius: 1rem;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.divider {
+    text-align: center;
+    margin: 2rem 0 1rem;
+    position: relative;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #666;
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 40%;
+        height: 1px;
+        background: #ccc;
+    }
+
+    &::before {
+        left: 0;
+    }
+
+    &::after {
+        right: 0;
+    }
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    color: #fff;
+    transition: all 0.3s ease;
+
+    &.google {
+        background-color: #db4437;
+
+        &:hover {
+            background-color: #c1351d;
+        }
+    }
+
+    &.facebook {
+        background-color: #1877f2;
+
+        &:hover {
+            background-color: #145ecf;
+        }
+    }
+
+    &.github {
+        background-color: #333;
+
+        &:hover {
+            background-color: #000;
+        }
+    }
+
+    .icon {
+        font-size: 1.25rem;
+    }
+}
+
+/* 🔹 Input kiểu outlined (giống Material UI) */
+// .input-outlined {
+//     position: relative;
+//     margin-bottom: 3rem; // tăng khoảng cách dưới
+
+//     input {
+//         width: 100%;
+//         padding: 1.2rem 0.75rem;
+//         border: 1px solid #aaa;
+//         border-radius: 0.5rem;
+//         font-size: 1.25rem; // input text size ~ fs-5
+//         background: transparent;
+
+//         &:focus {
+//             border-color: #333;
+//             outline: none;
+//         }
+
+//         /* Khi có chữ hoặc focus/autofill */
+//         &:focus ~ label,
+//         &:not(:placeholder-shown) ~ label,
+//         &:-webkit-autofill ~ label {
+//             top: -2rem; // bay cao hơn để không dính field trên
+//             font-size: 1.25rem; // fs-5
+//             color: #333;
+//         }
+//     }
+
+//     label {
+//         position: absolute;
+//         left: 0.75rem;
+//         top: 50%;
+//         transform: translateY(-50%);
+//         transition: 0.25s ease;
+//         background: #fff;
+//         padding: 0 0.4rem;
+//         color: #666;
+//         pointer-events: none;
+//         font-size: 1.5rem; // trạng thái ban đầu fs-4
+//         line-height: 1.2;
+//     }
+// }
+
+.input-outlined {
+    position: relative;
+    margin-bottom: 3rem;
+
+    input {
+        width: 100%;
+        padding: 1.2rem 0.75rem;
+        border: 1px solid #aaa;
+        border-radius: 0.5rem;
+        font-size: 1.5rem;
+        background: transparent;
+
+        &:focus {
+            border-color: #333;
+            outline: none;
+        }
+
+        /* Khi có chữ hoặc focus/autofill */
+        &:focus ~ label,
+        &:not(:placeholder-shown) ~ label,
+        &:-webkit-autofill ~ label {
+            top: 0; // 👈 thay -2rem thành 0 để chỉ bay lên sát input
+            font-size: 1.5rem; // nhỏ hơn trạng thái ban đầu một chút
+            color: #333;
+        }
+    }
+
+    input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 100px #fff inset !important; // ép nền autofill thành trắng
+        -webkit-text-fill-color: #000 !important; // giữ màu chữ
+        caret-color: #000; // con trỏ cũng màu đen
+        transition: background-color 9999s ease-in-out 0s; // tránh blink vàng
+    }
+
+    label {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: 0.25s ease;
+        background: #fff;
+        padding: 0 0.4rem;
+        color: #666;
+        pointer-events: none;
+        font-size: 1.5rem; // trạng thái ban đầu to hơn một chút
+        line-height: 1.2;
+    }
+}

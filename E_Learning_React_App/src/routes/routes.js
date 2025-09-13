@@ -6,6 +6,7 @@ import { AdminLayout, UserProfileLayout } from '~/layouts';
 // Public Pages
 import Home from '~/pages/Home';
 import Login from '~/pages/Login';
+import Register from '~/pages/Register/Register';
 import SearchCourse from '~/pages/SearchCourse';
 import CourseDetail from '~/pages/CourseDetail/CourseDetail';
 import Cart from '~/pages/Cart/Cart';
@@ -36,6 +37,7 @@ const publicRoutes = [
     { path: config.routes.home, component: Home },
     { path: config.routes.homeAlias, component: Home },
     { path: config.routes.login, component: Login },
+    { path: config.routes.register, component: Register },
     { path: config.routes.searchCourses, component: SearchCourse },
     { path: config.routes.courseDetail, component: CourseDetail },
     { path: config.routes.cart, component: Cart },

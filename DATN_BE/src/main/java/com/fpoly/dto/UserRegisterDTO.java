@@ -4,8 +4,14 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserRegisterDTO {
 	@JsonProperty("fullname")
 	private String fullname;
@@ -24,53 +30,7 @@ public class UserRegisterDTO {
 
 	@JsonProperty("google_account_id")
 	private int googleAccountId;
-
-	public String getFullname() {
-		return fullname;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public String getRetypePassword() {
-		return retypePassword;
-	}
-
-	public int getFacebookAccountId() {
-		return facebookAccountId;
-	}
-
-	public int getGoogleAccountId() {
-		return googleAccountId;
-	}
-
-	public void setFullname(String fullname) {
-		this.fullname = fullname;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public void setRetypePassword(String retypePassword) {
-		this.retypePassword = retypePassword;
-	}
-
-	public void setFacebookAccountId(int facebookAccountId) {
-		this.facebookAccountId = facebookAccountId;
-	}
-
-	public void setGoogleAccountId(int googleAccountId) {
-		this.googleAccountId = googleAccountId;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
+	
+    @JsonProperty("otp")
+    private String otp;   // 👈 thêm trường OTP để BE nhận từ FE
 }
