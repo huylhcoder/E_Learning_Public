@@ -1,5 +1,5 @@
 .login-container {
-    min-height: 100vh;
+    // min-height: 100vh;
     background-image: url('https://images.unsplash.com/photo-1600195077075-245f9c2b7b54');
     background-size: cover;
     background-position: center;
@@ -86,49 +86,6 @@
         font-size: 1.25rem;
     }
 }
-
-/* 🔹 Input kiểu outlined (giống Material UI) */
-// .input-outlined {
-//     position: relative;
-//     margin-bottom: 3rem; // tăng khoảng cách dưới
-
-//     input {
-//         width: 100%;
-//         padding: 1.2rem 0.75rem;
-//         border: 1px solid #aaa;
-//         border-radius: 0.5rem;
-//         font-size: 1.25rem; // input text size ~ fs-5
-//         background: transparent;
-
-//         &:focus {
-//             border-color: #333;
-//             outline: none;
-//         }
-
-//         /* Khi có chữ hoặc focus/autofill */
-//         &:focus ~ label,
-//         &:not(:placeholder-shown) ~ label,
-//         &:-webkit-autofill ~ label {
-//             top: -2rem; // bay cao hơn để không dính field trên
-//             font-size: 1.25rem; // fs-5
-//             color: #333;
-//         }
-//     }
-
-//     label {
-//         position: absolute;
-//         left: 0.75rem;
-//         top: 50%;
-//         transform: translateY(-50%);
-//         transition: 0.25s ease;
-//         background: #fff;
-//         padding: 0 0.4rem;
-//         color: #666;
-//         pointer-events: none;
-//         font-size: 1.5rem; // trạng thái ban đầu fs-4
-//         line-height: 1.2;
-//     }
-// }
 
 .input-outlined {
     position: relative;

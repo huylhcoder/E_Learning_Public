@@ -10,6 +10,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import com.fpoly.dto.ChangePasswordDTO;
 import com.fpoly.dto.MonthlyRevenueDTO;
 import com.fpoly.dto.UserMonthlyStatsDTO;
 import com.fpoly.dto.UserYearStatsDTO;
@@ -41,6 +42,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 import jakarta.servlet.jsp.el.NotFoundELResolver;
+import jakarta.validation.Valid;
 
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -66,6 +68,8 @@ public class UserService {
 	// HBao Code
 	@Autowired
 	private JavaMailSender mailSender;
+	@Autowired
+	JwtTokenUtils jwtTokenUtils;
 
 //Register Page
 	// Tạo ra một người dùng mới
@@ -138,6 +142,19 @@ public class UserService {
 	    return userRepository.save(newUser);
 	}
 
+//Change Pass Page
+	 public void changePassword(String token, ChangePasswordDTO dto) {
+	        String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+	        User user = userRepository.findByEmail(email)
+	                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+
+	        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+	            throw new IllegalArgumentException("Mật khẩu cũ không chính xác");
+	        }
+
+	        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+	        userRepository.save(user);
+	    }
 
 //Khác
 
@@ -340,5 +357,8 @@ public class UserService {
 		// Truyền User vào
 		return jwtTokenUtil.generateToken(existingUser);
 	}
+
+
+	
 
 }

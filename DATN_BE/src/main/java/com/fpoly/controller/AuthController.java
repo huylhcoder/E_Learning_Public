@@ -21,6 +21,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,7 @@ import com.fpoly.entity.User;
 
 import com.fpoly.dto.IntrospectResponse;
 import com.fpoly.dto.ApiResponse;
+import com.fpoly.dto.ChangePasswordDTO;
 import com.fpoly.dto.IntrospectRequest;
 import com.fpoly.dto.UserLoginDTO;
 import com.fpoly.dto.UserRegisterDTO;
@@ -84,6 +86,44 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\": \"Mật khẩu không khớp!\"}");
 		}
 		return ResponseEntity.status(HttpStatus.OK).body(userService.existsByEmail(userRegisterDTO.getEmail()));
+	}
+
+	// Gửi mã OTP
+	@PostMapping("/send-verification-code")
+	public ResponseEntity<String> sendVerificationCode(@RequestBody String email) {
+		String code = String.format("%06d", new Random().nextInt(999999));
+
+		// Lưu vào Redis
+		verificationService.saveOTP(email, code);
+
+		// Gửi email
+		String htmlContent = "<h3>Mã xác minh đăng ký tài khoản:</h3><h2>" + code + "</h2>";
+		emailService.sendOTP(new MailInfo(email, "Mã xác minh E-Learning", htmlContent));
+
+		return ResponseEntity.ok("Mã xác minh đã được gửi đến email của bạn");
+	}
+
+	// Kiểm tra OTP
+	@PostMapping("/verify-code")
+	public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> payload) {
+		String email = payload.get("email");
+		String code = payload.get("code");
+
+		if (verificationService.verifyOTP(email, code)) {
+			return ResponseEntity.ok("Xác thực thành công");
+		}
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mã xác thực không đúng hoặc đã hết hạn");
+	}
+
+	// Đăng ký
+	@PostMapping("/register")
+	public ResponseEntity<?> createUser(@RequestBody UserRegisterDTO userDTO) throws Exception {
+		if (!verificationService.verifyOTP(userDTO.getEmail(), userDTO.getOtp())) {
+			return ResponseEntity.badRequest().body("OTP không hợp lệ");
+		}
+		verificationService.clearOTP(userDTO.getEmail()); // Xóa mã OTP sau khi dùng
+		User user = userService.createUser(userDTO);
+		return ResponseEntity.ok("Đăng ký thành công");
 	}
 //
 //	@PostMapping("/send-verification-code")
@@ -141,44 +181,6 @@ public class AuthController {
 //		}
 //	}
 
-	// Gửi mã OTP
-	@PostMapping("/send-verification-code")
-	public ResponseEntity<String> sendVerificationCode(@RequestBody String email) {
-		String code = String.format("%06d", new Random().nextInt(999999));
-
-		// Lưu vào Redis
-		verificationService.saveOTP(email, code);
-
-		// Gửi email
-		String htmlContent = "<h3>Mã xác minh đăng ký tài khoản:</h3><h2>" + code + "</h2>";
-		emailService.sendOTP(new MailInfo(email, "Mã xác minh E-Learning", htmlContent));
-
-		return ResponseEntity.ok("Mã xác minh đã được gửi đến email của bạn");
-	}
-
-	// Kiểm tra OTP
-	@PostMapping("/verify-code")
-	public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> payload) {
-		String email = payload.get("email");
-		String code = payload.get("code");
-
-		if (verificationService.verifyOTP(email, code)) {
-			return ResponseEntity.ok("Xác thực thành công");
-		}
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Mã xác thực không đúng hoặc đã hết hạn");
-	}
-
-	// Đăng ký
-	@PostMapping("/register")
-	public ResponseEntity<?> createUser(@RequestBody UserRegisterDTO userDTO) throws Exception {
-		if (!verificationService.verifyOTP(userDTO.getEmail(), userDTO.getOtp())) {
-			return ResponseEntity.badRequest().body("OTP không hợp lệ");
-		}
-		verificationService.clearOTP(userDTO.getEmail()); // Xóa mã OTP sau khi dùng
-		User user = userService.createUser(userDTO);
-		return ResponseEntity.ok("Đăng ký thành công");
-	}
-
 //Login Page
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userLoginDTO) {
@@ -225,6 +227,18 @@ public class AuthController {
 
 		return ResponseEntity
 				.ok(ApiResponse.<IntrospectResponse>builder().code(HttpStatus.OK.value()).result(result).build());
+	}
+
+//Change Password
+	@PostMapping("/change-password")
+	public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String token,
+			@RequestBody @Valid ChangePasswordDTO dto) {
+		try {
+			userService.changePassword(token, dto);
+			return ResponseEntity.ok("Đổi mật khẩu thành công");
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+		}
 	}
 
 }
