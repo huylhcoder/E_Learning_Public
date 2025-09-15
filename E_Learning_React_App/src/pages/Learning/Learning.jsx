@@ -50,8 +50,6 @@ const Learning = () => {
             const response = await axios.get(`/course/learning/course-detail/${courseId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            console.log('Course:', response.data);
-
             setCourse(response.data);
 
             // Tổ chức lại dữ liệu sections
@@ -97,18 +95,41 @@ const Learning = () => {
         }
     };
 
+    // const updateVideoProgress = async (progress) => {
+    //     try {
+    //         await axios.put(
+    //             '/video-progress',
+    //             {
+    //                 lessonId: currentLesson.lessonId,
+    //                 videoProgress: progress,
+    //             },
+    //             {
+    //                 headers: { Authorization: `Bearer ${token}` },
+    //             },
+    //         );
+    //         setVideoProgress(progress);
+    //     } catch (error) {
+    //         console.error('Lỗi khi cập nhật tiến độ video:', error);
+    //     }
+    // };
+
     const updateVideoProgress = async (progress) => {
+        if (!currentLesson) return;
+
         try {
-            await axios.put(
-                '/video-progress',
+            await axios.post(
+                '/video-progress/save',
                 {
+                    courseId, // 👈 chỉ truyền courseId
                     lessonId: currentLesson.lessonId,
+                    pathVideo: currentLesson.pathVideo,
                     videoProgress: progress,
                 },
                 {
                     headers: { Authorization: `Bearer ${token}` },
                 },
             );
+
             setVideoProgress(progress);
         } catch (error) {
             console.error('Lỗi khi cập nhật tiến độ video:', error);
@@ -118,7 +139,7 @@ const Learning = () => {
     const completeLesson = async () => {
         try {
             await axios.post(
-                '/lesson-complete',
+                '/lesson/lesson-complete',
                 {
                     lessonId: currentLesson.lessonId,
                     courseId,
@@ -134,80 +155,6 @@ const Learning = () => {
         }
     };
 
-    // const submitComment = async () => {
-    //     if (!rating || !newComment) {
-    //         alert('Vui lòng nhập đánh giá và nhận xét.');
-    //         return;
-    //     }
-
-    //     try {
-    //         await axios.post(
-    //             `/comment`,
-    //             {
-    //                 courseId,
-    //                 content: newComment,
-    //                 starRating: rating,
-    //             },
-    //             {
-    //                 headers: { Authorization: `Bearer ${token}` },
-    //             },
-    //         );
-    //         alert('Đánh giá của bạn đã được gửi.');
-    //         setNewComment('');
-    //         setRating(0);
-    //         loadComments();
-    //     } catch (error) {
-    //         console.error('Lỗi khi gửi đánh giá:', error);
-    //     }
-    // };
-
-    // Trong Learning
-    // const submitComment = async (rating, newComment) => {
-    //     if (!rating || !newComment) {
-    //         alert('Vui lòng nhập đánh giá và nhận xét.');
-    //         return;
-    //     }
-
-    //     try {
-    //         await axios.post(
-    //             `/comment`,
-    //             { courseId, content: newComment, starRating: rating },
-    //             { headers: { Authorization: `Bearer ${token}` } },
-    //         );
-    //         alert('Đánh giá của bạn đã được gửi.');
-    //         loadComments();
-    //     } catch (error) {
-    //         console.error('Lỗi khi gửi đánh giá:', error);
-    //     }
-    // };
-
-    // const loadComments = async () => {
-    //     try {
-    //         const response = await axios.get(`/comment/course/${courseId}`, {
-    //             headers: { Authorization: `Bearer ${token}` },
-    //         });
-    //         console.log('Comments :' + response.data);
-    //         setComments(response.data);
-    //     } catch (error) {
-    //         console.error('Lỗi khi tải đánh giá:', error);
-    //     }
-    // };
-
-    // const handleVideoProgress = (progress) => {
-    //     setVideoProgress(progress);
-    //     // Lưu tiến độ khi video đạt mốc nhất định (ví dụ: mỗi 10%)
-    //     if (progress % 10 < 1) {
-    //         updateVideoProgress(progress);
-    //     }
-    // };
-
-    // const handleLessonClick = (lesson) => {
-    //     console.log('Lesson onclick:', lesson);
-    //     setCurrentLesson(lesson);
-    //     // Cuộn lên đầu trang khi chuyển bài học
-    //     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // };
-
     const loadCourseProgress = async () => {
         try {
             const response = await axios.get(`/course-progress/progress?courseId=${courseId}`, {
@@ -219,11 +166,6 @@ const Learning = () => {
             console.error('Lỗi khi tải tiến độ khóa học:', error);
         }
     };
-
-    // const handleTestClick = (test) => {
-    //     window.scrollTo({ top: 0, behavior: 'smooth' });
-    //     navigate(`/quiz?testId=${test.testId}`);
-    // };
 
     const handleLessonClick = (lesson) => {
         setCurrentLesson(lesson);

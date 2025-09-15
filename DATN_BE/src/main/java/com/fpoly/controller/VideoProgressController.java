@@ -1,5 +1,6 @@
 package com.fpoly.controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +21,13 @@ import com.fpoly.dto.MonthlyRevenueDTO;
 import com.fpoly.dto.UserMonthlyStatsDTO;
 import com.fpoly.dto.UserYearStatsDTO;
 import com.fpoly.dto.YearRevenueDTO;
+import com.fpoly.dto.learning.VideoProgressRequest;
 import com.fpoly.entity.Course;
 import com.fpoly.entity.CourseProgress;
 import com.fpoly.entity.RegisteredCourse;
 import com.fpoly.entity.User;
 import com.fpoly.entity.VideoProgress;
+import com.fpoly.repository.RegisteredCourseRepository;
 import com.fpoly.security.JwtTokenUtils;
 import com.fpoly.service.CourseProgressService;
 import com.fpoly.service.CourseService;
@@ -36,89 +39,84 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @CrossOrigin("*") // cho phép bên ngoài truy xuất vào thoải mái k ngăn cản gì cả
 @RestController
-@RequestMapping("${api.prefix}/video_progress")
+@RequestMapping("${api.prefix}/video-progress")
 public class VideoProgressController {
 	@Autowired
-    private VideoProgressService videoProgressService;
+	private VideoProgressService videoProgressService;
 	@Autowired
 	private UserService UserService;
-	
-	@Autowired
-    private JwtTokenUtils jwtTokenUtils;
-	
 
+	@Autowired
+	private RegisteredCourseRepository registeredCourseRepository;
+
+	@Autowired
+	private JwtTokenUtils jwtTokenUtils;
 
 //Learning Page
-	//Lưu  tiến  độ video
-//	@PutMapping("/video-progress")
-//	public ResponseEntity<?> updateVideoProgress(@RequestBody VideoProgressRequest req, @AuthenticationPrincipal User user) {
-//	    VideoProgress vp = videoProgressRepo.findByUserIdAndLessonId(user.getId(), req.getLessonId())
-//	        .orElse(new VideoProgress());
-//	    vp.setUserId(user.getId());
-//	    vp.setLessonId(req.getLessonId());
-//	    vp.setRegisteredCourseId(req.getRegisteredCourseId());
-//	    vp.setPathVideo(req.getPathVideo());
-//	    vp.setUpdate_at(LocalDateTime.now());
-//	    vp.setVideoProgress(req.getVideoProgress());
-//	    videoProgressRepo.save(vp);
-//	    return ResponseEntity.ok("Video progress updated");
-//	}
+	// Lưu tiến độ video
+	@PostMapping("/save")
+	public ResponseEntity<VideoProgress> saveOrUpdateProgress(@RequestBody VideoProgressRequest request,
+			@RequestHeader("Authorization") String token) {
 
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+		User user = UserService.getUserByEmailToan(email);
 
-    // API để lưu hoặc cập nhật tiến độ video
-    @PostMapping("/save")
-    public ResponseEntity<VideoProgress> saveOrUpdateProgress(@RequestBody VideoProgress progress, @RequestHeader("Authorization") String token) {
-    	  String email = jwtTokenUtils.extractEmail(token.substring(7));  // Loại bỏ "Bearer " khỏi token
-	        User user = UserService.getUserByEmailToan(email);
-	        
-	        
-	        if (user == null) {
-	            return ResponseEntity.status(HttpStatus.SC_FORBIDDEN).body(null);  // Trả lỗi nếu không tìm thấy user
-	        }
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.SC_FORBIDDEN).build();
+		}
 
-	        // Cập nhật userId vào tiến độ video
-	        progress.setUserId(user.getUserId());  // Gán userId vào progress
+		// Tìm registeredCourse theo userId + courseId
+		RegisteredCourse rc = registeredCourseRepository
+				.findByUser_UserIdAndCourse_CourseId(user.getUserId(), request.getCourseId())
+				.orElseThrow(() -> new IllegalArgumentException("User chưa đăng ký khóa học"));
 
-	        // Lưu hoặc cập nhật tiến độ video
-	        VideoProgress savedProgress = videoProgressService.saveOrUpdateVideoProgress(progress, user.getUserId());
-	        return ResponseEntity.ok(savedProgress);
-    }
+		VideoProgress progress = new VideoProgress();
+		progress.setUserId(user.getUserId());
+		progress.setRegisteredCourseId(rc.getRegisteredCourseId()); // BE tự lấy
+		progress.setLessonId(request.getLessonId());
+		progress.setPathVideo(request.getPathVideo());
+		progress.setVideoProgress(request.getVideoProgress());
+		progress.setUpdate_at(LocalDateTime.now());
 
-    // API để lấy tiến độ video của người dùng theo userId và lessonId
-    @GetMapping("/{lessonId}")
-    public ResponseEntity<?> getProgress(@RequestHeader("Authorization") String authorizationHeader, @PathVariable int lessonId) {
-        System.out.println("Authorization header: " + authorizationHeader);
+		VideoProgress savedProgress = videoProgressService.saveOrUpdateVideoProgress(progress, user.getUserId());
 
-    	String token;
- 	    String email;
+		return ResponseEntity.ok(savedProgress);
+	}
 
- 	    try {
- 	        // Kiểm tra header Authorization
- 	        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
- 	            return ResponseEntity.status(400).body("Authorization header không hợp lệ.");
- 	        }
+	// API để lấy tiến độ video của người dùng theo userId và lessonId
+	@GetMapping("/{lessonId}")
+	public ResponseEntity<?> getProgress(@RequestHeader("Authorization") String authorizationHeader,
+			@PathVariable int lessonId) {
+		System.out.println("Authorization header: " + authorizationHeader);
 
- 	        // Trích xuất token từ Authorization header
- 	        token = authorizationHeader.substring(7); // Bỏ "Bearer " để lấy token
+		String token;
+		String email;
 
- 	        // Trích xuất email từ token
- 	        email = jwtTokenUtils.extractEmail(token);
- 	        System.out.println("Extracted Email: " + email);
- 	       System.out.println("Token: " + token);
- 	    } catch (Exception e) {
- 	        return ResponseEntity.status(400).body("Token không hợp lệ.");
- 	    }
+		try {
+			// Kiểm tra header Authorization
+			if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+				return ResponseEntity.status(400).body("Authorization header không hợp lệ.");
+			}
 
- 	    // Kiểm tra thông tin người dùng từ email
- 	    User user = UserService.getUserByEmailToan(email);
- 	    if (user == null) {
- 	        return ResponseEntity.status(404).body("Người dùng không tồn tại.");
- 	    }
-        return videoProgressService.getVideoProgressByUserAndLesson(user.getUserId(), lessonId)
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.notFound().build());
-        
-        
-    }
-    
+			// Trích xuất token từ Authorization header
+			token = authorizationHeader.substring(7); // Bỏ "Bearer " để lấy token
+
+			// Trích xuất email từ token
+			email = jwtTokenUtils.extractEmail(token);
+			System.out.println("Extracted Email: " + email);
+			System.out.println("Token: " + token);
+		} catch (Exception e) {
+			return ResponseEntity.status(400).body("Token không hợp lệ.");
+		}
+
+		// Kiểm tra thông tin người dùng từ email
+		User user = UserService.getUserByEmailToan(email);
+		if (user == null) {
+			return ResponseEntity.status(404).body("Người dùng không tồn tại.");
+		}
+		return videoProgressService.getVideoProgressByUserAndLesson(user.getUserId(), lessonId).map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.notFound().build());
+
+	}
+
 }

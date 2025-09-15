@@ -127,12 +127,12 @@ public class CourseController {
 //MyCourse 
 	@GetMapping("/registered-course")
 	public ResponseEntity<List<RegisteredCourseDTO>> getListRegisteredCourseOfUser(
-	        @RequestHeader("Authorization") String token) {
-	    String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
-	    User user = UserService.getUserByEmailToan(email);
+			@RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+		User user = UserService.getUserByEmailToan(email);
 
-	    List<RegisteredCourseDTO> list = registeredCourseService.getRegisteredCoursesWithProgress(user.getUserId());
-	    return ResponseEntity.ok(list);
+		List<RegisteredCourseDTO> list = registeredCourseService.getRegisteredCoursesWithProgress(user.getUserId());
+		return ResponseEntity.ok(list);
 	}
 
 	@GetMapping("/favorite-course")
@@ -143,10 +143,23 @@ public class CourseController {
 	}
 
 //Learning
+//	@GetMapping("/learning/course-detail/{courseId}")
+//	public CourseDetailDTO getCourseDetail(@PathVariable int courseId,
+//			@RequestHeader(value = "Authorization", required = false) String token) {
+//		return courseService.getCourseDetail(courseId);
+//	}
 	@GetMapping("/learning/course-detail/{courseId}")
 	public CourseDetailDTO getCourseDetail(@PathVariable int courseId,
 			@RequestHeader(value = "Authorization", required = false) String token) {
-		return courseService.getCourseDetail(courseId);
+
+		Integer userId = null;
+		if (token != null && !token.isBlank()) {
+			String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+			User currentUser = UserService.getUserByEmailToan(email);
+			userId = currentUser.getUserId();
+		}
+
+		return courseService.getCourseDetail(courseId, userId);
 	}
 
 //Khác
@@ -706,5 +719,4 @@ public class CourseController {
 		return ResponseEntity.ok(courses);
 	}
 
-	
 }

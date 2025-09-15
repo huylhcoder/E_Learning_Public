@@ -51,6 +51,8 @@ import com.fpoly.repository.RegisteredCourseRepository;
 import com.fpoly.repository.SectionRepository;
 import com.fpoly.repository.TestRepository;
 import com.fpoly.repository.UserRepository;
+import com.fpoly.repository.UserTestResultRepository;
+import com.fpoly.repository.VideoProgressRepository;
 import com.fpoly.repository.VoucherRepository;
 import com.fpoly.security.JwtTokenUtils;
 
@@ -82,6 +84,10 @@ public class CourseService {
 	private UserRepository userRepository;
 	@Autowired
 	private CartRepository cartRepository;
+	@Autowired
+	private VideoProgressRepository videoProgressRepository;
+	@Autowired
+	private UserTestResultRepository userTestResultRepository;
 
 	@Autowired
 	private UserService userService;
@@ -199,53 +205,74 @@ public class CourseService {
 	}
 
 	// Tìm kiếm khóa học liên quan
-	   public List<Course> getRelatedCourses(int courseId) {
-	        Course currentCourse = courseRepository.findById(courseId)
-	                .orElseThrow(() -> new RuntimeException("Course not found"));
+	public List<Course> getRelatedCourses(int courseId) {
+		Course currentCourse = courseRepository.findById(courseId)
+				.orElseThrow(() -> new RuntimeException("Course not found"));
 
-	        List<Course> result = new ArrayList<>();
-	        int limit = 10;
+		List<Course> result = new ArrayList<>();
+		int limit = 10;
 
-	        // 1. Lấy theo danh mục
-	        List<Integer> categoryIds = currentCourse.getCourseCategories()
-	                .stream()
-	                .map(cc -> cc.getCategory().getCategoryId())
-	                .collect(Collectors.toList());
+		// 1. Lấy theo danh mục
+		List<Integer> categoryIds = currentCourse.getCourseCategories().stream()
+				.map(cc -> cc.getCategory().getCategoryId()).collect(Collectors.toList());
 
-	        if (!categoryIds.isEmpty()) {
-	            result.addAll(courseRepository.findRelatedByCategories(categoryIds, courseId));
-	        }
+		if (!categoryIds.isEmpty()) {
+			result.addAll(courseRepository.findRelatedByCategories(categoryIds, courseId));
+		}
 
-	        // 2. Nếu chưa đủ -> tìm theo tên
-	        if (result.size() < limit) {
-	            List<Course> byName = courseRepository.findByNameLike(currentCourse.getName(), courseId);
-	            // Loại bỏ trùng
-	            byName.removeAll(result);
-	            result.addAll(byName);
-	        }
+		// 2. Nếu chưa đủ -> tìm theo tên
+		if (result.size() < limit) {
+			List<Course> byName = courseRepository.findByNameLike(currentCourse.getName(), courseId);
+			// Loại bỏ trùng
+			byName.removeAll(result);
+			result.addAll(byName);
+		}
 
-	        // 3. Nếu vẫn chưa đủ -> fallback: lấy top popular
-	        if (result.size() < limit) {
-	            List<Course> popular = courseRepository.findTopPopularCourses(PageRequest.of(0, limit * 2));
-	            // Loại bỏ trùng
-	            popular.removeAll(result);
-	            result.addAll(popular);
-	        }
+		// 3. Nếu vẫn chưa đủ -> fallback: lấy top popular
+		if (result.size() < limit) {
+			List<Course> popular = courseRepository.findTopPopularCourses(PageRequest.of(0, limit * 2));
+			// Loại bỏ trùng
+			popular.removeAll(result);
+			result.addAll(popular);
+		}
 
-	        // Trả về đúng 10 hoặc ít hơn nếu DB không còn
-	        return result.stream().limit(limit).collect(Collectors.toList());
-	    }
+		// Trả về đúng 10 hoặc ít hơn nếu DB không còn
+		return result.stream().limit(limit).collect(Collectors.toList());
+	}
 
 //Learning
-	public CourseDetailDTO getCourseDetail(int courseId) {
+	public CourseDetailDTO getCourseDetail(int courseId, Integer userId) {
 		Course course = courseRepository.findById(courseId).orElseThrow(() -> new RuntimeException("Not found"));
 
 		List<SectionDTO> sectionDTOs = course.getListSection().stream().map(section -> {
-			List<LessonDTO> lessons = section.getListLesson().stream().map(l -> new LessonDTO(l.getLessonId(),
-					l.getName(), l.getDescription(), null, l.getLessionDuration(), null, false)).toList();
+			// map lessons
+			List<LessonDTO> lessons = section.getListLesson().stream().map(l -> {
+				boolean completed = false;
+				if (userId != null) {
+					completed = videoProgressRepository.existsByUserIdAndLessonId(userId, l.getLessonId());
+				}
 
-			List<TestDTO> tests = section.getListTest().stream()
-					.map(t -> new TestDTO(t.getTestId(), t.getTitle(), null, null, 0)).toList();
+				// map contentDescription (HTML từ Quill) — giả sử Lesson có
+				// getContentDescription()
+				String contentDescription = l.getContentDescription(); // nếu tên khác, đổi lại
+
+				return new LessonDTO(l.getLessonId(), l.getName(), l.getDescription(), contentDescription,
+						l.getLessionDuration(), l.getPathVideo(), // giả sử có getter
+						completed);
+			}).toList();
+
+			// map tests
+			List<TestDTO> tests = section.getListTest().stream().map(t -> {
+				boolean completed = false;
+				if (userId != null) {
+					completed = userTestResultRepository.existsByUser_UserIdAndTest_TestIdAndStatusTrue(userId,
+							t.getTestId());
+				}
+
+				return new TestDTO(t.getTestId(), t.getTitle(), t.getDescription(),
+						String.valueOf(t.getNumberOfQuestion()), t.getCountdownTimer(), completed // isCompleted
+				);
+			}).toList();
 
 			return new SectionDTO(section.getSectionId(), section.getName(), lessons, tests);
 		}).toList();
@@ -253,11 +280,10 @@ public class CourseService {
 		return new CourseDetailDTO(course.getCourseId(), course.getName(), course.getTopic(), course.getDescription(),
 				sectionDTOs);
 	}
-	
+
 	public Course timKhoaHocTheoMaKhoaHocToan(int courseId) {
 		return courseRepository.findByCourseId(courseId);
 	}
-
 
 //Method cũ
 
@@ -265,7 +291,6 @@ public class CourseService {
 		return courseRepository.findById(courseId);
 	}
 
-	
 	public List<Course> getAllCourse() {
 		return courseRepository.findAll();
 	}

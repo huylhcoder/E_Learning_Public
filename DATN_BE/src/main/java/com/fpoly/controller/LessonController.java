@@ -18,11 +18,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.fpoly.entity.Course;
+import com.fpoly.entity.CourseProgress;
 import com.fpoly.entity.Lesson;
+import com.fpoly.entity.LessonComplete;
 import com.fpoly.entity.User;
+import com.fpoly.repository.CourseProgressRepository;
+import com.fpoly.repository.LessonCompleteRepository;
+import com.fpoly.repository.LessonRepository;
+import com.fpoly.security.JwtTokenUtils;
 import com.fpoly.service.CourseService;
 import com.fpoly.service.LessonService;
+import com.fpoly.service.UserService;
 import com.fpoly.cloudinary.VideoService;
+import com.fpoly.dto.learning.LessonCompleteRequest;
 
 @CrossOrigin("*") // cho phép bên ngoài truy xuất vào thoải mái k ngăn cản gì cả
 @RestController
@@ -34,21 +42,63 @@ public class LessonController {
 	private CourseService CourseService;
 	@Autowired
 	private VideoService videoService;
+	@Autowired
+	private UserService userService;
+
+	@Autowired
+	private LessonRepository lessonRepo;
+	@Autowired
+	private LessonCompleteRepository lessonCompleteRepo;
+	@Autowired
+	private CourseProgressRepository courseProgressRepo;
+
+	@Autowired
+	private JwtTokenUtils jwtTokenUtils;
 
 //Learning Page
 	// Đánh dấu hoàn thành bài học
-//	@PostMapping("/lesson-complete")
-//	public ResponseEntity<?> completeLesson(@RequestBody LessonCompleteRequest req,
-//			@AuthenticationPrincipal User user) {
-//		if (!lessonCompleteRepo.existsByUserIdAndLessonId(user.getUserId(), req.getLessonId())) {
-//			lessonCompleteRepo.save(new LessonComplete(null, lessonRepo.findById(req.getLessonId()).get(), user));
-//			CourseProgress cp = courseProgressRepo.findByUserIdAndCourseId(user.getUserId(), req.getCourseId()).get();
-//			cp.setTotalLessonComplete(cp.getTotalLessonComplete() + 1);
-//			cp.setProgressPercentage(((float) cp.getTotalLessonComplete() / cp.getTotalLesson()) * 100);
-//			courseProgressRepo.save(cp);
-//		}
-//		return ResponseEntity.ok("Lesson marked as complete");
-//	}
+	@PostMapping("/lesson-complete")
+	public ResponseEntity<?> completeLesson(@RequestBody LessonCompleteRequest req,
+			@RequestHeader("Authorization") String token) {
+
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+		User user = userService.getUserByEmailToan(email);
+
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
+		// Kiểm tra lesson đã hoàn thành chưa
+		boolean exists = lessonCompleteRepo.existsByUser_UserIdAndLesson_LessonId(user.getUserId(), req.getLessonId());
+		if (!exists) {
+			Lesson lesson = lessonRepo.findById(req.getLessonId())
+					.orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
+
+			// Lưu lessonComplete
+			LessonComplete lc = new LessonComplete();
+			lc.setLesson(lesson);
+			lc.setUser(user);
+			lessonCompleteRepo.save(lc);
+
+			// Cập nhật CourseProgress
+			CourseProgress cp = courseProgressRepo
+					.findByUser_UserIdAndCourse_CourseId(user.getUserId(), req.getCourseId())
+					.orElseThrow(() -> new IllegalArgumentException("CourseProgress not found"));
+
+			cp.setTotalLessionComplete(cp.getTotalLessionComplete() + 1);
+
+			// 🔑 Tính lại tiến độ dựa trên cả lesson + quiz
+			int totalUnits = cp.getTotalLession() + cp.getTotalQuiz();
+			int completedUnits = cp.getTotalLessionComplete() + cp.getTotalTestComplete();
+
+			float percentage = totalUnits > 0 ? ((float) completedUnits / totalUnits) * 100 : 0;
+			cp.setProgressPercentage(percentage);
+
+			courseProgressRepo.save(cp);
+		}
+
+		return ResponseEntity.ok("Lesson marked as complete");
+	}
 
 //	@GetMapping("/course/{id}")
 //    public ResponseEntity<List<Lesson>> getLessionByCourse(@PathVariable("id") int id) {

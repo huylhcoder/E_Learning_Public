@@ -1,6 +1,7 @@
 package com.fpoly.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,9 +10,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fpoly.entity.Course;
 import com.fpoly.entity.CourseProgress;
 import com.fpoly.entity.Payment;
 import com.fpoly.entity.RegisteredCourse;
+import com.fpoly.entity.User;
 
 public interface RegisteredCourseRepository extends JpaRepository<RegisteredCourse, Integer> {
 //Search Course
@@ -38,6 +41,13 @@ public interface RegisteredCourseRepository extends JpaRepository<RegisteredCour
 	@Transactional
 	@Query("DELETE FROM RegisteredCourse rc WHERE rc.payment.paymentId IN :paymentIds")
 	void deleteByPaymentIds(@Param("paymentIds") List<Integer> paymentIds);
+
+//Learning
+    // Cách 1: Dùng object User và Course
+    Optional<RegisteredCourse> findByUserAndCourse(User user, Course course);
+    
+	// Cách 2: Dùng nested property (Spring Data JPA hỗ trợ)
+	Optional<RegisteredCourse> findByUser_UserIdAndCourse_CourseId(int userId, int courseId);
 
 // Các method khác...
 	@Query("SELECT rc FROM RegisteredCourse rc WHERE rc.user.userId = :userId")

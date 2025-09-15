@@ -18,30 +18,33 @@ import com.fpoly.dto.MonthlyRevenueDTO;
 
 public interface UserTestResultRepository extends JpaRepository<UserTestResult, Integer> {
 
-    // Lấy kết quả mới nhất
-    Optional<UserTestResult> findTopByUser_UserIdAndTest_TestIdOrderByCreateAtDesc(int userId, int testId);
+//Learning Page
+	boolean existsByUser_UserIdAndTest_TestIdAndStatusTrue(int userId, int testId);
 
-    // Lấy theo testId và userId
-    Optional<UserTestResult> findByTest_TestIdAndUser_UserId(Integer testId, Integer userId);
+//Quiz Page
+	// Lấy kết quả mới nhất
+	Optional<UserTestResult> findTopByUser_UserIdAndTest_TestIdOrderByCreateAtDesc(int userId, int testId);
 
-    // Tìm kết quả test của 1 user trong 1 bài test
-    Optional<UserTestResult> findByUser_UserIdAndTest_TestId(int userId, int testId);
-    
+	// Lấy theo testId và userId
+	Optional<UserTestResult> findByTest_TestIdAndUser_UserId(Integer testId, Integer userId);
 
-    // Nếu bạn muốn lấy luôn list (trường hợp user làm lại nhiều lần, nhưng bạn chỉ lưu 1 record)
-    List<UserTestResult> findAllByUser_UserIdAndTest_TestId(int userId, int testId);
-    
-    // Cập nhật score
-    @Modifying
-    @Transactional
-    @Query("UPDATE UserTestResult u SET u.score = 0 WHERE u.user.userId = :userId AND u.test.testId = :testId")
-    void updateScoreToZero(@Param("userId") int userId, @Param("testId") int testId);
+	// Tìm kết quả test của 1 user trong 1 bài test
+	Optional<UserTestResult> findByUser_UserIdAndTest_TestId(int userId, int testId);
 
-    // Hiển thị test đã làm
-    @Query("SELECT ur FROM UserTestResult ur JOIN ur.test t WHERE ur.user.userId = :userId")
-    List<UserTestResult> findByUser(@Param("userId") int userId);
+	// Nếu bạn muốn lấy luôn list (trường hợp user làm lại nhiều lần, nhưng bạn chỉ
+	// lưu 1 record)
+	List<UserTestResult> findAllByUser_UserIdAndTest_TestId(int userId, int testId);
 
-    // Tìm theo entity
-    UserTestResult findByUserAndTest(User user, Test test);
+	// Cập nhật score
+	@Modifying
+	@Transactional
+	@Query("UPDATE UserTestResult u SET u.score = 0 WHERE u.user.userId = :userId AND u.test.testId = :testId")
+	void updateScoreToZero(@Param("userId") int userId, @Param("testId") int testId);
+
+	// Hiển thị test đã làm
+	@Query("SELECT ur FROM UserTestResult ur JOIN ur.test t WHERE ur.user.userId = :userId")
+	List<UserTestResult> findByUser(@Param("userId") int userId);
+
+	// Tìm theo entity
+	UserTestResult findByUserAndTest(User user, Test test);
 }
-

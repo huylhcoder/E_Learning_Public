@@ -13,4 +13,5 @@ public class TestDTO {
     private String description;    // Mô tả bài test
     private String numberOfQuestion; // Số câu hỏi
     private int countdownTimer;    // Thời gian làm bài (giây)
+    private boolean isCompleted; // ✅ thêm
 }
