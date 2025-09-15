@@ -38,6 +38,7 @@ const DiscountManager = () => {
 
         switch (name) {
             case 'voucherCode':
+                value = value.trim(); // cắt khoảng trắng đầu/cuối trước khi validate
                 if (!value) msg = 'Mã voucher không được bỏ trống';
                 else if (!/^[a-zA-Z0-9]+$/.test(value)) msg = 'Mã chỉ chứa chữ và số, không có khoảng trắng';
                 break;

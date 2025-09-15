@@ -1,35 +1,38 @@
 package com.fpoly.dto;
 
+import java.util.Date;
 
+import com.fpoly.entity.User;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+//@Data
+//@NoArgsConstructor
+//@AllArgsConstructor
+//public class CommentDTO {
+//
+//	private int userId;
+//	private int courseId;
+//	private int starRating;
+//	private String content;
+//
+//}
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CommentDTO {
+	private int commentId;
+	private User user;
 
-	private int userId;
 	private int courseId;
-	private int starRating;
+	private String courseName;
+
+	private float starRating;
 	private String content;
-	public int getUserId() {
-		return userId;
-	}
-	public void setUserId(int userId) {
-		this.userId = userId;
-	}
-	public int getStarRating() {
-		return starRating;
-	}
-	public void setStarRating(int starRating) {
-		this.starRating = starRating;
-	}
-	public String getContent() {
-		return content;
-	}
-	public void setContent(String content) {
-		this.content = content;
-	}
-	public int getCourseId() {
-		return courseId;
-	}
-	public void setCourseId(int courseId) {
-		this.courseId = courseId;
-	}
-	
+
+	private Date createdDate;
+	private boolean status;
 }

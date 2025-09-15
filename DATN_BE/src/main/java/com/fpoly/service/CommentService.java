@@ -1,10 +1,12 @@
 package com.fpoly.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fpoly.dto.CommentDTO;
 import com.fpoly.entity.Comment;
 import com.fpoly.entity.Course;
 import com.fpoly.entity.Voucher;
@@ -18,35 +20,55 @@ import com.fpoly.repository.CommentRepository;;
 @Service
 public class CommentService {
 	@Autowired
-    CommentRepository commentRepository;
-	
-	public List<Comment> getAllComment(){
-		return commentRepository.findAll();
+	CommentRepository commentRepository;
+
+//Learning Page
+	// Kiểm tra người dùng đã Comment chưa
+	public List<CommentDTO> getUserComments(int courseId, int userId) {
+		List<Comment> comments = commentRepository.findByCourse_CourseIdAndUser_UserId(courseId, userId);
+		return comments.stream().map(this::convertToDTO).collect(Collectors.toList());
 	}
-	
-	public List<Comment> findCommentByIdToan(Course course) {
-		return commentRepository.findByCourse(course);
+
+	private CommentDTO convertToDTO(Comment comment) {
+		CommentDTO dto = new CommentDTO();
+		dto.setUser(comment.getUser());
+		dto.setCourseId(comment.getCourse().getCourseId());
+		dto.setStarRating(comment.getStarRating());
+		dto.setContent(comment.getContent());
+		return dto;
 	}
-	public List<Comment> findCommentByCourseToan(Course course) {
-		return commentRepository.findByCourse(course);
+
+	public List<Comment> hienThiDanhGiaTheoKhoaHoc(int courseId) {
+		return commentRepository.findByCourseIdAndStatus(courseId, true); // true cho status = 1
 	}
+
 	public void addCommentToan(Comment cmt) {
 		commentRepository.save(cmt);
 	}
-		
-	
-	public Comment getCommentById(int commentId) {
-	    return commentRepository.findById(commentId).orElse(null);
+
+//Khác
+	public List<Comment> getAllComment() {
+		return commentRepository.findAll();
 	}
-	
+
+	public List<Comment> findCommentByIdToan(Course course) {
+		return commentRepository.findByCourse(course);
+	}
+
+	public List<Comment> findCommentByCourseToan(Course course) {
+		return commentRepository.findByCourse(course);
+	}
+
+	public Comment getCommentById(int commentId) {
+		return commentRepository.findById(commentId).orElse(null);
+	}
+
 	public Comment saveComment(Comment comment) {
 		return commentRepository.save(comment);
 	}
-	
+
 	public List<Comment> getAllUser() {
 		return commentRepository.findAllRepliesWithComments();
 	}
-	public List<Comment> hienThiDanhGiaTheoKhoaHoc(int courseId) {
-	    return commentRepository. findByCourseIdAndStatus(courseId, true); // true cho status = 1
-	}
+
 }

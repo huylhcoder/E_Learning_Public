@@ -46,9 +46,25 @@ const Checkout = () => {
                 }
 
                 // Lấy danh sách voucher
-                const voucherResp = await axios.get('/voucher/myvoucher', { headers });
-                setVouchers(voucherResp.data);
+                // const voucherResp = await axios.get('/voucher/myvoucher', { headers });
+                // setVouchers(voucherResp?.data);
+                // console.log(voucherResp);
+                // Lấy danh sách voucher
+                try {
+                    const voucherResp = await axios.get('/voucher/myvoucher', { headers });
+                    const data = voucherResp?.data;
+                    console.log(data);
 
+                    // Nếu API trả object thì lấy field vouchers hoặc ép về []
+                    setVouchers(Array.isArray(data) ? data : data?.vouchers || []);
+                } catch (err) {
+                    if (err.response && err.response.status === 404) {
+                        setVouchers([]); // luôn trả về mảng rỗng
+                    } else {
+                        console.error(err);
+                        alert('Lỗi khi lấy dữ liệu thanh toán.');
+                    }
+                }
             } catch (err) {
                 console.error(err);
                 alert('Lỗi khi lấy dữ liệu thanh toán.');
@@ -85,6 +101,7 @@ const Checkout = () => {
             console.log('Kết quả thanh toán:', resp);
             const paymentUrl = resp.data?.data;
             if (paymentUrl) {
+                console.log(paymentUrl);
                 window.location.href = paymentUrl;
             } else {
                 alert('Không nhận được link thanh toán từ server.');

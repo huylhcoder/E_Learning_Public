@@ -253,6 +253,11 @@ public class CourseService {
 		return new CourseDetailDTO(course.getCourseId(), course.getName(), course.getTopic(), course.getDescription(),
 				sectionDTOs);
 	}
+	
+	public Course timKhoaHocTheoMaKhoaHocToan(int courseId) {
+		return courseRepository.findByCourseId(courseId);
+	}
+
 
 //Method cũ
 
@@ -260,10 +265,7 @@ public class CourseService {
 		return courseRepository.findById(courseId);
 	}
 
-	public Course timKhoaHocTheoMaKhoaHocToan(int courseId) {
-		return courseRepository.findByCourseId(courseId);
-	}
-
+	
 	public List<Course> getAllCourse() {
 		return courseRepository.findAll();
 	}

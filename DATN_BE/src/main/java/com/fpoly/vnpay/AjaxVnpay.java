@@ -65,166 +65,174 @@ public class AjaxVnpay {
 
 //CheckoutPage
 	/*
-	 * Xác thực token người dùng Kiểm tra voucher khuyến mãi (nếu có) 
-	 * Lưu thông tin thanh toán và khóa học đăng ký với setTransactionStatus(false)
-	 * Tạo URL thanh toán VNPay và trả về cho frontend
+	 * Xác thực token người dùng Kiểm tra voucher khuyến mãi (nếu có) Lưu thông tin
+	 * thanh toán và khóa học đăng ký với setTransactionStatus(false) Tạo URL thanh
+	 * toán VNPay và trả về cho frontend
 	 */
 	@PostMapping("/vnpayajax")
 	public void doPost(HttpServletRequest req, HttpServletResponse resp,
-	        @RequestHeader(value = "Authorization", required = false) String token,
-	        @RequestParam("listCourseId") String listCourseIdJson,
-	        @RequestParam("voucherCode") String voucherCodeOpt) throws IOException, JSONException {
+			@RequestHeader(value = "Authorization", required = false) String token,
+			@RequestParam("listCourseId") String listCourseIdJson,
+			@RequestParam(value = "voucherCode", required = false) String voucherCodeOpt)
+			throws IOException, JSONException {
 
-	    System.out.println("----- VNPay Ajax Start -----");
-	    System.out.println("Giá trị listCourseIdJson: " + listCourseIdJson);
-	    System.out.println("Giá trị voucherCodeOpt: " + voucherCodeOpt);
+		System.out.println("----- VNPay Ajax Start -----");
+		System.out.println("Giá trị listCourseIdJson: " + listCourseIdJson);
+		System.out.println("Giá trị voucherCodeOpt: " + voucherCodeOpt);
 
-	    // Parse courseId JSON
-	    List<Integer> listCourseId = new ArrayList<>();
-	    JSONArray jsonArray = new JSONArray(listCourseIdJson);
-	    for (int i = 0; i < jsonArray.length(); i++) {
-	        listCourseId.add(jsonArray.getInt(i));
-	    }
+		// Parse courseId JSON
+		List<Integer> listCourseId = new ArrayList<>();
+		JSONArray jsonArray = new JSONArray(listCourseIdJson);
+		for (int i = 0; i < jsonArray.length(); i++) {
+			listCourseId.add(jsonArray.getInt(i));
+		}
 
-	    // Token xử lý
-	    String tokenValue = token != null ? token.replace("Bearer ", "").trim() : "";
-	    String email;
-	    try {
-	        email = jwtTokenUtils.extractEmail(tokenValue);
-	    } catch (Exception e) {
-	        System.out.println("Token không hợp lệ");
-	        resp.sendRedirect("http://localhost:3000/payment-result?vnPaymentStatus=false");
-	        return;
-	    }
+		// Token xử lý
+		String tokenValue = token != null ? token.replace("Bearer ", "").trim() : "";
+		String email;
+		try {
+			email = jwtTokenUtils.extractEmail(tokenValue);
+		} catch (Exception e) {
+			System.out.println("Token không hợp lệ");
+			resp.sendRedirect("http://localhost:3000/payment-result?vnPaymentStatus=false");
+			return;
+		}
 
-	    User user = userService.getUserByEmailToan(email);
-	    if (user == null) {
-	        System.out.println("User null");
-	        resp.sendRedirect("http://localhost:3000/payment-result?vnPaymentStatus=false");
-	        return;
-	    }
+		User user = userService.getUserByEmailToan(email);
+		if (user == null) {
+			System.out.println("User null");
+			resp.sendRedirect("http://localhost:3000/payment-result?vnPaymentStatus=false");
+			return;
+		}
 
-	    // Xử lý voucher nếu có
-	    String voucherCode = voucherCodeOpt.trim();
-	    boolean hasVoucher = !voucherCode.isEmpty();
-	    Voucher voucher = null;
+		// Xử lý voucher nếu có
+		String voucherCode = (voucherCodeOpt != null) ? voucherCodeOpt.trim() : "";
+		boolean hasVoucher = !voucherCode.isEmpty();
 
-	    if (hasVoucher) {
-	        voucher = voucherService.findVoucherByCode_Huy(voucherCode);
-	        if (voucher == null || voucher.getQuantity() == 0 || !voucher.isStatus()
-	                || new Date().before(voucher.getStartDate()) || new Date().after(voucher.getEndDate())) {
-	            System.out.println("Voucher không hợp lệ hoặc hết hạn");
-	            resp.sendRedirect("http://localhost:3000/payment-result?vnPaymentStatus=false");
-	            return;
-	        }
-	    }
+		Voucher voucher = null;
 
-	    // Tạo payment mới
-	    Payment payment = new Payment();
-	    payment.setTransactionStatus(false); // Chưa thanh toán
-	    payment.setUser(user);
-	    payment.setCreateAt(new Date());
-	    Payment paymentSaved = paymentService.savePayment(payment);
+		if (hasVoucher) {
+			voucher = voucherService.findVoucherByCode_Huy(voucherCode);
+			if (voucher == null || voucher.getQuantity() == 0 || !voucher.isStatus()
+					|| new Date().before(voucher.getStartDate()) || new Date().after(voucher.getEndDate())) {
+				System.out.println("Voucher không hợp lệ hoặc hết hạn");
+				resp.sendRedirect("http://localhost:3000/payment-result?vnPaymentStatus=false");
+				return;
+			}
+		}
 
-	    float totalAmount = 0;
+		// Tạo payment mới
+		Payment payment = new Payment();
+		payment.setTransactionStatus(false); // Chưa thanh toán
+		payment.setUser(user);
+		payment.setCreateAt(new Date());
+		Payment paymentSaved = paymentService.savePayment(payment);
 
-	    for (Integer courseId : listCourseId) {
-	        Course course = courseService.timKhoaHocTheoMaKhoaHocHuy(courseId).orElse(null);
-	        if (course == null) {
-	            System.out.println("Course null: " + courseId);
-	            resp.sendRedirect("http://localhost:3000/payment-result?vnPaymentStatus=false");
-	            return;
-	        }
+		float totalAmount = 0;
 
-	        float coursePrice = course.getPrice();
+		for (Integer courseId : listCourseId) {
+			Course course = courseService.timKhoaHocTheoMaKhoaHocHuy(courseId).orElse(null);
+			if (course == null) {
+				System.out.println("Course null: " + courseId);
+				resp.sendRedirect("http://localhost:3000/payment-result?vnPaymentStatus=false");
+				return;
+			}
 
-	        if (hasVoucher) {
-	            coursePrice -= (coursePrice * voucher.getPercentSale() / 100);
-	        }
+			float coursePrice = course.getPrice();
 
-	        totalAmount += coursePrice;
+			if (hasVoucher) {
+				coursePrice -= (coursePrice * voucher.getPercentSale() / 100);
+			}
 
-	        RegisteredCourse registered = new RegisteredCourse();
-	        registered.setCourse(course);
-	        registered.setUser(user);
-	        registered.setPayment(paymentSaved);
-	        registered.setCreateAt(new Date());
-	        registered.setStatusPayment(false);
-	        registered.setPrice(coursePrice); // Giá tại thời điểm thanh toán
+			totalAmount += coursePrice;
 
-	        registeredCourseService.saverRgisteredCourse(registered);
-	    }
+			RegisteredCourse registered = new RegisteredCourse();
+			registered.setCourse(course);
+			registered.setUser(user);
+			registered.setPayment(paymentSaved);
+			registered.setCreateAt(new Date());
+			registered.setStatusPayment(false);
+			registered.setPrice(coursePrice); // Giá tại thời điểm thanh toán
 
-	    // Cập nhật lại tổng tiền vào bảng payment
-	    paymentSaved.setAmount(totalAmount);
-	    paymentService.savePayment(paymentSaved);
+			registeredCourseService.saverRgisteredCourse(registered);
+		}
 
-	    // Tạo URL thanh toán VNPAY
-	    long amount = (long) (totalAmount * 100); // nhân 100 vì VNPAY yêu cầu
-	    String vnp_TxnRef = Config.getRandomNumber(8);
-	    String vnp_IpAddr = Config.getIpAddress(req);
+		// Cập nhật lại tổng tiền vào bảng payment
+		paymentSaved.setAmount(totalAmount);
+		paymentService.savePayment(paymentSaved);
 
-	    Map<String, String> vnp_Params = new HashMap<>();
-	    vnp_Params.put("vnp_Version", "2.1.0");
-	    vnp_Params.put("vnp_Command", "pay");
-	    vnp_Params.put("vnp_TmnCode", Config.vnp_TmnCode);
-	    vnp_Params.put("vnp_Amount", String.valueOf(amount));
-	    vnp_Params.put("vnp_CurrCode", "VND");
+		// Tạo URL thanh toán VNPAY
+		long amount = (long) (totalAmount * 100); // nhân 100 vì VNPAY yêu cầu
+		String vnp_TxnRef = Config.getRandomNumber(8);
+		String vnp_IpAddr = Config.getIpAddress(req);
 
-	    String bankCode = req.getParameter("bankCode");
-	    if (bankCode != null && !bankCode.isEmpty()) {
-	        vnp_Params.put("vnp_BankCode", bankCode);
-	    }
+		Map<String, String> vnp_Params = new HashMap<>();
+		vnp_Params.put("vnp_Version", "2.1.0");
+		vnp_Params.put("vnp_Command", "pay");
+		vnp_Params.put("vnp_TmnCode", Config.vnp_TmnCode);
+		vnp_Params.put("vnp_Amount", String.valueOf(amount));
+		vnp_Params.put("vnp_CurrCode", "VND");
 
-	    vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-	    vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang: " + vnp_TxnRef);
-	    vnp_Params.put("vnp_OrderType", "other");
+		String bankCode = req.getParameter("bankCode");
+		if (bankCode != null && !bankCode.isEmpty()) {
+			vnp_Params.put("vnp_BankCode", bankCode);
+		}
 
-	    String locale = req.getParameter("language");
-	    vnp_Params.put("vnp_Locale", (locale != null && !locale.isEmpty()) ? locale : "vn");
+		vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
+		vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang: " + vnp_TxnRef);
+		vnp_Params.put("vnp_OrderType", "other");
 
-	    vnp_Params.put("vnp_ReturnUrl", Config.vnp_ReturnUrl + "?user=" + tokenValue + "&paymentId=" +
-	            paymentSaved.getPaymentId() + "&voucherCode=" + voucherCode);
-	    vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+		String locale = req.getParameter("language");
+		vnp_Params.put("vnp_Locale", (locale != null && !locale.isEmpty()) ? locale : "vn");
 
-	    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-	    Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-	    vnp_Params.put("vnp_CreateDate", formatter.format(cal.getTime()));
-	    cal.add(Calendar.MINUTE, 15);
-	    vnp_Params.put("vnp_ExpireDate", formatter.format(cal.getTime()));
+		String returnUrl = Config.vnp_ReturnUrl + "?user=" + URLEncoder.encode(tokenValue, StandardCharsets.UTF_8)
+				+ "&paymentId=" + paymentSaved.getPaymentId() + "&voucherCode="
+				+ (voucherCode != null ? URLEncoder.encode(voucherCode, StandardCharsets.UTF_8) : "");
 
-	    // Build query & hash
-	    List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
-	    Collections.sort(fieldNames);
+		vnp_Params.put("vnp_ReturnUrl", returnUrl);
 
-	    StringBuilder hashData = new StringBuilder();
-	    StringBuilder query = new StringBuilder();
-	    for (Iterator<String> it = fieldNames.iterator(); it.hasNext();) {
-	        String key = it.next();
-	        String value = vnp_Params.get(key);
-	        if (value != null && !value.isEmpty()) {
-	            hashData.append(key).append('=').append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
-	            query.append(URLEncoder.encode(key, StandardCharsets.US_ASCII)).append('=')
-	                    .append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
-	            if (it.hasNext()) {
-	                hashData.append('&');
-	                query.append('&');
-	            }
-	        }
-	    }
+//	    vnp_Params.put("vnp_ReturnUrl", Config.vnp_ReturnUrl + "?user=" + tokenValue + "&paymentId=" +
+//	            paymentSaved.getPaymentId() + "&voucherCode=" + voucherCode);
+		vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
 
-	    String vnp_SecureHash = Config.hmacSHA512(Config.secretKey, hashData.toString());
-	    query.append("&vnp_SecureHash=").append(vnp_SecureHash);
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+		vnp_Params.put("vnp_CreateDate", formatter.format(cal.getTime()));
+		cal.add(Calendar.MINUTE, 15);
+		vnp_Params.put("vnp_ExpireDate", formatter.format(cal.getTime()));
 
-	    String paymentUrl = Config.vnp_PayUrl + "?" + query;
+		// Build query & hash
+		List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+		Collections.sort(fieldNames);
 
-	    JsonObject responseJson = new JsonObject();
-	    responseJson.addProperty("code", "00");
-	    responseJson.addProperty("message", "success");
-	    responseJson.addProperty("data", paymentUrl);
+		StringBuilder hashData = new StringBuilder();
+		StringBuilder query = new StringBuilder();
+		for (Iterator<String> it = fieldNames.iterator(); it.hasNext();) {
+			String key = it.next();
+			String value = vnp_Params.get(key);
+			if (value != null && !value.isEmpty()) {
+				hashData.append(key).append('=').append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
+				query.append(URLEncoder.encode(key, StandardCharsets.US_ASCII)).append('=')
+						.append(URLEncoder.encode(value, StandardCharsets.US_ASCII));
+				if (it.hasNext()) {
+					hashData.append('&');
+					query.append('&');
+				}
+			}
+		}
 
-	    resp.getWriter().write(new Gson().toJson(responseJson));
-	    System.out.println("----- VNPay Ajax End -----");
+		String vnp_SecureHash = Config.hmacSHA512(Config.secretKey, hashData.toString());
+		query.append("&vnp_SecureHash=").append(vnp_SecureHash);
+
+		String paymentUrl = Config.vnp_PayUrl + "?" + query;
+
+		JsonObject responseJson = new JsonObject();
+		responseJson.addProperty("code", "00");
+		responseJson.addProperty("message", "success");
+		responseJson.addProperty("data", paymentUrl);
+
+		resp.getWriter().write(new Gson().toJson(responseJson));
+		System.out.println("----- VNPay Ajax End -----");
 	}
 
 }

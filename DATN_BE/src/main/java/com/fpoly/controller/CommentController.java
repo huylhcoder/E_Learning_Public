@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -59,21 +60,30 @@ public class CommentController {
 	@Autowired
 	private JwtTokenUtils jwtTokenUtils;
 
-	@GetMapping("")
-	public List<Comment> getAllComments() {
-		return cmtservice.getAllComment();
+//Learning Page
+	// Kiểm tra User có bình luận khóa học này chưa
+	@GetMapping("/check/{courseId}")
+	public ResponseEntity<?> checkUserComments(@PathVariable int courseId,
+			@RequestHeader("Authorization") String token) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+		User currentUser = userService.getUserByEmailToan(email);
+
+		List<CommentDTO> comments = cmtservice.getUserComments(courseId, currentUser.getUserId());
+		return ResponseEntity.ok(comments); // Trả về list (có thể rỗng nếu chưa bình luận)
 	}
 
+	// Hiển thị bình luận của khóa học hiện tại
 	@GetMapping("/course/{courseId}")
 	public List<Comment> findCommentByIdAndStatusHao(@PathVariable("courseId") int courseId) {
 		return cmtservice.hienThiDanhGiaTheoKhoaHoc(courseId);
 	}
 
-	@PostMapping("/{token}")
-	public ResponseEntity<?> addComment(@PathVariable("token") String token, @RequestBody CommentDTO cmtDTO) {
+	// Tạo bình luận mới
+	@PostMapping("")
+	public ResponseEntity<?> addComment(@RequestHeader("Authorization") String token, @RequestBody CommentDTO cmtDTO) {
 		String email = "";
 		try {
-			email = jwtTokenUtils.extractEmail(token);
+			email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
 			System.out.println("Email: " + email);
 		} catch (Exception e) {
 			return ResponseEntity.status(400).body("Token không hợp lệ.");
@@ -108,6 +118,12 @@ public class CommentController {
 			e.printStackTrace(); // Debug thông báo lỗi
 			return ResponseEntity.status(500).body("Đã xảy ra lỗi trong quá trình thêm bình luận.");
 		}
+	}
+
+//Khác
+	@GetMapping("")
+	public List<Comment> getAllComments() {
+		return cmtservice.getAllComment();
 	}
 
 	@PutMapping("/changeStatus/{commentId}")
