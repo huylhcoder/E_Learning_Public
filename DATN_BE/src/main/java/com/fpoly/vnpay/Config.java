@@ -16,9 +16,12 @@ import javax.crypto.spec.SecretKeySpec;
 import jakarta.servlet.http.HttpServletRequest;
 
 public class Config {
-	//hoanghuy382004hh@gmail.com
+//hoanghuy382004hh@gmail.com
 	public static String vnp_TmnCode = "R2XYH89Y";
 	public static String secretKey = "25M0FOUI5KBJ0PK58ZR5CH9CW9J46PO6";
+//lehuy220820@gmail.com
+//	public static String vnp_TmnCode = "686GE2JR";
+//	public static String secretKey = "JZJ880F8A5DCZKQFQOW45ITDXI8WGWMZ";
 	public static String vnp_PayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 	public static String vnp_ReturnUrl = "http://localhost:8080/api/v1/vnpayreturn";
 	public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";

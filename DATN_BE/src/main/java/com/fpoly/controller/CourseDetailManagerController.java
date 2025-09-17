@@ -77,6 +77,7 @@ public class CourseDetailManagerController {
 	    return ResponseEntity.notFound().build();
 	}
 	
+	//Cập nhật nội dung khóa học
 	@PutMapping(value = "/{courseId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> updateCourseDetailInfo(
 	        @PathVariable("courseId") int courseId,
@@ -118,7 +119,7 @@ public class CourseDetailManagerController {
 	}
 
 
-
+	//Xóa phần
 	@DeleteMapping("/remove-section/{sectionId}")
 	public ResponseEntity<?> removSection(@PathVariable("sectionId") int sectionId) {
 		System.out.println(sectionId);
