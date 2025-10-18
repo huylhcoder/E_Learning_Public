@@ -50,6 +50,12 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 			+ "WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " + "AND c.status = 1")
 	List<CourseNameSuggestionDTO> findCourseNamesByKeyword(@Param("keyword") String keyword);
 
+//Roadmap Page
+	@Query("SELECT c FROM Course c " + "JOIN c.courseCategories cc " + "JOIN cc.category cat "
+			+ "WHERE (:level IS NULL OR c.courseLevel.name = :level) "
+			+ "AND (:category IS NULL OR cat.name LIKE %:category%) " + "AND c.status = 1")
+	List<Course> searchCourses(@Param("level") String level, @Param("category") String category);
+
 //Khác
 	// ------------ CÂU TRUY VẤN SQL CỦA HBảo ----------------------------------
 	// 1. LẤY DANH SÁCH KHÓA HỌC CÓ TRẠNG THÁI Status = 1

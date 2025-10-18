@@ -1,0 +1,48 @@
+/* Roadmap.module.scss */
+
+// Import biến của Bootstrap nếu cần (tùy vào cách setup dự án của bạn)
+// @import '~bootstrap/scss/functions';
+// @import '~bootstrap/scss/variables';
+// @import '~bootstrap/scss/mixins';
+
+.roadmap-form-card {
+    // Tùy chỉnh card form
+    border: none;
+    border-top: 5px solid var(--bs-primary); // Đường viền màu primary
+    transition: transform 0.3s ease-in-out;
+
+    &:hover {
+        transform: translateY(-3px);
+    }
+}
+
+.roadmap-result {
+    // Tùy chỉnh khung kết quả
+    background-color: #f8f9fa; // Màu nền nhẹ
+    border-left: 5px solid var(--bs-success) !important; // Điểm nhấn bên trái
+
+    h2 {
+        color: var(--bs-success);
+        i {
+            color: var(--bs-success);
+        }
+    }
+}
+
+.course-item {
+    // Tùy chỉnh mỗi khóa học
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--bs-white);
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        border-color: var(--bs-primary); // Viền màu primary khi hover
+    }
+
+    h4 {
+        font-size: 1.25rem;
+    }
+}

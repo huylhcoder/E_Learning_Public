@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +21,8 @@ import com.fpoly.dto.CourseNameSuggestionDTO;
 import com.fpoly.dto.CourseSearchResponseDTO;
 import com.fpoly.dto.FunFactDTO;
 import com.fpoly.dto.RegisteredCourseDTO;
+import com.fpoly.dto.RoadmapRequest;
+import com.fpoly.dto.RoadmapResponse;
 import com.fpoly.dto.learning.CourseDetailDTO;
 import com.fpoly.entity.Category;
 import com.fpoly.entity.Course;
@@ -31,6 +35,7 @@ import com.fpoly.service.CourseService;
 import com.fpoly.service.FavoriteCourseService;
 import com.fpoly.service.LessonService;
 import com.fpoly.service.RegisteredCourseService;
+import com.fpoly.service.RoadmapService;
 import com.fpoly.service.SectionService;
 import com.fpoly.service.TestService;
 import com.fpoly.service.UserService;
@@ -49,6 +54,8 @@ public class CourseController {
 	private UserService UserService;
 	@Autowired
 	private FavoriteCourseService favoriteCourseService;
+	@Autowired
+	private RoadmapService roadmapService;
 
 	@Autowired
 	private JwtTokenUtils jwtTokenUtils;
@@ -160,6 +167,14 @@ public class CourseController {
 		}
 
 		return courseService.getCourseDetail(courseId, userId);
+	}
+
+//Roadmap page
+	
+	@PostMapping("/roadmap")
+	public ResponseEntity<RoadmapResponse> suggest(@RequestBody RoadmapRequest req) {
+		RoadmapResponse r = roadmapService.suggestRoadmap(req);
+		return ResponseEntity.ok(r);
 	}
 
 //Khác
