@@ -1,53 +1,81 @@
-import { useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
+import styles from './SortCourse.module.scss';
+import classNames from 'classnames/bind';
 
-function SortCourse({ totalElements}) {
-    const [searchParams, setSearchParams] = useSearchParams();
+const cx = classNames.bind(styles);
+
+function SortCourse({ totalElements, onSortChange }) {
+    const [selectedSort, setSelectedSort] = useState(null);
 
     const handleSort = (sortType) => {
-        const newParams = new URLSearchParams(searchParams);
-
-        // Xoá cả 2 trước rồi set đúng cái cần
-        newParams.delete('priceASC');
-        newParams.delete('priceDESC');
-
-        if (sortType === 'asc') {
-            newParams.set('priceASC', true);
-        } else if (sortType === 'desc') {
-            newParams.set('priceDESC', true);
+        // Nếu chọn lại loại đang được chọn, có thể reset hoặc giữ nguyên (tùy logic mong muốn)
+        if (selectedSort === sortType) {
+            // Có thể thêm logic reset ở đây nếu muốn
         }
+        setSelectedSort(sortType);
+        onSortChange(sortType); // Gửi event ra ngoài FE
+    };
 
-        newParams.set('page', 0); // reset page về 0 khi sort thay đổi
-        setSearchParams(newParams);
+    // Xác định văn bản hiển thị cho nút dropdown
+    const getDropdownText = () => {
+        if (selectedSort === 'asc') return 'Giá: Tăng dần';
+        if (selectedSort === 'desc') return 'Giá: Giảm dần';
+        return 'Sắp xếp theo giá';
     };
 
     return (
-        <div className="d-flex float-end">
-            <h6 className="m-auto px-3 text-primary fw-bold">Tìm thấy {totalElements} kết quả</h6>
-            <ul className="nav nav-pills border border-1">
-                <li className="nav-item dropdown">
-                    <span className="nav-link dropdown-toggle text-dark" data-bs-toggle="dropdown" role="button">
-                        Sắp xếp theo giá
-                    </span>
-                    <ul className="dropdown-menu">
-                        <li>
-                            <button
-                                onClick={() => handleSort('asc')}
-                                className="dropdown-item"
-                            >
-                                Giá tăng dần
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                onClick={() => handleSort('desc')}
-                                className="dropdown-item"
-                            >
-                                Giá giảm dần
-                            </button>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+        <div className="d-flex align-items-center justify-content-end mb-4">
+            {/* Hiển thị số lượng kết quả */}
+            <h6 className="m-auto me-3 text-secondary fw-bold fs-5">
+                Tìm thấy <span className="text-primary">{totalElements}</span> kết quả
+            </h6>
+            
+            {/* Khối Dropdown Sắp xếp */}
+            <div className={cx('sort-dropdown-group', 'dropdown')}>
+                <button
+                    className={cx('sort-toggle', 'btn', 'btn-outline-secondary fs-5', 'dropdown-toggle', {
+                        'btn-active': selectedSort !== null
+                    })}
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                >
+                    <i className="bi bi-sort-down me-2"></i>
+                    {getDropdownText()}
+                </button>
+
+                <ul className="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <button
+                            onClick={() => handleSort('asc')}
+                            className={cx('dropdown-item', 'sort-item fs-5', { active: selectedSort === 'asc' })}
+                        >
+                            <i className="bi bi-arrow-up-circle me-2"></i> Giá tăng dần
+                        </button>
+                    </li>
+                    <li>
+                        <button
+                            onClick={() => handleSort('desc')}
+                            className={cx('dropdown-item', 'sort-item fs-5', { active: selectedSort === 'desc' })}
+                        >
+                            <i className="bi bi-arrow-down-circle me-2"></i> Giá giảm dần
+                        </button>
+                    </li>
+                    {selectedSort && (
+                        <>
+                            <li><hr className="dropdown-divider"/></li>
+                            <li>
+                                <button
+                                    onClick={() => handleSort(null)}
+                                    className={cx('dropdown-item', 'sort-item', 'reset-item fs-5')}
+                                >
+                                    <i className="bi bi-x-circle me-2"></i> Bỏ sắp xếp
+                                </button>
+                            </li>
+                        </>
+                    )}
+                </ul>
+            </div>
         </div>
     );
 }

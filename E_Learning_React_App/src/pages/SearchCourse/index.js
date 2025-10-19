@@ -10,6 +10,7 @@ function SearchCourse() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [sortType, setSortType] = useState(null); // <--- thêm
     const [paginationInfo, setPaginationInfo] = useState({
         page: 0,
         totalPages: 0,
@@ -38,21 +39,30 @@ function SearchCourse() {
         fetchCourses();
     }, [searchParams]);
 
+    // ✅ Sắp xếp ở FE mỗi khi sortType hoặc courses thay đổi
+    const sortedCourses = [...courses].sort((a, b) => {
+        if (!sortType) return 0;
+        if (sortType === 'asc') return a.price - b.price;
+        if (sortType === 'desc') return b.price - a.price;
+        return 0;
+    });
+
     return (
         <main className="container py-4">
             <div className="row">
-                {/* Sidebar: Bộ lọc (3 cột) */}
                 <div className="col-lg-3 mb-4">
                     <FilterCourse setSearchParams={setSearchParams} />
                 </div>
 
-                {/* Nội dung chính: danh sách + phân trang (9 cột) */}
                 <div className="col-lg-9">
                     <div className="d-flex justify-content-end mb-3">
-                        <SortCourse totalElements={paginationInfo.totalElements} setSearchParams={setSearchParams} />
+                        <SortCourse
+                            totalElements={paginationInfo.totalElements}
+                            onSortChange={setSortType} // <--- nhận event từ SortCourse
+                        />
                     </div>
 
-                    <ListCourse loading={loading} courses={courses} />
+                    <ListCourse loading={loading} courses={sortedCourses} />
 
                     <div className="mt-4 d-flex justify-content-center">
                         <Pagination
