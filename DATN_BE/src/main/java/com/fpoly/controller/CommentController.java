@@ -79,6 +79,47 @@ public class CommentController {
 	}
 
 	// Tạo bình luận mới
+//	@PostMapping("")
+//	public ResponseEntity<?> addComment(@RequestHeader("Authorization") String token, @RequestBody CommentDTO cmtDTO) {
+//		String email = "";
+//		try {
+//			email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+//			System.out.println("Email: " + email);
+//		} catch (Exception e) {
+//			return ResponseEntity.status(400).body("Token không hợp lệ.");
+//		}
+//
+//		// Lấy thông tin người dùng từ email
+//		User user = userService.getUserByEmailToan(email);
+//		if (user == null) {
+//			return ResponseEntity.status(404).body("Người dùng không tồn tại.");
+//		}
+//
+//		try {
+//			// Lấy thông tin khoá học từ courseId trong CommentDTO
+//			Course course = courseService.timKhoaHocTheoMaKhoaHocToan(cmtDTO.getCourseId());
+//			if (course == null) {
+//				return ResponseEntity.status(404).body("Khóa học không tồn tại.");
+//			}
+//
+//			// Tạo mới Comment
+//			Comment cmt = new Comment();
+//			cmt.setCourse(course);
+//			cmt.setUser(user); // Sử dụng người dùng từ email trong token
+//			cmt.setStarRating(cmtDTO.getStarRating());
+//			cmt.setContent(cmtDTO.getContent());
+//			cmt.setCreateAt(new Date());
+//
+//			// Lưu Comment vào cơ sở dữ liệu
+//			cmtservice.addCommentToan(cmt);
+//
+//			return ResponseEntity.ok(cmtDTO);
+//		} catch (Exception e) {
+//			e.printStackTrace(); // Debug thông báo lỗi
+//			return ResponseEntity.status(500).body("Đã xảy ra lỗi trong quá trình thêm bình luận.");
+//		}
+//	}
+
 	@PostMapping("")
 	public ResponseEntity<?> addComment(@RequestHeader("Authorization") String token, @RequestBody CommentDTO cmtDTO) {
 		String email = "";
@@ -96,7 +137,7 @@ public class CommentController {
 		}
 
 		try {
-			// Lấy thông tin khoá học từ courseId trong CommentDTO
+			// Lấy thông tin khoá học
 			Course course = courseService.timKhoaHocTheoMaKhoaHocToan(cmtDTO.getCourseId());
 			if (course == null) {
 				return ResponseEntity.status(404).body("Khóa học không tồn tại.");
@@ -105,17 +146,35 @@ public class CommentController {
 			// Tạo mới Comment
 			Comment cmt = new Comment();
 			cmt.setCourse(course);
-			cmt.setUser(user); // Sử dụng người dùng từ email trong token
+			cmt.setUser(user);
 			cmt.setStarRating(cmtDTO.getStarRating());
 			cmt.setContent(cmtDTO.getContent());
 			cmt.setCreateAt(new Date());
 
-			// Lưu Comment vào cơ sở dữ liệu
+			// Lưu comment
 			cmtservice.addCommentToan(cmt);
 
-			return ResponseEntity.ok(cmtDTO);
+			// --- 🔽 TÍNH LẠI AVERAGE RATING & TOTAL RATE ---
+			List<Comment> comments = cmtservice.findCommentByCourseToan(course);
+			if (comments != null && !comments.isEmpty()) {
+				double totalStars = comments.stream().mapToDouble(Comment::getStarRating).sum();
+				int totalCount = comments.size();
+				float avgRating = (float) (totalStars / totalCount);
+
+				course.setTotalRate(totalCount);
+				course.setAverageRating(avgRating);
+				course.setUpdateAt(new Date());
+				courseService.save(course); // cập nhật vào DB
+			} else {
+				// Nếu chưa có comment nào, reset lại
+				course.setTotalRate(0);
+				course.setAverageRating(0);
+				courseService.save(course);
+			}
+
+			return ResponseEntity.ok("Thêm bình luận thành công và cập nhật điểm trung bình!");
 		} catch (Exception e) {
-			e.printStackTrace(); // Debug thông báo lỗi
+			e.printStackTrace();
 			return ResponseEntity.status(500).body("Đã xảy ra lỗi trong quá trình thêm bình luận.");
 		}
 	}

@@ -60,7 +60,8 @@ const SectionsAccordion = ({ sections, currentLesson, onLessonClick, onTestClick
                                 >
                                     <div>
                                         <FontAwesomeIcon icon={faQuestionCircle} className="ms-2 pe-2" />
-                                        {test.title}
+                                        {/* {test.title} */}
+                                        Quiz: {section.sectionNumber}
                                     </div>
                                     {/* ✅ Hiển thị icon hoàn thành nếu test.completed = true */}
                                     {test.completed && (

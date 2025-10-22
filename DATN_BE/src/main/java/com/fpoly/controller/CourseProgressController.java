@@ -62,11 +62,12 @@ public class CourseProgressController {
 
 //Learning Page
 	// Hiển thị tiến độ
+	// Nếu chưa có thì thực hiện tạo tiến độ mới
 	@GetMapping("/progress")
 	public ResponseEntity<CourseProgressDTO> getCourseProgress(
 			@RequestHeader(value = "Authorization", required = false) String token,
 			@RequestParam("courseId") int courseId) {
-
+		System.out.println("Mã khóa học: " + courseId);
 		CourseProgressDTO dto = courseProgressService.getCourseProgress(courseId, token);
 		return ResponseEntity.ok(dto);
 	}
@@ -76,7 +77,7 @@ public class CourseProgressController {
 	public ResponseEntity<LessonDTO> getCurrentLesson(
 			@RequestHeader(value = "Authorization", required = false) String token,
 			@RequestParam(value = "courseId") int courseId) {
-
+		
 		LessonDTO dto = courseProgressService.getCurrentLessonDTO(courseId, token);
 		return ResponseEntity.ok(dto);
 	}

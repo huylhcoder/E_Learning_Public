@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -128,6 +129,7 @@ public class SectionManagerController {
 		if (sectionTonTai == null) {
 			return ResponseEntity.notFound().build();
 		}
+		System.out.println(section.getName());
 
 		// Cập nhật thông tin
 		sectionTonTai.setName(section.getName());
@@ -219,8 +221,23 @@ public class SectionManagerController {
 		}
 
 		try {
+//			Lesson lessonCreate = lessonService.addLesson(lesson);
+//			lessonService.updateLessonDuration(lessonCreate.getLessonId(), lessonCreate.getLessionDuration());
+//			return ResponseEntity.ok(lessonCreate);
 			Lesson lessonCreate = lessonService.addLesson(lesson);
-			lessonService.updateLessonDuration(lessonCreate.getLessonId(), lessonCreate.getLessionDuration());
+			// lessonService.updateLessonDuration(lessonCreate.getLessonId(),
+			// lessonCreate.getLessionDuration()); // Có vẻ thừa, vì lessonCreate đã có thời
+			// lượng
+
+			// 💡 BƯỚC 1: Cập nhật thời lượng Phần (Section)
+			Section updatedSection = sectionService.calculateAndSetSectionDuration(sectionId);
+
+			if (updatedSection != null) {
+				// 💡 BƯỚC 2: Cập nhật thời lượng Khóa học (Course)
+				int courseId = updatedSection.getCourse().getCourseId();
+				courseService.calculateAndSetCourseDuration(courseId);
+			}
+
 			return ResponseEntity.ok(lessonCreate);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -288,9 +305,25 @@ public class SectionManagerController {
 		}
 
 		try {
+//			Lesson lesssonUpdated = lessonService.updateLesson(lessonUpdate);
+//			lessonService.updateLessonDuration(lesssonUpdated.getLessonId(), lesssonUpdated.getLessionDuration());
+//			return ResponseEntity.ok(lesssonUpdated);
+			
 			Lesson lesssonUpdated = lessonService.updateLesson(lessonUpdate);
-			lessonService.updateLessonDuration(lesssonUpdated.getLessonId(), lesssonUpdated.getLessionDuration());
-			return ResponseEntity.ok(lesssonUpdated);
+	        // lessonService.updateLessonDuration(lesssonUpdated.getLessonId(), lesssonUpdated.getLessionDuration()); // Có vẻ thừa
+
+	        // 💡 BƯỚC 1: Cập nhật thời lượng Phần (Section)
+	        Section updatedSection = sectionService.calculateAndSetSectionDuration(sectionId);
+	        
+	        if (updatedSection != null) {
+	            // 💡 BƯỚC 2: Cập nhật thời lượng Khóa học (Course)
+	            int courseId = updatedSection.getCourse().getCourseId();
+	            courseService.calculateAndSetCourseDuration(courseId);
+	        }
+	        
+	        return ResponseEntity.ok(lesssonUpdated);
+	        
+	        
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Có lỗi xảy ra khi thêm bài học: " + e.getMessage());
@@ -328,22 +361,83 @@ public class SectionManagerController {
 	}
 
 	/////////////////////////////////////// API liên quan đến quiz
+//	@GetMapping("/{sectionId}/test-manager") // Hiển thị một bài kiểm tra duy nhất
+//	public ResponseEntity<?> showTest(@PathVariable("sectionId") int sectionId) {
+//		System.out.println("Bài kiểm tra của phần: " + sectionId);
+//		//
+//		Section sectionTonTai = sectionService.getSectionById_Huy(sectionId).orElse(null);
+//		if (sectionTonTai == null) {
+//			return ResponseEntity.notFound().build();
+//		}
+//		Test baiKiemTraEntity = testService.timKiemBaiQuizNhoNhatCuaSection(sectionTonTai);
+//		if (baiKiemTraEntity == null) {
+//			return ResponseEntity.notFound().build();
+//		}
+//		TestDTO baiKiemTraDTO = new TestDTO();
+//		baiKiemTraDTO.setTestID(baiKiemTraEntity.getTestId());
+//		baiKiemTraDTO.setCountdownTimer(baiKiemTraEntity.getCountdownTimer());
+//
+//		List<Question> listQuestionEntity = questionService.timKiemDanhSachCauHoiTheoBaiQuizTam(baiKiemTraEntity);
+//		List<QuestionDTO> listQuestionDTO = new ArrayList<>();
+//
+//		for (Question questionEntity : listQuestionEntity) {
+//			QuestionDTO questionDTO = new QuestionDTO();
+//			questionDTO.setQuestionId(questionEntity.getQuestionId());
+//			questionDTO.setContents(questionEntity.getContents());
+//
+//			List<Answer> listAnswerEntity = answerService.timListDapAnTheoCauHoiTam(questionEntity);
+//			List<AnswerDTO> listAnswerDTO = new ArrayList<>();
+//
+//			for (Answer answerEntity : listAnswerEntity) {
+//				AnswerDTO answerDTO = new AnswerDTO();
+//				answerDTO.setAnswerId(answerEntity.getAnswerId());
+//				answerDTO.setText(answerEntity.getContent());
+//				answerDTO.setCorrect(answerEntity.isCorrect()); // Set giá trị isCorrect từ entity
+//
+//				listAnswerDTO.add(answerDTO);
+//			}
+//			questionDTO.setListAnswerDTO(listAnswerDTO);
+//			listQuestionDTO.add(questionDTO);
+//		}
+//
+//		baiKiemTraDTO.setListQuestion(listQuestionDTO);
+//		return ResponseEntity.ok(baiKiemTraDTO);
+//	}
+
 	@GetMapping("/{sectionId}/test-manager") // Hiển thị một bài kiểm tra duy nhất
 	public ResponseEntity<?> showTest(@PathVariable("sectionId") int sectionId) {
 		System.out.println("Bài kiểm tra của phần: " + sectionId);
-		//
+
+		// 1. Kiểm tra Section có tồn tại không
 		Section sectionTonTai = sectionService.getSectionById_Huy(sectionId).orElse(null);
 		if (sectionTonTai == null) {
+			// Nếu Section không tồn tại, trả về 404 là đúng
 			return ResponseEntity.notFound().build();
 		}
+
+		// 2. Tìm bài kiểm tra
 		Test baiKiemTraEntity = testService.timKiemBaiQuizNhoNhatCuaSection(sectionTonTai);
+
+		// 3. Xử lý khi KHÔNG tìm thấy bài kiểm tra
 		if (baiKiemTraEntity == null) {
-			return ResponseEntity.notFound().build();
+			// Trả về 200 OK, nhưng với một đối tượng TestDTO (hoặc Map) có testID = 0 (hoặc
+			// null)
+			// để Frontend biết rằng Section tồn tại nhưng chưa có Test.
+			TestDTO emptyTestDTO = new TestDTO();
+			emptyTestDTO.setTestID(0); // Rất quan trọng: set TestID = 0
+			emptyTestDTO.setCountdownTimer(0);
+			emptyTestDTO.setListQuestion(Collections.emptyList());
+
+			return ResponseEntity.ok(emptyTestDTO);
 		}
+
+		// 4. Trường hợp tìm thấy bài kiểm tra (Logic cũ của bạn)
 		TestDTO baiKiemTraDTO = new TestDTO();
+		// ... (logic mapping từ entity sang DTO của bạn)
 		baiKiemTraDTO.setTestID(baiKiemTraEntity.getTestId());
 		baiKiemTraDTO.setCountdownTimer(baiKiemTraEntity.getCountdownTimer());
 
+		// ... (Phần còn lại của logic mapping câu hỏi và đáp án)
 		List<Question> listQuestionEntity = questionService.timKiemDanhSachCauHoiTheoBaiQuizTam(baiKiemTraEntity);
 		List<QuestionDTO> listQuestionDTO = new ArrayList<>();
 
@@ -359,8 +453,7 @@ public class SectionManagerController {
 				AnswerDTO answerDTO = new AnswerDTO();
 				answerDTO.setAnswerId(answerEntity.getAnswerId());
 				answerDTO.setText(answerEntity.getContent());
-				answerDTO.setCorrect(answerEntity.isCorrect()); // Set giá trị isCorrect từ entity
-
+				answerDTO.setCorrect(answerEntity.isCorrect());
 				listAnswerDTO.add(answerDTO);
 			}
 			questionDTO.setListAnswerDTO(listAnswerDTO);
@@ -701,11 +794,12 @@ public class SectionManagerController {
 
 	// Tạo bài kiểm tra mới
 	@PostMapping("/{sectionId}/update-countdown-timer/{testId}/{setCountdownTimer}")
-	public ResponseEntity<?> updateCountdownTimer(@PathVariable("sectionId") int sectionId, @PathVariable("testId") int testId, @PathVariable("setCountdownTimer") int setCountdownTimer) {
-		
-		//Đồng hồ điểm ngược
+	public ResponseEntity<?> updateCountdownTimer(@PathVariable("sectionId") int sectionId,
+			@PathVariable("testId") int testId, @PathVariable("setCountdownTimer") int setCountdownTimer) {
+
+		// Đồng hồ điểm ngược
 		int setCountdownTimerInt = setCountdownTimer;
-		//Thời gian điểm ngược không thể nhỏ hơn 0
+		// Thời gian điểm ngược không thể nhỏ hơn 0
 		if (setCountdownTimerInt < 0) {
 			return ResponseEntity.notFound().build();
 		}

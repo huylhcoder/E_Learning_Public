@@ -21,18 +21,39 @@ const QuizManager = ({ sectionId, token }) => {
     const fileInputRef = useRef();
     let timeoutRef = useRef(null);
 
+    // // Lấy bài test
+    // const getTest = async () => {
+    //     try {
+    //         const resp = await axios.get(`/section-manager/${sectionId}/test-manager`, {
+    //             headers: { Authorization: `Bearer ${token}` },
+    //         });
+    //         setTestId(resp?.data?.testID);
+    //         setCountdownTimer(resp?.data?.countdownTimer);
+    //         setListQuestion(resp?.data?.listQuestion);
+    //     } catch (err) {
+    //         setListQuestion([]);
+    //         console.error('Không thể load bài kiểm tra', err);
+    //     }
+    // };
+
     // Lấy bài test
     const getTest = async () => {
         try {
             const resp = await axios.get(`/section-manager/${sectionId}/test-manager`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setTestId(resp.data.testID);
-            setCountdownTimer(resp.data.countdownTimer);
-            setListQuestion(resp.data.listQuestion);
+
+            // API đã được sửa để trả về body với testID = 0 khi chưa có test.
+            // Dù là 200 OK, chúng ta vẫn nhận được resp.data và xử lý bình thường.
+            setTestId(resp?.data?.testID);
+            setCountdownTimer(resp?.data?.countdownTimer);
+            setListQuestion(resp?.data?.listQuestion);
         } catch (err) {
-            setListQuestion([]);
-            console.error('Không thể load bài kiểm tra', err);
+            // Khối catch này chỉ bắt các lỗi không mong muốn (ví dụ: lỗi mạng, 500 Internal Server Error)
+            // Vì 404 khi không có test đã được chuyển thành 200 OK với testID=0 ở backend.
+            // KHÔNG cần setTestId(0) ở đây nữa vì nó đã được set thông qua resp.data ở khối try.
+            console.error('Lỗi khi tải dữ liệu bài kiểm tra:', err);
+            // Có thể thêm toast.error cho người dùng nếu đây là lỗi server thực sự
         }
     };
 
@@ -219,12 +240,14 @@ const QuizManager = ({ sectionId, token }) => {
         <div className="mt-3">
             {/* Nếu chưa có test */}
             {testId === 0 ? (
-                <button className="btn btn-success" onClick={addTest}>
+                <button className="btn btn-primary fs-5" onClick={addTest}>
                     <FaPlus /> Tạo bài kiểm tra
                 </button>
             ) : (
                 <>
-                    <span className="text-primary fs-3 fw-bold mb-3">Tổng số lượng câu hỏi: {listQuestion.length}</span>
+                    <span className="text-primary fs-3 fw-bold mb-3">
+                        Tổng số lượng câu hỏi: {listQuestion?.length}
+                    </span>
                     <div className="d-flex align-items-center mb-3">
                         <label className="me-2">Đồng hồ đếm ngược (giây):</label>
                         <input
@@ -291,7 +314,7 @@ const QuizManager = ({ sectionId, token }) => {
 
                     {/* Danh sách câu hỏi */}
 
-                    {listQuestion.map((q, idx) => (
+                    {listQuestion?.map((q, idx) => (
                         <div key={q.questionId} className="card mt-3 mb-3">
                             <div className="card-body">
                                 <div className="d-flex justify-content-between">

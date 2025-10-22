@@ -44,7 +44,6 @@ public interface CourseProgressRepository extends JpaRepository<CourseProgress, 
 
 	@Query("SELECT c FROM CourseProgress c WHERE c.progressPercentage = 100 AND c.progressStatus = 1")
 	List<CourseProgress> FillTotalCourseCompleteCuaBao();
-	//
 
 	//
 	@Query("SELECT cp FROM CourseProgress cp WHERE cp.user.userId = :userId AND cp.course.courseId = :courseId")

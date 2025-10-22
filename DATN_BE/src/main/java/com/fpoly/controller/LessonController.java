@@ -85,6 +85,7 @@ public class LessonController {
 					.findByUser_UserIdAndCourse_CourseId(user.getUserId(), req.getCourseId())
 					.orElseThrow(() -> new IllegalArgumentException("CourseProgress not found"));
 
+			cp.setCurrentLesson(lesson);
 			cp.setTotalLessionComplete(cp.getTotalLessionComplete() + 1);
 
 			// 🔑 Tính lại tiến độ dựa trên cả lesson + quiz

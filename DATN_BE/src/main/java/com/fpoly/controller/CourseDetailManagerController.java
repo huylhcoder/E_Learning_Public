@@ -2,6 +2,7 @@ package com.fpoly.controller;
 
 import java.io.Console;
 import java.net.http.HttpRequest;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,75 +52,111 @@ public class CourseDetailManagerController {
 	private CloudinaryService cloudinaryService;
 
 	// Tìm khóa học theo mã khóa hoc
+//	@GetMapping("/{courseId}")
+//	public ResponseEntity<?> courseDetails(@PathVariable("courseId") int courseId) {
+//	    Course course = courseService.timKhoaHocTheoMaKhoaHocHuy(courseId).orElse(null);
+//	    if (course != null) {
+//	        CourseDetailManagerDTO courseDTO = new CourseDetailManagerDTO();
+//	        courseDTO.setCourseId(course.getCourseId());
+//	        courseDTO.setName(course.getName());
+//	        courseDTO.setStatus(course.getStatus());
+//	        courseDTO.setDescription(course.getDescription());
+//	        courseDTO.setContentDescription(course.getContentDescription()); // ✅ thêm vào
+//	        courseDTO.setAvatar(course.getAvatar());
+//	        courseDTO.setPrice(course.getPrice());
+//	        courseDTO.setTopic(course.getTopic());
+//	        courseDTO.setLevelId(course.getCourseLevel().getCourseLevelId());
+//
+//	        // Lấy list categoryId từ bảng trung gian
+//	        List<Integer> categoryIds = course.getCourseCategories().stream()
+//	                .map(cc -> cc.getCategory().getCategoryId())
+//	                .collect(Collectors.toList());
+//	        courseDTO.setCategoryIds(categoryIds);
+//
+//	        return ResponseEntity.ok(courseDTO);
+//	    }
+//	    return ResponseEntity.notFound().build();
+//	}
 	@GetMapping("/{courseId}")
 	public ResponseEntity<?> courseDetails(@PathVariable("courseId") int courseId) {
-	    Course course = courseService.timKhoaHocTheoMaKhoaHocHuy(courseId).orElse(null);
-	    if (course != null) {
-	        CourseDetailManagerDTO courseDTO = new CourseDetailManagerDTO();
-	        courseDTO.setCourseId(course.getCourseId());
-	        courseDTO.setName(course.getName());
-	        courseDTO.setStatus(course.getStatus());
-	        courseDTO.setDescription(course.getDescription());
-	        courseDTO.setContentDescription(course.getContentDescription()); // ✅ thêm vào
-	        courseDTO.setAvatar(course.getAvatar());
-	        courseDTO.setPrice(course.getPrice());
-	        courseDTO.setTopic(course.getTopic());
-	        courseDTO.setLevelId(course.getCourseLevel().getCourseLevelId());
+		Course course = courseService.timKhoaHocTheoMaKhoaHocHuy(courseId).orElse(null);
 
-	        // Lấy list categoryId từ bảng trung gian
-	        List<Integer> categoryIds = course.getCourseCategories().stream()
-	                .map(cc -> cc.getCategory().getCategoryId())
-	                .collect(Collectors.toList());
-	        courseDTO.setCategoryIds(categoryIds);
+		if (course != null) {
+			CourseDetailManagerDTO courseDTO = new CourseDetailManagerDTO();
+			courseDTO.setCourseId(course.getCourseId());
 
-	        return ResponseEntity.ok(courseDTO);
-	    }
-	    return ResponseEntity.notFound().build();
+			// Các trường có thể là null
+			courseDTO.setName(course.getName());
+			courseDTO.setDescription(course.getDescription());
+			courseDTO.setContentDescription(course.getContentDescription());
+			courseDTO.setAvatar(course.getAvatar());
+			courseDTO.setPrice(course.getPrice());
+			courseDTO.setTopic(course.getTopic());
+
+			// 1. Xử lý CourseLevel (Nguyên nhân lỗi NullPointerException)
+			// Nếu CourseLevel là null (khóa học nháp), đặt levelId là null hoặc 0
+			if (course.getCourseLevel() != null) {
+				courseDTO.setLevelId(course.getCourseLevel().getCourseLevelId());
+			} else {
+				courseDTO.setLevelId(0); // Hoặc 0 nếu bạn muốn một giá trị mặc định số
+			}
+
+			courseDTO.setStatus(course.getStatus());
+
+			// 2. Xử lý CourseCategories (có thể null hoặc rỗng)
+			// Nếu CourseCategories null, trả về danh sách rỗng để tránh
+			// NullPointerException khi stream
+			if (course.getCourseCategories() != null && !course.getCourseCategories().isEmpty()) {
+				List<Integer> categoryIds = course.getCourseCategories().stream()
+						.map(cc -> cc.getCategory().getCategoryId()).collect(Collectors.toList());
+				courseDTO.setCategoryIds(categoryIds);
+			} else {
+				courseDTO.setCategoryIds(Collections.emptyList());
+			}
+
+			return ResponseEntity.ok(courseDTO);
+		}
+		return ResponseEntity.notFound().build();
 	}
-	
-	//Cập nhật nội dung khóa học
+
+	// Cập nhật nội dung khóa học
 	@PutMapping(value = "/{courseId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<?> updateCourseDetailInfo(
-	        @PathVariable("courseId") int courseId,
-	        @RequestParam("courseId") Optional<Integer> id,
-	        @RequestParam("name") Optional<String> name,
-	        @RequestParam("status") Optional<Integer> status,
-	        @RequestParam("description") Optional<String> description,
-	        @RequestParam("contentDescription") Optional<String> contentDescription,
-	        @RequestParam("avatar") Optional<String> avatar,
-	        @RequestParam("price") Optional<Float> price,
-	        @RequestParam("topic") Optional<String> topic,
-	        @RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
-	        @RequestParam("levelId") Optional<Integer> levelId,
-	        @RequestParam(value = "file", required = false) MultipartFile file
-	) throws IOException, java.io.IOException {
+	public ResponseEntity<?> updateCourseDetailInfo(@PathVariable("courseId") int courseId,
+			@RequestParam("courseId") Optional<Integer> id, @RequestParam("name") Optional<String> name,
+			@RequestParam("status") Optional<Integer> status, @RequestParam("description") Optional<String> description,
+			@RequestParam("contentDescription") Optional<String> contentDescription,
+			@RequestParam("avatar") Optional<String> avatar, @RequestParam("price") Optional<Float> price,
+			@RequestParam("topic") Optional<String> topic,
+			@RequestParam(value = "categoryIds", required = false) List<Integer> categoryIds,
+			@RequestParam("levelId") Optional<Integer> levelId,
+			@RequestParam(value = "file", required = false) MultipartFile file)
+			throws IOException, java.io.IOException {
 
-	    if (file != null && !file.isEmpty()) {
-	        Map<?, ?> data = cloudinaryService.upload(file);
-	        avatar = Optional.ofNullable((String) data.get("url"));
-	    }
+		if (file != null && !file.isEmpty()) {
+			Map<?, ?> data = cloudinaryService.upload(file);
+			avatar = Optional.ofNullable((String) data.get("url"));
+		}
 
-	    try {
-	        CourseDetailManagerDTO courseDTO = new CourseDetailManagerDTO();
-	        courseDTO.setCourseId(courseId);
-	        courseDTO.setName(name.orElse(null));
-	        courseDTO.setStatus(status.orElse(0));
-	        courseDTO.setDescription(description.orElse(null));
-	        courseDTO.setContentDescription(contentDescription.orElse(null)); // ✅
-	        courseDTO.setAvatar(avatar.orElse(null));
-	        courseDTO.setPrice(price.orElse(0f));
-	        courseDTO.setTopic(topic.orElse(null));
-	        courseDTO.setCategoryIds(categoryIds); // ✅
-	        courseDTO.setLevelId(levelId.orElse(null));
+		try {
+			CourseDetailManagerDTO courseDTO = new CourseDetailManagerDTO();
+			courseDTO.setCourseId(courseId);
+			courseDTO.setName(name.orElse(null));
+			courseDTO.setStatus(status.orElse(0));
+			courseDTO.setDescription(description.orElse(null));
+			courseDTO.setContentDescription(contentDescription.orElse(null)); // ✅
+			courseDTO.setAvatar(avatar.orElse(null));
+			courseDTO.setPrice(price.orElse(0f));
+			courseDTO.setTopic(topic.orElse(null));
+			courseDTO.setCategoryIds(categoryIds); // ✅
+			courseDTO.setLevelId(levelId.orElse(null));
 
-	        return ResponseEntity.ok(courseService.luuThongTinKhoaHoc(courseDTO));
-	    } catch (Exception e) {
-	        return ResponseEntity.status(500).body("Lỗi: " + e.getMessage());
-	    }
+			return ResponseEntity.ok(courseService.luuThongTinKhoaHoc(courseDTO));
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Lỗi: " + e.getMessage());
+		}
 	}
 
-
-	//Xóa phần
+	// Xóa phần
 	@DeleteMapping("/remove-section/{sectionId}")
 	public ResponseEntity<?> removSection(@PathVariable("sectionId") int sectionId) {
 		System.out.println(sectionId);

@@ -18,8 +18,12 @@ public interface SectionRepository extends JpaRepository<Section, Integer> {
 
 //CourseDetailPage
 	List<Section> findByCourse_CourseId(int courseId);
-	
-	
+
+//Section Manager
+	// Cập nhật thời lượng tổng cho toàn khóa học
+	@Query("SELECT SUM(s.sectionDuration) FROM Section s WHERE s.course.courseId = :courseId")
+	Float sumSectionDurationByCourseId(@Param("courseId") int courseId);
+
 //Các method v1
 
 	List<Section> findByCourse(Course course);

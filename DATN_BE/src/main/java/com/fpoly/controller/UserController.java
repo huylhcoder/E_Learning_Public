@@ -3,6 +3,7 @@ package com.fpoly.controller;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -11,11 +12,14 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -30,6 +34,7 @@ import com.fpoly.entity.CourseProgress;
 import com.fpoly.entity.MailInfo;
 import com.fpoly.entity.User;
 import com.fpoly.security.JwtTokenUtils;
+import com.fpoly.service.CertificateService;
 import com.fpoly.service.CourseProgressService;
 import com.fpoly.service.EmailService;
 import com.fpoly.service.UserService;
@@ -43,8 +48,12 @@ public class UserController {
 	@Autowired
 	private UserService userService;
 	@Autowired
-	private EmailService emailService;
+	private CourseProgressService courseProgressService;
 
+	@Autowired
+	private CertificateService certificateService;
+	@Autowired
+	private EmailService emailService;
 	@Autowired
 	private CloudinaryService cloudinaryService;
 
@@ -139,7 +148,7 @@ public class UserController {
 	public List<User> getAllUserAdmin() {
 		return userService.getAllUser();
 	}
-	
+
 	@PutMapping("/blockUser/{userId}")
 	public ResponseEntity<User> blockStatusKhoa(@PathVariable("userId") int userId) {
 		User kiemTraTonTai = userService.getUserById(userId);
@@ -201,18 +210,62 @@ public class UserController {
 		}
 
 	}
+
+//Learning 
+	// Nhận chứng chỉ
+	/**
+	 * API để người dùng yêu cầu nhận chứng chỉ. Service sẽ lo toàn bộ logic nghiệp
+	 * vụ: kiểm tra tiến độ, tạo, gửi email, và cập nhật trạng thái. * @param
+	 * courseId ID khóa học
+	 * 
+	 * @param token Header chứa JWT token (ví dụ: "Bearer eyJ...")
+	 * @return File ảnh chứng chỉ PNG hoặc thông báo lỗi
+	 */
+	@PostMapping("/certificate/{courseId}")
+	public ResponseEntity<?> issueCertificate(@RequestHeader(value = "Authorization", required = false) String token,
+			@PathVariable int courseId) {
+
+		if (token == null || token.isEmpty()) {
+			return new ResponseEntity<>("Yêu cầu cần có token xác thực.", HttpStatus.UNAUTHORIZED);
+		}
+
+		try {
+			// 1. GỌI SERVICE: Service thực hiện TẤT CẢ logic nghiệp vụ (kiểm tra, tạo, gửi
+			// mail, cập nhật DB)
+			byte[] certificateImageBytes = certificateService.generateAndSendCertificate(courseId, token);
+
+			// 2. TRẢ VỀ FILE ẢNH CHO NGƯỜI DÙNG TẢI XUỐNG
+			String jwt = token.replace("Bearer ", "");
+			String email = jwtTokenUtils.extractEmail(jwt);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.IMAGE_PNG);
+
+			// Tạo tên file từ email (loại bỏ phần @domain) và courseId
+			String usernamePart = email.split("@")[0];
+			String fileName = "certificate_" + usernamePart + "_" + courseId + ".png";
+			headers.setContentDispositionFormData("attachment", fileName);
+
+			return new ResponseEntity<>(certificateImageBytes, headers, HttpStatus.OK);
+
+		} catch (IllegalStateException e) {
+			// Lỗi khi tiến độ chưa 100% (ném từ Service)
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+		} catch (IllegalArgumentException e) {
+			// Lỗi không tìm thấy Course/Progress/User (ném từ Service)
+			return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+		} catch (RuntimeException e) {
+			// Lỗi tìm User/JWT (bao gồm cả lỗi trong userRepository.findByEmail)
+			return new ResponseEntity<>("Lỗi xác thực hoặc dữ liệu: " + e.getMessage(), HttpStatus.UNAUTHORIZED);
+		} catch (Exception e) {
+			// Log lỗi hệ thống chi tiết
+			e.printStackTrace();
+			return new ResponseEntity<>("Lỗi hệ thống khi cấp phát chứng chỉ: " + e.getMessage(),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 //Khác
 
-//	@PutMapping("/unblockUser/{userId}")
-//	public ResponseEntity<User> unblockStatusKhoa(@PathVariable("userId") int userId) {
-//		User kiemTraTonTai = userService.getUserById(userId);
-//		if (kiemTraTonTai != null) {
-//			kiemTraTonTai.setActive(false);
-//			userService.saveUser(kiemTraTonTai);
-//			return ResponseEntity.ok(kiemTraTonTai);
-//		}
-//		return ResponseEntity.ok(kiemTraTonTai);
-//	}
 	// Phương thức lấy ngày giờ hiện tại
 	public class DateTimeUtils {
 		// Định dạng ngày giờ theo yêu cầu
@@ -224,8 +277,6 @@ public class UserController {
 			return now.format(DATE_TIME_FORMATTER);
 		}
 	}
-
-	
 
 //	
 //	@GetMapping("/userAdmin/{userId}")

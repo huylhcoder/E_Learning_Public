@@ -45,6 +45,11 @@ public class CommentService {
 	public void addCommentToan(Comment cmt) {
 		commentRepository.save(cmt);
 	}
+	
+	//Tìm kiếm danh sách comment theo khóa học
+	public List<Comment> findCommentByCourseToan(Course course) {
+		return commentRepository.findByCourse(course);
+	}
 
 //Khác
 	public List<Comment> getAllComment() {
@@ -52,10 +57,6 @@ public class CommentService {
 	}
 
 	public List<Comment> findCommentByIdToan(Course course) {
-		return commentRepository.findByCourse(course);
-	}
-
-	public List<Comment> findCommentByCourseToan(Course course) {
 		return commentRepository.findByCourse(course);
 	}
 

@@ -107,11 +107,7 @@ const Comments = ({ courseId, token }) => {
                         ></textarea>
                     </div>
 
-                    <button
-                        className="btn btn-primary px-3 fs-4 mb-3"
-                        onClick={handleSubmit}
-                        disabled={submitting}
-                    >
+                    <button className="btn btn-primary px-3 fs-4 mb-3" onClick={handleSubmit} disabled={submitting}>
                         {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
                     </button>
                 </div>

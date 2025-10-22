@@ -12,6 +12,10 @@ import java.util.List;
 
 @Repository
 public interface TestRepository extends JpaRepository<Test, Integer> {
+	
+//Learning
+	// Phương thức đếm tổng số Test/Quiz của một khóa học (qua Section)
+    int countBySection_Course_CourseId(int courseId);
 
 	Test findByTestId(int testId);
 	List<Test> findBySection(Section sectionEntity);

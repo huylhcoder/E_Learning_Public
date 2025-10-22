@@ -285,6 +285,33 @@ public class CourseService {
 		return courseRepository.findByCourseId(courseId);
 	}
 
+//Section Manager
+	// Cập nhật thời lượng tổng cho toàn khóa học
+	public Course calculateAndSetCourseDuration(int courseId) {
+		Course course = courseRepository.findById(courseId).orElse(null);
+		if (course == null) {
+			return null;
+		}
+
+		// 1. Tính tổng thời lượng của tất cả Section trong Course
+		// (Giả sử bạn có phương thức trong SectionRepository để làm việc này)
+		Float totalDuration = sectionRepository.sumSectionDurationByCourseId(courseId);
+
+		// Đảm bảo không bị null và cập nhật
+		float newDuration = (totalDuration != null) ? totalDuration : 0.0f;
+
+		if (course.getCourseDuration() != newDuration) {
+			course.setCourseDuration(newDuration);
+			return courseRepository.save(course);
+		}
+		return course;
+	}
+
+//Lưu khóa học 
+	public Course save(Course course) {
+		return courseRepository.save(course);
+	}
+
 //Method cũ
 
 	public Optional<Course> timKhoaHocTheoMaKhoaHocHuy(int courseId) {

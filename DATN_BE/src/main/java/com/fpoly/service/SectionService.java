@@ -39,6 +39,27 @@ public class SectionService {
 		return sectionRepository.save(section);
 	}
 
+	// Cập nhật thời lượng section
+	public Section calculateAndSetSectionDuration(int sectionId) {
+		Section section = sectionRepository.findById(sectionId).orElse(null);
+		if (section == null) {
+			return null;
+		}
+
+		// 1. Tính tổng thời lượng của tất cả Lesson trong Section
+		// (Giả sử bạn có phương thức trong LessonRepository để làm việc này)
+		Float totalDuration = lessonRepository.sumLessionDurationBySectionId(sectionId);
+
+		// Đảm bảo không bị null và cập nhật
+		float newDuration = (totalDuration != null) ? totalDuration : 0.0f;
+
+		if (section.getSectionDuration() != newDuration) {
+			section.setSectionDuration(newDuration);
+			return sectionRepository.save(section);
+		}
+		return section;
+	}
+
 	// Tìm kiếm phần mới được tạo
 	public Section getLatestSection() {
 		return sectionRepository.findSectionWithMaxId();

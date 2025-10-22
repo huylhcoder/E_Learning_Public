@@ -30,6 +30,15 @@ const SectionDetailManager = () => {
         showListLesson();
     }, []);
 
+    // Cleanup effect for video URL
+    useEffect(() => {
+        return () => {
+            if (videoSrc) {
+                URL.revokeObjectURL(videoSrc);
+            }
+        };
+    }, [videoSrc]);
+
     const showSectionDetail = async () => {
         try {
             const response = await axios.get(`/section-manager/${sectionId}`, {
@@ -61,16 +70,93 @@ const SectionDetailManager = () => {
         }
     };
 
+    // const saveLesson = async (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
+    //     const formData = new FormData();
+    //     formData.append('name', lessonDetail.name);
+    //     formData.append('description', lessonDetail.description);
+    //     if (selectedFile) {
+    //         formData.append('file', selectedFile);
+    //     }
+
+    //     try {
+    //         if (lessonDetail.lessonId !== 0) {
+    //             await axios.put(
+    //                 `/section-manager/${sectionId}/lesson/${lessonDetail.lessonId}/update-lesson`,
+    //                 formData,
+    //                 { headers: { Authorization: `Bearer ${tokenLogin}` } },
+    //             );
+    //             toast.success('Cập nhật bài học thành công');
+    //         } else {
+    //             await axios.post(`/section-manager/${sectionId}/add-lesson`, formData, {
+    //                 headers: { Authorization: `Bearer ${tokenLogin}` },
+    //             });
+    //             toast.success('Thêm bài học mới thành công');
+    //         }
+    //         showListLesson();
+    //     } catch (error) {
+    //         toast.error(error.response?.data || 'Có lỗi xảy ra khi lưu bài học');
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+
+    // Hàm này phải được định nghĩa bên ngoài component hoặc ở đâu đó có thể truy cập được
+    const extractVideoDuration = (file) => {
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+
+            video.onloadedmetadata = function () {
+                resolve(video.duration);
+                URL.revokeObjectURL(video.src);
+            };
+
+            video.onerror = function () {
+                console.error('Lỗi khi load metadata video.');
+                resolve(0);
+                URL.revokeObjectURL(video.src);
+            };
+
+            video.src = URL.createObjectURL(file);
+        });
+    };
+
     const saveLesson = async (e) => {
         e.preventDefault();
         setLoading(true);
+
+        let duration = lessonDetail.videoDuration || 0; // Bắt đầu với giá trị cũ hoặc 0
+
+        // 1. Trích xuất thời lượng nếu có file mới
+        if (selectedFile) {
+            try {
+                // Dừng hàm và chờ kết quả trích xuất thời lượng
+                duration = await extractVideoDuration(selectedFile);
+            } catch (error) {
+                console.error('Không thể lấy thời lượng video:', error);
+                // Có thể hiển thị toast lỗi và dừng lại ở đây nếu thời lượng là bắt buộc
+                // toast.error('Lỗi: Không thể xác định thời lượng video.');
+                // setLoading(false);
+                // return;
+            }
+        }
+
+        // 2. Tạo FormData SAU KHI có giá trị duration cuối cùng
         const formData = new FormData();
         formData.append('name', lessonDetail.name);
         formData.append('description', lessonDetail.description);
+
+        // Gắn thời lượng đã được tính toán (hoặc giá trị cũ)
+        formData.append('videoDuration', duration);
+
+        // Gắn file nếu có
         if (selectedFile) {
             formData.append('file', selectedFile);
         }
 
+        // 3. Thực hiện API call
         try {
             if (lessonDetail.lessonId !== 0) {
                 await axios.put(
@@ -95,7 +181,7 @@ const SectionDetailManager = () => {
 
     const handleDeleteLesson = async (lessonId) => {
         try {
-            await axios.delete(`/section-manager/${sectionId}/lesson/${lessonId}`, {
+            await axios.delete(`/section-manager/${sectionId}/lesson/${lessonId}/remove-lesson`, {
                 headers: { Authorization: `Bearer ${tokenLogin}` },
             });
             toast.success('Xóa bài học thành công');
@@ -107,8 +193,9 @@ const SectionDetailManager = () => {
 
     const handleSectionUpdate = async (e) => {
         e.preventDefault();
+        console.log('Cập nhật phần:', section);
         try {
-            await axios.put(`/section-manager/${sectionId}/update`, section, {
+            await axios.put(`/section-manager/${sectionId}`, section, {
                 headers: { Authorization: `Bearer ${tokenLogin}` },
             });
             toast.success('Cập nhật phần thành công');
@@ -129,15 +216,6 @@ const SectionDetailManager = () => {
 
         setSelectedFile(null); // Reset selected file when editing
     };
-
-    // Cleanup effect for video URL
-    useEffect(() => {
-        return () => {
-            if (videoSrc) {
-                URL.revokeObjectURL(videoSrc);
-            }
-        };
-    }, [videoSrc]);
 
     return (
         <div className="container">

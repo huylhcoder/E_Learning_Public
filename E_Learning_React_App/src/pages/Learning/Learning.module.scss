@@ -39,3 +39,9 @@
         height: 100%;
     }
 }
+
+/* Trong file CSS tương ứng (ví dụ: Learning.module.scss hoặc global CSS) */
+.video-placeholder {
+    aspect-ratio: 16 / 9; /* Tỉ lệ 16:9 cho video */
+    width: 100%;
+}

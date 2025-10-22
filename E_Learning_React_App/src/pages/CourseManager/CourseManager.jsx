@@ -54,8 +54,8 @@ const CourseManager = () => {
 
     const themMoiKhoaHoc = async () => {
         try {
-            const resp = await axios.post(`/course-manager`);
-            const newId = resp.data;
+            const resp = await axios.post(`/course-manager/add-draf-course`);
+            const newId = resp.data;         
             toast.success('Thêm mới khóa học thành công');
             navigate(`/admin/course-detail-manager/${newId}`);
         } catch (error) {
