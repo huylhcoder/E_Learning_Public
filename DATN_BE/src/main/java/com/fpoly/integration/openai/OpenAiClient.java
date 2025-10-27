@@ -196,7 +196,7 @@ public class OpenAiClient {
 	@Value("${ai.api.key}")
 	private String apiKey;
 
-	@Value("${ai.api.base-url:https://openrouter.ai/api/v1}")
+	@Value("${ai.api.base-url}")
 	private String baseUrl;
 
 	private final RestTemplate restTemplate;

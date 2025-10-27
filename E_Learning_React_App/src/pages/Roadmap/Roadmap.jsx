@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 // Giả định bạn đã cài đặt react-router-dom
-import { Link } from 'react-router-dom'; 
+import { Link } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faStar } from '@fortawesome/free-solid-svg-icons';
 // Giả định các import khác
 import axios from '~/utils/CustomizeAxios';
 import styles from './Roadmap.module.scss';
 import classNames from 'classnames/bind';
+import { formatCurrency } from '~/utils/format';
 
 const cx = classNames.bind(styles);
-
-// Hàm giả định để format tiền tệ (nếu không có, bạn có thể tự implement)
-const formatCurrency = (price) => {
-    if (price === null || price === undefined) return 'N/A';
-    return price.toLocaleString('en-US', { style: 'currency', currency: 'USD' }).replace('$', '');
-};
 
 const Roadmap = () => {
     const [goal, setGoal] = useState('');
@@ -21,10 +18,10 @@ const Roadmap = () => {
     const [loading, setLoading] = useState(false);
     const [roadmap, setRoadmap] = useState(null);
 
-    const [levels, setLevels] = useState([]); 
-    const [categories, setCategories] = useState([]); 
+    const [levels, setLevels] = useState([]);
+    const [categories, setCategories] = useState([]);
 
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
     console.log(roadmap);
 
     // Lấy levels + categories khi load component
@@ -153,7 +150,11 @@ const Roadmap = () => {
                                 >
                                     {loading ? (
                                         <>
-                                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                            <span
+                                                className="spinner-border spinner-border-sm me-2"
+                                                role="status"
+                                                aria-hidden="true"
+                                            ></span>
                                             Đang gợi ý...
                                         </>
                                     ) : (
@@ -170,14 +171,14 @@ const Roadmap = () => {
 
             {/* Hiển thị kết quả */}
             {loading && !roadmap && (
-                 <div className="text-center my-5 p-5 border rounded bg-light">
+                <div className="text-center my-5 p-5 border rounded bg-light">
                     <div className="spinner-grow text-primary" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </div>
                     <p className="mt-3 fw-bold text-primary">Hệ thống đang tạo roadmap cho bạn, vui lòng chờ...</p>
                 </div>
             )}
-            
+
             {roadmap && (
                 <div className={cx('roadmap-result', 'p-4', 'p-md-5', 'border', 'rounded-3', 'shadow')}>
                     {/* Thông tin Roadmap */}
@@ -190,15 +191,23 @@ const Roadmap = () => {
                     <h3 className="h4 fw-bold mb-4 text-primary">
                         <i className="bi bi-book-half me-2"></i> Khóa học gợi ý:
                     </h3>
-                    
+
                     <div className="list-group">
                         {roadmap.recommendedCourses?.map((course) => (
                             // Sử dụng Link thay thế cho div và thêm path động
-                            <Link 
-                                key={course.courseId} 
+                            <Link
+                                key={course.courseId}
                                 // Đường dẫn tới trang chi tiết khóa học. Giả định courseId là ID của khóa học.
                                 to={`/course/course-detail/${course.courseId}`}
-                                className={cx('course-item', 'list-group-item', 'list-group-item-action', 'p-4', 'mb-3', 'rounded-3', 'shadow-sm')}
+                                className={cx(
+                                    'course-item',
+                                    'list-group-item',
+                                    'list-group-item-action',
+                                    'p-4',
+                                    'mb-3',
+                                    'rounded-3',
+                                    'shadow-sm',
+                                )}
                             >
                                 <div className="d-flex w-100 justify-content-between">
                                     <h4 className="mb-1 fw-bold text-dark">{course.name}</h4>
@@ -210,14 +219,16 @@ const Roadmap = () => {
                                 <div className="d-flex justify-content-between align-items-center mt-3 border-top pt-2">
                                     <div className="small">
                                         <span className="me-3">
-                                            <i className="bi bi-tag-fill me-1"></i> Chủ đề: <span className="fw-semibold">{course.topic}</span>
+                                            <i className="bi bi-tag-fill me-1"></i> Chủ đề:{' '}
+                                            <span className="fw-semibold">{course.topic}</span>
                                         </span>
                                     </div>
                                     <div className="small fw-bold text-primary">
                                         <span className="me-3 text-warning">
-                                            <i className="bi bi-star-fill"></i> {course.averageRating}
+                                            {course.averageRating.toFixed(2)}{' '}
+                                            <FontAwesomeIcon icon={faStar} className="text-warning fs-5" />
                                         </span>
-                                        Giá: {formatCurrency(course.price)}$
+                                        Giá: {formatCurrency(course.price)}
                                     </div>
                                 </div>
                             </Link>

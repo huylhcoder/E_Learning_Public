@@ -65,7 +65,6 @@ function CourseManagerDetail() {
             const resp = await axios.get(`/course-manager-detail/${courseId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            console.log('Fetch course response:', resp.data);
 
             // Đảm bảo cập nhật toàn bộ state một lần
             setCourse(resp.data);
@@ -116,7 +115,11 @@ function CourseManagerDetail() {
     const handleSave = async (e) => {
         e.preventDefault();
 
-        console.log('contentDescription: ' + course.contentDescription || '');
+        const validationError = validateCourse(course);
+        if (validationError) {
+            toast.error(validationError);
+            return; // Dừng lại nếu dữ liệu không hợp lệ
+        }
 
         try {
             const formData = new FormData();
@@ -130,17 +133,10 @@ function CourseManagerDetail() {
             formData.append('topic', course.topic || '');
             formData.append('levelId', course.levelId || '');
 
-            console.log(course.categories);
-
             // Truyền nhiều category
             (course.categories || []).forEach((cat) => {
                 formData.append('categoryIds', cat.categoryId);
             });
-
-            // // ✅ gửi nhiều categoryIds
-            // if (course.categories && course.categories.length > 0) {
-            //     course.categories.forEach((cat) => formData.append('categoryIds', cat.categoryId));
-            // }
 
             if (selectedImage) {
                 const blob = dataURLtoBlob(selectedImage);
@@ -193,6 +189,28 @@ function CourseManagerDetail() {
         for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
         return new Blob([ab], { type: mimeString });
     }
+
+    // ----------- Utils: Thêm hàm validate ----------
+    const validateCourse = (course) => {
+        if (!course.name || course.name.trim() === '') {
+            return 'Tên khóa học không được để trống.';
+        }
+        if (!course.levelId) {
+            return 'Vui lòng chọn Độ khó cho khóa học.';
+        }
+        if (!course.categories || course.categories.length === 0) {
+            return 'Khóa học phải có ít nhất một Danh mục.';
+        }
+        if (!course.price || isNaN(Number(course.price)) || Number(course.price) < 0) {
+            return 'Giá khóa học phải là một số hợp lệ và không âm.';
+        }
+        // Thêm kiểm tra giá trị thực tế của price
+        if (Number(course.price) < 0) {
+            return 'Giá khóa học không được âm.';
+        }
+
+        return null; // Trả về null nếu hợp lệ
+    };
 
     if (isLoading) {
         return <div>Loading...</div>;
