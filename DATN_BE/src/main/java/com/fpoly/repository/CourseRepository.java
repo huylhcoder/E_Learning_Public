@@ -56,6 +56,20 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 			+ "AND (:category IS NULL OR cat.name LIKE %:category%) " + "AND c.status = 1")
 	List<Course> searchCourses(@Param("level") String level, @Param("category") String category);
 
+//Course Manager
+	/**
+	 * Tính tổng số bình luận (Comment) cho một khóa học.
+	 */
+	@Query("SELECT COUNT(c) FROM Comment c WHERE c.course.courseId = :courseId")
+	int countCommentsByCourseId(@Param("courseId") int courseId);
+
+	/**
+	 * Tính tổng số tiền (Revenue) từ các RegisteredCourse đã thanh toán
+	 * (statusPayment = true)
+	 */
+	@Query("SELECT SUM(rc.price) FROM RegisteredCourse rc WHERE rc.course.courseId = :courseId AND rc.statusPayment = true")
+	Double sumRevenueByCourseIdAndPaymentStatusTrue(@Param("courseId") int courseId);
+
 //Khác
 	// ------------ CÂU TRUY VẤN SQL CỦA HBảo ----------------------------------
 	// 1. LẤY DANH SÁCH KHÓA HỌC CÓ TRẠNG THÁI Status = 1

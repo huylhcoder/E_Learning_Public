@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { formatCurrency } from '~/utils/format';
 
 const formatDuration = (duration) => {
   const hours = Math.floor(duration / 3600);
@@ -84,7 +85,7 @@ const PostedCoursesTable = ({ list }) => {
               <small>Ngày tải lên</small>
             </td>
             <td>{item.numberOfComment}</td>
-            <td>{item.revenue} VNĐ</td>
+            <td>{formatCurrency(item.revenue)}</td>
           </tr>
         ))}
       </tbody>

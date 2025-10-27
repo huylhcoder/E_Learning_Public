@@ -26,6 +26,7 @@ import com.fpoly.dto.CourseDetailManagerDTO;
 import com.fpoly.dto.CourseManagerDTO;
 import com.fpoly.entity.Course;
 import com.fpoly.entity.User;
+import com.fpoly.repository.CourseRepository;
 import com.fpoly.service.CourseService;
 import com.fpoly.service.LessonService;
 import com.fpoly.service.SectionService;
@@ -40,6 +41,9 @@ public class CourseManagerController {
 	@Autowired
 	private CourseService courseService;
 	@Autowired
+	private CourseRepository courseRepository; // Cần inject thêm CourseRepository để sử dụng các phương thức tính toán
+												// mới
+	@Autowired
 	private SectionService sectionService;
 	@Autowired
 	private LessonService lessonService;
@@ -52,22 +56,36 @@ public class CourseManagerController {
 	// Hiển thị danh sách khóa học đang public + danh sách khóa học không công khai
 	@GetMapping("/posted-course")
 	public ResponseEntity<?> postedCourses() {
-		// Tìm kiểm khóa học đã đăng công khai(1) và không công khai (2)
+		// 1. Tìm kiểm khóa học đã đăng công khai(1) và không công khai (2)
 		List<Course> listCourse = courseService.hienThiKhoaHocTheoTrangThaiKhoaHoc_Huy(Arrays.asList(1, 2));
 		List<CourseManagerDTO> listCourseDTO = new ArrayList<CourseManagerDTO>();
+
 		for (Course item : listCourse) {
 			CourseManagerDTO courseDTO = new CourseManagerDTO();
+
+			// Lấy thông tin cơ bản
 			courseDTO.setCourseId(item.getCourseId());
 			courseDTO.setAvatar(item.getAvatar());
 			courseDTO.setName(item.getName());
 			courseDTO.setCourseDuration(item.getCourseDuration());
 			courseDTO.setStatus(item.getStatus());
 			courseDTO.setCreateAt(item.getCreateAt());
-			courseDTO.setNumberOfComment(0);
-			courseDTO.setRevenue(0);
-			//
+
+			// 2. TÍNH TOÁN DỮ LIỆU BỔ SUNG
+
+			// Tính tổng số bình luận
+			int totalComments = courseRepository.countCommentsByCourseId(item.getCourseId());
+			courseDTO.setNumberOfComment(totalComments);
+
+			// Tính tổng doanh thu (registered_course.status_payment = true)
+			Double totalRevenue = courseRepository.sumRevenueByCourseIdAndPaymentStatusTrue(item.getCourseId());
+			// Sử dụng totalRevenue ?? 0.0 để tránh NullPointerException nếu không có giao
+			// dịch
+			courseDTO.setRevenue(totalRevenue != null ? totalRevenue : 0.0);
+
 			listCourseDTO.add(courseDTO);
 		}
+
 		return ResponseEntity.ok(listCourseDTO);
 	}
 
@@ -143,13 +161,13 @@ public class CourseManagerController {
 		return ResponseEntity.ok("Chi tiết khóa học");
 	}
 
-	//Cập nhật khóa học + danh sách danh mục + ảnh đại diện mới (nếu có)
+	// Cập nhật khóa học + danh sách danh mục + ảnh đại diện mới (nếu có)
 	@PutMapping(value = "/update-course/{courseId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<?> updateCourseDetailInfo(@PathVariable("courseId") int courseId,
-			@RequestParam("name") Optional<String> name,
-			@RequestParam("status") Optional<Integer> status, @RequestParam("description") Optional<String> description,
-			@RequestParam("avatar") Optional<String> avatar, @RequestParam("price") Optional<Float> price,
-			@RequestParam("topic") Optional<String> topic, @RequestParam("listCategoryId") List<Integer> listCategoryId,
+			@RequestParam("name") Optional<String> name, @RequestParam("status") Optional<Integer> status,
+			@RequestParam("description") Optional<String> description, @RequestParam("avatar") Optional<String> avatar,
+			@RequestParam("price") Optional<Float> price, @RequestParam("topic") Optional<String> topic,
+			@RequestParam("listCategoryId") List<Integer> listCategoryId,
 			@RequestParam("levelId") Optional<Integer> levelId,
 			@RequestParam(value = "file", required = false) MultipartFile file)
 			throws IOException, java.io.IOException {
@@ -180,10 +198,10 @@ public class CourseManagerController {
 		}
 	}
 
-	
-	//Xóa phần của khóa học
+	// Xóa phần của khóa học
 	@DeleteMapping("/{courseId}/remove-section/{sectionId}")
-	public ResponseEntity<?> removSection(@PathVariable("courseId") int courseId, @PathVariable("sectionId") int sectionId) {
+	public ResponseEntity<?> removSection(@PathVariable("courseId") int courseId,
+			@PathVariable("sectionId") int sectionId) {
 		System.out.println(sectionId);
 		try {
 			sectionService.removeSection(sectionId);

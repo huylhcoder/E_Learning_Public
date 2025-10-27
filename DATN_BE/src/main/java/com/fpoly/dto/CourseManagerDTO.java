@@ -17,7 +17,7 @@ public class CourseManagerDTO {
 	private int status;// 0 => không công khai, 1 = công khai, 2 = không công khai
 	private Date createAt;
 	private int numberOfComment;// Số lượng comment
-	private float revenue;// Doanh thu
+	private double revenue;// Doanh thu
 	private float courseDuration;// Thời lượng
 
 	private List<CategoryDto> categories;
