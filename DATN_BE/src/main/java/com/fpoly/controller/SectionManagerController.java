@@ -308,22 +308,22 @@ public class SectionManagerController {
 //			Lesson lesssonUpdated = lessonService.updateLesson(lessonUpdate);
 //			lessonService.updateLessonDuration(lesssonUpdated.getLessonId(), lesssonUpdated.getLessionDuration());
 //			return ResponseEntity.ok(lesssonUpdated);
-			
-			Lesson lesssonUpdated = lessonService.updateLesson(lessonUpdate);
-	        // lessonService.updateLessonDuration(lesssonUpdated.getLessonId(), lesssonUpdated.getLessionDuration()); // Có vẻ thừa
 
-	        // 💡 BƯỚC 1: Cập nhật thời lượng Phần (Section)
-	        Section updatedSection = sectionService.calculateAndSetSectionDuration(sectionId);
-	        
-	        if (updatedSection != null) {
-	            // 💡 BƯỚC 2: Cập nhật thời lượng Khóa học (Course)
-	            int courseId = updatedSection.getCourse().getCourseId();
-	            courseService.calculateAndSetCourseDuration(courseId);
-	        }
-	        
-	        return ResponseEntity.ok(lesssonUpdated);
-	        
-	        
+			Lesson lesssonUpdated = lessonService.updateLesson(lessonUpdate);
+			// lessonService.updateLessonDuration(lesssonUpdated.getLessonId(),
+			// lesssonUpdated.getLessionDuration()); // Có vẻ thừa
+
+			// 💡 BƯỚC 1: Cập nhật thời lượng Phần (Section)
+			Section updatedSection = sectionService.calculateAndSetSectionDuration(sectionId);
+
+			if (updatedSection != null) {
+				// 💡 BƯỚC 2: Cập nhật thời lượng Khóa học (Course)
+				int courseId = updatedSection.getCourse().getCourseId();
+				courseService.calculateAndSetCourseDuration(courseId);
+			}
+
+			return ResponseEntity.ok(lesssonUpdated);
+
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("Có lỗi xảy ra khi thêm bài học: " + e.getMessage());
@@ -465,87 +465,6 @@ public class SectionManagerController {
 	}
 
 	// Import test
-//	@PostMapping("/{sectionId}/test/{testId}/import-quiz")
-//	public ResponseEntity<String> importExcel(@RequestParam("file") MultipartFile file,
-//	                                          @PathVariable("sectionId") int sectionId,
-//	                                          @PathVariable("testId") int testId) throws IOException, EncryptedDocumentException, java.io.IOException {
-//	    if (file.isEmpty()) {
-//	        return new ResponseEntity<>("File is empty", HttpStatus.BAD_REQUEST);
-//	    }
-//
-//	    Section section = sectionService.getSectionById_Huy(sectionId).orElse(null);
-//	    if (section == null) {
-//	        return ResponseEntity.notFound().build();
-//	    }
-//
-//	    Test test = testService.timKiemBaiQuizNhoNhatCuaSection(section);
-//	    if (test == null) {
-//	        return ResponseEntity.notFound().build();
-//	    }
-//
-//	    try {
-//	        Workbook workbook = WorkbookFactory.create(file.getInputStream());
-//	        Sheet sheet = workbook.getSheetAt(0);
-//
-//	        Map<String, Question> questionMap = new HashMap<>(); // Map để lưu các câu hỏi theo nội dung
-//	        List<Answer> answers = new ArrayList<>(); // Danh sách để lưu các đáp án
-//
-//	        for (Row row : sheet) {
-//	            if (row.getRowNum() == 0) continue; // Bỏ qua dòng tiêu đề
-//
-//	            // Lấy dữ liệu từ các cột
-//	            Cell questionCell = row.getCell(1); // QUESTION
-//	            Cell answerCell = row.getCell(2); // ANSWER
-//	            Cell correctCell = row.getCell(3); // CORRECT
-//
-//	            if (questionCell == null || answerCell == null || correctCell == null) {
-//	                continue; // Bỏ qua dòng không hợp lệ
-//	            }
-//
-//	            String questionContent = questionCell.getStringCellValue().trim();
-//
-//	            // Kiểm tra xem câu hỏi đã tồn tại trong Map hay chưa
-//	            Question question = questionMap.computeIfAbsent(questionContent, key -> {
-//	                Question newQuestion = new Question();
-//	                newQuestion.setTest(test);
-//	                newQuestion.setContents(key);
-//	                newQuestion.setListAnswer(new ArrayList<>());
-//	                return newQuestion;
-//	            });
-//
-//	            // Chuyển đổi nội dung của đáp án thành String
-//	            String answerContent;
-//	            if (answerCell.getCellType() == CellType.STRING) {
-//	                answerContent = answerCell.getStringCellValue().trim();
-//	            } else if (answerCell.getCellType() == CellType.NUMERIC) {
-//	                answerContent = String.valueOf((int) answerCell.getNumericCellValue());
-//	            } else {
-//	                continue; // Bỏ qua đáp án không hợp lệ
-//	            }
-//
-//	            // Tạo đáp án và liên kết với câu hỏi
-//	            Answer answer = new Answer();
-//	            answer.setQuestion(question); // Gắn câu hỏi vào đáp án
-//	            answer.setContent(answerContent);
-//	            answer.setCorrect(correctCell.getBooleanCellValue());
-//	            question.getListAnswer().add(answer); // Thêm đáp án vào danh sách của câu hỏi
-//
-//	            // Thêm đáp án vào danh sách lưu trữ
-//	            answers.add(answer);
-//	        }
-//
-//	        // Lưu các câu hỏi vào cơ sở dữ liệu
-//	        questionService.saveAll(new ArrayList<>(questionMap.values()));
-//
-//	        // Lưu các đáp án vào cơ sở dữ liệu
-//	        answerService.saveAll(answers);
-//
-//	        return new ResponseEntity<>("Import successful", HttpStatus.OK);
-//	    } catch (IOException e) {
-//	        return new ResponseEntity<>("Error reading file: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-//	    }
-//	}
-
 	@PostMapping("/{sectionId}/test/{testId}/import-quiz")
 	public ResponseEntity<?> importExcel(@RequestParam("file") MultipartFile file,
 			@PathVariable("sectionId") int sectionId, @PathVariable("testId") int testId)
@@ -668,6 +587,22 @@ public class SectionManagerController {
 		return ResponseEntity.ok(answerService.themDapAn(answerEntity));
 	}
 
+	@PostMapping("/{sectionId}/question-detail/{questionId}/add-answer-with-content")
+	public ResponseEntity<?> addAnswerWithContent(@PathVariable("sectionId") int sectionId,
+			@PathVariable("questionId") int questionId, @RequestBody AnswerDTO answerDTO) {
+
+		Question questionEntity = questionService.timKiemCauHoiTheoIdCauHoi_Huy(questionId)
+				.orElseThrow(() -> new RuntimeException("Không tìm thấy câu hỏi!"));
+
+		Answer answerEntity = new Answer();
+		answerEntity.setQuestion(questionEntity);
+		answerEntity.setContent(answerDTO.getText());
+		answerEntity.setCorrect(answerDTO.isCorrect());
+
+		Answer saved = answerService.themDapAn(answerEntity);
+		return ResponseEntity.ok(saved);
+	}
+
 	@DeleteMapping("/{sectionId}/question-detail/{questionId}/remove-answer/{answerId}")
 	public ResponseEntity<?> removeAnswerForQuestion(@PathVariable("answerId") int answerId) {
 		System.out.println(answerId);
@@ -726,7 +661,8 @@ public class SectionManagerController {
 		return ResponseEntity.ok(existingQuestion);
 	}
 
-	@DeleteMapping("/{sectionId}/question-detail/{questionId}/remove-question") // Xóa câu hỏi
+	// Xóa câu hỏi
+	@DeleteMapping("/{sectionId}/question-detail/{questionId}/remove-question")
 	public ResponseEntity<?> removeQuestion(@PathVariable("questionId") int questionId) {
 		System.out.println(questionId);
 
@@ -750,30 +686,64 @@ public class SectionManagerController {
 		return ResponseEntity.ok(questionCanDuocXoa);
 	}
 
-	@PostMapping("/{sectionId}/test-manager/{testId}/add-question") // Thêm câu hỏi mới
-	public ResponseEntity<?> addQuestion(@PathVariable("testId") int testId, @RequestBody QuestionDTO questionDTO) {
-		// Tạo bài kiểm tra
-		Question questionEntity = new Question();
-		questionEntity.setContents(questionDTO.getContents());
-		// Tìm bài kiểm tra dựa trên ID
-		Test test = testService.timTestTheoIdTam(testId);
-		if (test == null) {
-			return ResponseEntity.notFound().build(); // Trả về lỗi nếu không tìm thấy bài kiểm tra
-		}
-		questionEntity.setTest(test); // Gán bài kiểm tra cho câu hỏi
-		Question createdQuestion = questionService.addQuestion(questionEntity);
-		// Duyệt list => add đáp án
-		for (AnswerDTO answerDTO : questionDTO.getListAnswerDTO()) {
-			// Add đáp án
-			Answer answer = new Answer();
-			answer.setContent(answerDTO.getText());
-			System.out.println("Trạng thái đáp án: " + answerDTO.isCorrect() + " - " + answerDTO.isCorrect());
-			answer.setCorrect(answerDTO.isCorrect());
-			answer.setQuestion(createdQuestion);
-			answerService.save(answer);
+	// Thêm câu hỏi mới
+//	@PostMapping("/{sectionId}/test-manager/{testId}/add-question") 
+//	public ResponseEntity<?> addQuestion(@PathVariable("testId") int testId, @RequestBody QuestionDTO questionDTO) {
+//		// Tạo bài kiểm tra
+//		Question questionEntity = new Question();
+//		questionEntity.setContents(questionDTO.getContents());
+//		// Tìm bài kiểm tra dựa trên ID
+//		Test test = testService.timTestTheoIdTam(testId);
+//		if (test == null) {
+//			return ResponseEntity.notFound().build(); // Trả về lỗi nếu không tìm thấy bài kiểm tra
+//		}
+//		questionEntity.setTest(test); // Gán bài kiểm tra cho câu hỏi
+//		Question createdQuestion = questionService.addQuestion(questionEntity);
+//		// Duyệt list => add đáp án
+//		for (AnswerDTO answerDTO : questionDTO.getListAnswerDTO()) {
+//			// Add đáp án
+//			Answer answer = new Answer();
+//			answer.setContent(answerDTO.getText());
+//			System.out.println("Trạng thái đáp án: " + answerDTO.isCorrect() + " - " + answerDTO.isCorrect());
+//			answer.setCorrect(answerDTO.isCorrect());
+//			answer.setQuestion(createdQuestion);
+//			answerService.save(answer);
+//
+//		}
+//		return ResponseEntity.ok(createdQuestion);
+//	}
+	@PostMapping("/{sectionId}/test-manager/{testId}/add-question")
+	public ResponseEntity<?> addQuestionWithAnswers(@PathVariable("sectionId") int sectionId,
+			@PathVariable("testId") int testId, @RequestBody QuestionDTO questionDTO) {
 
+		try {
+			// 1️⃣ Lấy bài test theo ID
+			Test testEntity = testService.findById(testId)
+					.orElseThrow(() -> new RuntimeException("Không tìm thấy bài kiểm tra!"));
+
+			// 2️⃣ Tạo entity Question
+			Question questionEntity = new Question();
+			questionEntity.setContents(questionDTO.getContents());
+			questionEntity.setTest(testEntity);
+
+			// 3️⃣ Lưu question trước (để có ID)
+			Question savedQuestion = questionService.save(questionEntity);
+
+			// 4️⃣ Duyệt qua listAnswerDTO và lưu từng đáp án
+			if (questionDTO.getListAnswerDTO() != null && !questionDTO.getListAnswerDTO().isEmpty()) {
+				for (AnswerDTO answerDTO : questionDTO.getListAnswerDTO()) {
+					Answer answerEntity = new Answer();
+					answerEntity.setQuestion(savedQuestion);
+					answerEntity.setContent(answerDTO.getText());
+					answerEntity.setCorrect(answerDTO.isCorrect());
+					answerService.save(answerEntity);
+				}
+			}
+
+			return ResponseEntity.ok(savedQuestion);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body("Lỗi khi thêm câu hỏi: " + e.getMessage());
 		}
-		return ResponseEntity.ok(createdQuestion);
 	}
 
 	// Tạo bài kiểm tra mới
@@ -792,7 +762,7 @@ public class SectionManagerController {
 		return ResponseEntity.ok(createdTest);
 	}
 
-	// Tạo bài kiểm tra mới
+	// Lưu đồng hồ đếm ngược
 	@PostMapping("/{sectionId}/update-countdown-timer/{testId}/{setCountdownTimer}")
 	public ResponseEntity<?> updateCountdownTimer(@PathVariable("sectionId") int sectionId,
 			@PathVariable("testId") int testId, @PathVariable("setCountdownTimer") int setCountdownTimer) {

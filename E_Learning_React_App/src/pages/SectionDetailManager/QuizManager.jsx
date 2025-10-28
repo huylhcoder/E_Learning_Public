@@ -13,53 +13,41 @@ const QuizManager = ({ sectionId, token }) => {
     const [listQuestion, setListQuestion] = useState([]);
     const [questionDetail, setQuestionDetail] = useState(null);
     const [questionIdToDelete, setQuestionIdToDelete] = useState(null);
-    const [newQuestion, setNewQuestion] = useState({
-        contents: '',
-        listAnswerDTO: [{ text: '', correct: false }],
-    });
+    const [validationErrors, setValidationErrors] = useState({});
+
+    const [isNewQuestion, setIsNewQuestion] = useState(false);
 
     const fileInputRef = useRef();
-    let timeoutRef = useRef(null);
-
-    // // Lấy bài test
-    // const getTest = async () => {
-    //     try {
-    //         const resp = await axios.get(`/section-manager/${sectionId}/test-manager`, {
-    //             headers: { Authorization: `Bearer ${token}` },
-    //         });
-    //         setTestId(resp?.data?.testID);
-    //         setCountdownTimer(resp?.data?.countdownTimer);
-    //         setListQuestion(resp?.data?.listQuestion);
-    //     } catch (err) {
-    //         setListQuestion([]);
-    //         console.error('Không thể load bài kiểm tra', err);
-    //     }
-    // };
-
-    // Lấy bài test
-    const getTest = async () => {
-        try {
-            const resp = await axios.get(`/section-manager/${sectionId}/test-manager`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            // API đã được sửa để trả về body với testID = 0 khi chưa có test.
-            // Dù là 200 OK, chúng ta vẫn nhận được resp.data và xử lý bình thường.
-            setTestId(resp?.data?.testID);
-            setCountdownTimer(resp?.data?.countdownTimer);
-            setListQuestion(resp?.data?.listQuestion);
-        } catch (err) {
-            // Khối catch này chỉ bắt các lỗi không mong muốn (ví dụ: lỗi mạng, 500 Internal Server Error)
-            // Vì 404 khi không có test đã được chuyển thành 200 OK với testID=0 ở backend.
-            // KHÔNG cần setTestId(0) ở đây nữa vì nó đã được set thông qua resp.data ở khối try.
-            console.error('Lỗi khi tải dữ liệu bài kiểm tra:', err);
-            // Có thể thêm toast.error cho người dùng nếu đây là lỗi server thực sự
-        }
-    };
+    const inputRefs = useRef([]); // lưu danh sách ref của các input đáp án
 
     useEffect(() => {
         getTest();
     }, [sectionId]);
+
+    useEffect(() => {
+        if (questionDetail?.listAnswerDTO?.length) {
+            inputRefs.current = inputRefs.current.slice(0, questionDetail.listAnswerDTO.length);
+        }
+    }, [questionDetail]);
+
+    // **************************************************************************************
+    // CÁC HÀM XỬ LÝ DỮ LIỆU CHUNG
+    // **************************************************************************************
+
+    // Tạo test mới
+    const addTest = async () => {
+        try {
+            await axios.post(
+                `/section-manager/${sectionId}/add-test`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } },
+            );
+            toast.success('Tạo bài kiểm tra thành công');
+            getTest();
+        } catch {
+            toast.error('Lỗi khi tạo test');
+        }
+    };
 
     // Cập nhật countdownTimer
     const updateCountdownTimer = async () => {
@@ -73,6 +61,20 @@ const QuizManager = ({ sectionId, token }) => {
             getTest();
         } catch (err) {
             toast.error('Thời gian phải >= 0 và là số');
+        }
+    };
+
+    // Lấy bài test và danh sách câu hỏi
+    const getTest = async () => {
+        try {
+            const resp = await axios.get(`/section-manager/${sectionId}/test-manager`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTestId(resp?.data?.testID);
+            setCountdownTimer(resp?.data?.countdownTimer);
+            setListQuestion(resp?.data?.listQuestion || []);
+        } catch (err) {
+            console.error('Lỗi khi tải dữ liệu bài kiểm tra:', err);
         }
     };
 
@@ -96,27 +98,60 @@ const QuizManager = ({ sectionId, token }) => {
         }
     };
 
-    // Lấy chi tiết câu hỏi
+    // Chuẩn bị form cho việc THÊM MỚI câu hỏi
+    const addNewQuestion = () => {
+        const timestamp = Date.now();
+        const newQuestion = {
+            questionId: 0,
+            contents: '',
+            listAnswerDTO: [
+                { answerId: timestamp, text: '', correct: true },
+                { answerId: timestamp + 1, text: '', correct: false },
+            ],
+        };
+
+        console.log('✅ Câu hỏi khởi tạo:', newQuestion);
+
+        setIsNewQuestion(true);
+        setQuestionDetail(newQuestion);
+    };
+
+    // Lấy chi tiết câu hỏi (Chế độ CHỈNH SỬA)
     const showQuestionDetail = async (questionId) => {
+        setIsNewQuestion(false);
         try {
             const resp = await axios.get(`/section-manager/${sectionId}/question-detail/${questionId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setQuestionDetail(resp.data);
+            console.log('Chi tiết câu hỏi: ' + JSON.stringify(resp.data.listAnswerDTO));
         } catch (err) {
             setQuestionDetail(null);
+            toast.error('Không tìm thấy chi tiết câu hỏi.');
         }
     };
 
-    // Thêm đáp án mới
+    // Thêm đáp án mới (API POST đáp án trống HOẶC cập nhật local)
     const addAnswer = async (questionId) => {
+        if (questionId === 0) {
+            // Trường hợp đang tạo mới (isNewQuestion = true) -> Chỉ thêm vào local state
+            setQuestionDetail((prev) => ({
+                ...prev,
+                listAnswerDTO: [...prev.listAnswerDTO, { answerId: Date.now(), text: '', correct: false }],
+            }));
+            return;
+        }
+
+        // Trường hợp đang chỉnh sửa (isNewQuestion = false) -> Gọi API tạo đáp án trống
+        // Sau đó gọi lại showQuestionDetail để tải đáp án với ID thực
         try {
             await axios.post(
                 `/section-manager/${sectionId}/question-detail/${questionId}/add-answer`,
                 {},
                 { headers: { Authorization: `Bearer ${token}` } },
             );
-            showQuestionDetail(questionId);
+            toast.success('Thêm đáp án thành công');
+            showQuestionDetail(questionId); // Tải lại chi tiết để lấy ID mới
         } catch {
             toast.error('Lỗi khi thêm đáp án');
         }
@@ -124,6 +159,29 @@ const QuizManager = ({ sectionId, token }) => {
 
     // Xóa đáp án
     const removeAnswer = async (questionId, answerId) => {
+        if (!questionDetail) return;
+
+        if (questionDetail.listAnswerDTO.length <= 1) {
+            toast.warning('Phải có ít nhất 1 đáp án.');
+            return;
+        }
+
+        // Xóa local nếu đang tạo mới (questionId = 0) HOẶC nếu answerId là ID tạm thời (không phải số dương)
+        if (questionId === 0 || !(answerId > 0)) {
+            setQuestionDetail((prev) => {
+                const newList = prev.listAnswerDTO.filter((a) => a.answerId !== answerId);
+
+                const remainingCorrect = newList.find((a) => a.correct);
+                if (!remainingCorrect && newList.length > 0) {
+                    newList[0].correct = true;
+                }
+
+                return { ...prev, listAnswerDTO: newList };
+            });
+            return;
+        }
+
+        // Xóa API nếu đang chỉnh sửa (questionId > 0) và answerId là ID thực (> 0)
         try {
             await axios.delete(
                 `/section-manager/${sectionId}/question-detail/${questionId}/remove-answer/${answerId}`,
@@ -131,83 +189,28 @@ const QuizManager = ({ sectionId, token }) => {
                     headers: { Authorization: `Bearer ${token}` },
                 },
             );
-            showQuestionDetail(questionId);
-            getTest();
+            // Cập nhật lại state sau khi xóa API thành công
+            setQuestionDetail((prev) => {
+                const newList = prev.listAnswerDTO.filter((a) => a.answerId !== answerId);
+
+                // Đảm bảo vẫn có 1 đáp án đúng sau khi xóa
+                const remainingCorrect = newList.find((a) => a.correct);
+                if (!remainingCorrect && newList.length > 0) {
+                    newList[0].correct = true;
+                    // CHÚ Ý: Cần cập nhật lại API nếu đáp án đúng bị thay đổi
+                    // Trong trường hợp này, ta sẽ gọi getTest() và dựa vào saveOrUpdateQuestion để cập nhật sau.
+                }
+
+                return { ...prev, listAnswerDTO: newList };
+            });
+            getTest(); // Tải lại danh sách bên ngoài
             toast.success('Xóa đáp án thành công');
         } catch {
             toast.error('Lỗi khi xóa đáp án');
         }
     };
 
-    // Cập nhật nội dung câu hỏi (debounce 2s)
-    // const onQuestionChange = (questionId, contents) => {
-    //     setQuestionDetail((prev) => ({ ...prev, contents }));
-    //     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    //     timeoutRef.current = setTimeout(async () => {
-    //         try {
-    //             await axios.put(
-    //                 `/section-manager/${sectionId}/question-detail/${questionId}`,
-    //                 { contents },
-    //                 {
-    //                     headers: {
-    //                         Authorization: `Bearer ${token}`,
-    //                         'Content-Type': 'application/json',
-    //                     },
-    //                 },
-    //             );
-    //             toast.success('Cập nhật câu hỏi thành công');
-    //         } catch {
-    //             toast.error('Lỗi khi cập nhật câu hỏi');
-    //         }
-    //     }, 2000);
-    // };
-
-    // // Cập nhật nội dung đáp án (debounce 2s)
-    // const onAnswerChange = (questionId, answer) => {
-    //     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    //     timeoutRef.current = setTimeout(async () => {
-    //         try {
-    //             await axios.put(
-    //                 `/section-manager/${sectionId}/question-detail/${questionId}/update-answer/${answer.answerId}`,
-    //                 { content: answer.text, isCorrect: answer.correct },
-    //                 {
-    //                     headers: {
-    //                         Authorization: `Bearer ${token}`,
-    //                         'Content-Type': 'application/json',
-    //                     },
-    //                 },
-    //             );
-    //         } catch {
-    //             toast.error('Lỗi khi cập nhật đáp án');
-    //         }
-    //     }, 2000);
-    // };
-
-    // // Cập nhật đáp án đúng
-    // const updateCorrectAnswer = async (questionId, selectedAnswer) => {
-    //     const updatedList = questionDetail.listAnswerDTO.map((a) => ({
-    //         ...a,
-    //         correct: a.answerId === selectedAnswer.answerId,
-    //     }));
-    //     setQuestionDetail((prev) => ({ ...prev, listAnswerDTO: updatedList }));
-    //     try {
-    //         await axios.put(
-    //             `/section-manager/${sectionId}/question-detail/${questionId}/update-anwer-correct`,
-    //             updatedList,
-    //             {
-    //                 headers: {
-    //                     Authorization: `Bearer ${token}`,
-    //                     'Content-Type': 'application/json',
-    //                 },
-    //             },
-    //         );
-    //         getTest();
-    //     } catch {
-    //         toast.error('Lỗi khi cập nhật đáp án đúng');
-    //     }
-    // };
-
-    // Xóa câu hỏi
+    // Xóa câu hỏi (dùng cho nút Xóa bên ngoài)
     const confirmDeleteQuestion = async () => {
         if (!questionIdToDelete) return;
         try {
@@ -221,20 +224,153 @@ const QuizManager = ({ sectionId, token }) => {
         }
     };
 
-    // Tạo test mới
-    const addTest = async () => {
+    // **************************************************************************************
+    // HÀM XỬ LÝ CẬP NHẬT LOCAL STATE TRONG MODAL
+    // **************************************************************************************
+
+    const handleAnswerTextChange = (e, index) => {
+        const newText = e.target.value;
+        setQuestionDetail((prev) => {
+            if (!prev) return prev;
+            const newListAnswer = prev.listAnswerDTO.map((answer, i) => {
+                if (i === index) {
+                    return { ...answer, text: newText };
+                }
+                return answer;
+            });
+            return {
+                ...prev,
+                listAnswerDTO: newListAnswer,
+            };
+        });
+    };
+
+    const handleAnswerCorrectChange = (index) => {
+        setQuestionDetail((prev) => {
+            if (!prev) return prev;
+            const newListAnswer = prev.listAnswerDTO.map((answer, i) => {
+                return { ...answer, correct: i === index };
+            });
+            return {
+                ...prev,
+                listAnswerDTO: newListAnswer,
+            };
+        });
+    };
+
+    // **************************************************************************************
+    // HÀM LƯU / CẬP NHẬT CHUNG
+    // **************************************************************************************
+
+    const saveOrUpdateQuestion = async () => {
+        if (!questionDetail) return;
+
+        let errors = {};
+
+        // 🧩 Kiểm tra nội dung câu hỏi
+        if (!questionDetail.contents.trim()) {
+            errors.contents = 'Nội dung câu hỏi không được để trống';
+        }
+
+        // 🧩 Kiểm tra số lượng đáp án
+        if (questionDetail.listAnswerDTO.length < 2) {
+            errors.answers = 'Phải có ít nhất 2 đáp án';
+        }
+
+        // 🧩 Kiểm tra nội dung các đáp án
+        const emptyAnswers = questionDetail.listAnswerDTO.some((a) => !a.text.trim());
+        if (emptyAnswers) {
+            errors.answerText = 'Không được để trống nội dung đáp án';
+        }
+
+        // 🧩 Kiểm tra đúng 1 đáp án đúng
+        const correctCount = questionDetail.listAnswerDTO.filter((a) => a.correct).length;
+        if (correctCount !== 1) {
+            errors.correct = 'Phải có chính xác 1 đáp án đúng';
+        }
+
+        setValidationErrors(errors);
+
+        if (Object.keys(errors).length > 0) {
+            toast.error('Vui lòng kiểm tra lại thông tin trước khi lưu.');
+            return;
+        }
+
         try {
-            await axios.post(
-                `/section-manager/${sectionId}/add-test`,
-                {},
-                { headers: { Authorization: `Bearer ${token}` } },
-            );
-            toast.success('Tạo bài kiểm tra thành công');
+            if (isNewQuestion) {
+                console.log('List câu hỏi khi tạo: ' + JSON.stringify(questionDetail.listAnswerDTO));
+
+                const newQuestionDTO = {
+                    contents: questionDetail.contents,
+                    listAnswerDTO: questionDetail.listAnswerDTO.map((a) => ({
+                        text: a.text,
+                        correct: a.correct, // ✅ đổi từ isCorrect → correct
+                    })),
+                };
+
+                try {
+                    await axios.post(
+                        `/section-manager/${sectionId}/test-manager/${testId}/add-question`,
+                        newQuestionDTO,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                'Content-Type': 'application/json',
+                            },
+                        },
+                    );
+
+                    toast.success('Thêm câu hỏi và đáp án thành công!');
+                    getTest();
+                } catch (error) {
+                    console.error(error);
+                    toast.error('Lỗi khi thêm câu hỏi hoặc đáp án!');
+                }
+            } else {
+                const questionId = questionDetail.questionId;
+
+                await axios.put(
+                    `/section-manager/${sectionId}/question-detail/${questionId}`,
+                    { contents: questionDetail.contents },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    },
+                );
+
+                const updatePromises = questionDetail.listAnswerDTO.map((ans) => {
+                    const answerData = { content: ans.text, isCorrect: ans.correct };
+                    if (ans.answerId && ans.answerId > 0) {
+                        return axios.put(
+                            `/section-manager/${sectionId}/question-detail/${questionId}/update-answer/${ans.answerId}`,
+                            answerData,
+                            { headers: { Authorization: `Bearer ${token}` } },
+                        );
+                    } else {
+                        return axios.post(
+                            `/section-manager/${sectionId}/question-detail/${questionId}/add-answer-with-content`,
+                            answerData,
+                            { headers: { Authorization: `Bearer ${token}` } },
+                        );
+                    }
+                });
+
+                await Promise.all(updatePromises);
+                toast.success('Cập nhật thành công!');
+            }
+
             getTest();
-        } catch {
-            toast.error('Lỗi khi tạo test');
+        } catch (error) {
+            console.error(error);
+            toast.error('Lỗi khi lưu/cập nhật câu hỏi!');
         }
     };
+
+    // **************************************************************************************
+    // GIAO DIỆN (GIỮ NGUYÊN)
+    // **************************************************************************************
 
     return (
         <div className="mt-3">
@@ -260,9 +396,17 @@ const QuizManager = ({ sectionId, token }) => {
                         <button className="btn btn-primary ms-2 ps-2 pe-2 fs-5" onClick={updateCountdownTimer}>
                             <FaSave /> Lưu
                         </button>
-                        {/* <button className="btn btn-primary ms-2 ps-2 pe-2 fs-5" onClick={updateCountdownTimer}>
-                            <FaUpload /> Import Excel
-                        </button> */}
+
+                        {/* NÚT THÊM CÂU HỎI MỚI */}
+                        <button
+                            className="btn btn-success ms-2 ps-2 pe-2 fs-5"
+                            onClick={addNewQuestion}
+                            data-bs-toggle="modal"
+                            data-bs-target="#editModal"
+                        >
+                            <FaPlus /> Thêm câu hỏi
+                        </button>
+
                         <button
                             className="btn btn-primary ms-2 ps-2 pe-2 fs-5"
                             data-bs-toggle="modal"
@@ -270,6 +414,7 @@ const QuizManager = ({ sectionId, token }) => {
                         >
                             <FaUpload /> Import Excel
                         </button>
+
                         {/* Modal import file */}
                         <div className="modal fade" id="importModal" tabIndex="-1">
                             <div className="modal-dialog">
@@ -296,7 +441,7 @@ const QuizManager = ({ sectionId, token }) => {
                                             Đóng
                                         </button>
                                         <button
-                                            className="btn btn-success"
+                                            className="btn btn-primary"
                                             onClick={uploadFile}
                                             data-bs-dismiss="modal"
                                         >
@@ -306,6 +451,7 @@ const QuizManager = ({ sectionId, token }) => {
                                 </div>
                             </div>
                         </div>
+
                         {/* Nút tải mẫu */}
                         <a href={sampleExcel} className="btn btn-primary ms-2 ps-2 pe-2 fs-5" download>
                             <FaDownload /> Tải Mẫu Excel
@@ -313,7 +459,6 @@ const QuizManager = ({ sectionId, token }) => {
                     </div>
 
                     {/* Danh sách câu hỏi */}
-
                     {listQuestion?.map((q, idx) => (
                         <div key={q.questionId} className="card mt-3 mb-3">
                             <div className="card-body">
@@ -360,12 +505,15 @@ const QuizManager = ({ sectionId, token }) => {
                         </div>
                     ))}
 
-                    {/* Modal chỉnh sửa câu hỏi */}
+                    {/* Modal chỉnh sửa/thêm mới câu hỏi */}
                     <div className="modal fade" id="editModal" tabIndex="-1">
                         <div className="modal-dialog modal-lg">
                             <div className="modal-content">
                                 <div className="modal-header">
-                                    <h5 className="modal-title">Chỉnh sửa câu hỏi</h5>
+                                    {/* Tiêu đề động */}
+                                    <h5 className="modal-title">
+                                        {isNewQuestion ? 'Thêm mới câu hỏi' : 'Chỉnh sửa câu hỏi'}
+                                    </h5>
                                     <button
                                         type="button"
                                         className="btn-close"
@@ -394,45 +542,31 @@ const QuizManager = ({ sectionId, token }) => {
 
                                             {/* Danh sách đáp án */}
                                             <div className="mb-3">
-                                                <label className="form-label fw-bold">Danh sách đáp án</label>
-                                                {questionDetail.listAnswerDTO.map((ans, index) => (
+                                                <label className="form-label fw-bold">
+                                                    Danh sách đáp án (Tối thiểu 2)
+                                                </label>
+                                                {/* {questionDetail.listAnswerDTO.map((ans, index) => (
                                                     <div key={ans.answerId} className="d-flex align-items-center mb-2">
                                                         <input
                                                             type="radio"
                                                             className="form-check-input me-2"
                                                             name="correctAnswer"
                                                             checked={ans.correct}
-                                                            onChange={() =>
-                                                                setQuestionDetail((prev) => ({
-                                                                    ...prev,
-                                                                    listAnswerDTO: prev.listAnswerDTO.map((a) =>
-                                                                        a.answerId === ans.answerId
-                                                                            ? { ...a, correct: true }
-                                                                            : { ...a, correct: false },
-                                                                    ),
-                                                                }))
-                                                            }
+                                                            onChange={() => handleAnswerCorrectChange(index)}
                                                         />
                                                         <input
                                                             type="text"
                                                             className="form-control"
                                                             value={ans.text}
-                                                            onChange={(e) =>
-                                                                setQuestionDetail((prev) => ({
-                                                                    ...prev,
-                                                                    listAnswerDTO: prev.listAnswerDTO.map((a) =>
-                                                                        a.answerId === ans.answerId
-                                                                            ? { ...a, text: e.target.value }
-                                                                            : a,
-                                                                    ),
-                                                                }))
-                                                            }
+                                                            onChange={(e) => handleAnswerTextChange(e, index)}
                                                         />
                                                         <button
                                                             className="btn btn-sm btn-danger ms-2"
                                                             onClick={() =>
                                                                 removeAnswer(questionDetail.questionId, ans.answerId)
                                                             }
+                                                            // Vô hiệu hóa nút xóa nếu chỉ còn 1 đáp án
+                                                            disabled={questionDetail.listAnswerDTO.length <= 1}
                                                         >
                                                             <FaTrash />
                                                         </button>
@@ -443,7 +577,51 @@ const QuizManager = ({ sectionId, token }) => {
                                                     onClick={() => addAnswer(questionDetail.questionId)}
                                                 >
                                                     <FaPlus /> Thêm đáp án
-                                                </button>
+                                                </button> */}
+                                                {questionDetail.listAnswerDTO.map((ans, index) => (
+                                                    <div key={ans.answerId} className="d-flex align-items-center mb-2">
+                                                        <input
+                                                            type="radio"
+                                                            className="form-check-input me-2"
+                                                            name="correctAnswer"
+                                                            checked={ans.correct}
+                                                            onChange={() => handleAnswerCorrectChange(index)}
+                                                        />
+                                                        <input
+                                                            ref={(el) => (inputRefs.current[index] = el)}
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={ans.text}
+                                                            onChange={(e) => handleAnswerTextChange(e, index)}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Tab') {
+                                                                    e.preventDefault();
+                                                                    const next = inputRefs.current[index + 1];
+                                                                    if (next) {
+                                                                        next.focus(); // focus tới đáp án tiếp theo
+                                                                    } else {
+                                                                        // nếu đang ở ô cuối thì tự thêm đáp án mới
+                                                                        addAnswer(questionDetail.questionId);
+                                                                        setTimeout(() => {
+                                                                            const newInput =
+                                                                                inputRefs.current[index + 1];
+                                                                            if (newInput) newInput.focus();
+                                                                        }, 100);
+                                                                    }
+                                                                }
+                                                            }}
+                                                        />
+                                                        <button
+                                                            className="btn btn-sm btn-danger ms-2"
+                                                            onClick={() =>
+                                                                removeAnswer(questionDetail.questionId, ans.answerId)
+                                                            }
+                                                            disabled={questionDetail.listAnswerDTO.length <= 1}
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </>
                                     ) : (
@@ -457,43 +635,10 @@ const QuizManager = ({ sectionId, token }) => {
                                     <button
                                         type="button"
                                         className="btn btn-primary"
-                                        onClick={async () => {
-                                            try {
-                                                // Cập nhật nội dung câu hỏi
-                                                await axios.put(
-                                                    `/section-manager/${sectionId}/question-detail/${questionDetail.questionId}`,
-                                                    { contents: questionDetail.contents },
-                                                    {
-                                                        headers: {
-                                                            Authorization: `Bearer ${token}`,
-                                                            'Content-Type': 'application/json',
-                                                        },
-                                                    },
-                                                );
-
-                                                // Cập nhật danh sách đáp án
-                                                for (let ans of questionDetail.listAnswerDTO) {
-                                                    await axios.put(
-                                                        `/section-manager/${sectionId}/question-detail/${questionDetail.questionId}/update-answer/${ans.answerId}`,
-                                                        { content: ans.text, isCorrect: ans.correct },
-                                                        {
-                                                            headers: {
-                                                                Authorization: `Bearer ${token}`,
-                                                                'Content-Type': 'application/json',
-                                                            },
-                                                        },
-                                                    );
-                                                }
-
-                                                toast.success('Cập nhật thành công!');
-                                                getTest();
-                                            } catch {
-                                                toast.error('Lỗi khi cập nhật câu hỏi');
-                                            }
-                                        }}
+                                        onClick={saveOrUpdateQuestion}
                                         data-bs-dismiss="modal"
                                     >
-                                        <FaSave /> Lưu thay đổi
+                                        <FaSave /> {isNewQuestion ? 'Tạo mới' : 'Lưu thay đổi'}
                                     </button>
                                 </div>
                             </div>

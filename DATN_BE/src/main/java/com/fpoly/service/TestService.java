@@ -87,7 +87,7 @@ public class TestService {
 		// Lưu DB
 		return userTestResultRepository.save(newResult);
 	}
-	
+
 	@Transactional
 	public TestQuestionsDTO getTestQuestions(Integer testId, String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -99,8 +99,8 @@ public class TestService {
 				user.getUserId());
 
 		// tìm kết quả thi (UserTestResult)
-		UserTestResult userTestResult = userTestResultRepository.findByTest_TestIdAndUser_UserId(testId, user.getUserId())
-				.orElse(null);
+		UserTestResult userTestResult = userTestResultRepository
+				.findByTest_TestIdAndUser_UserId(testId, user.getUserId()).orElse(null);
 		UserTestResult updateResult;
 		if (userTestResult == null) {
 			// lần đầu mở đề → tạo mới
@@ -174,43 +174,36 @@ public class TestService {
 		return dto;
 	}
 
-	
 	@Transactional
 	public void saveUserAnswer(Integer testId, SaveAnswerRequest request, String email) {
-	    User user = userRepository.findByEmail(email)
-	            .orElseThrow(() -> new RuntimeException("User not found"));
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
-	    Answer answer = answerRepository.getReferenceById(request.getAnswerId());
+		Answer answer = answerRepository.getReferenceById(request.getAnswerId());
 
-	    // Kiểm tra đã có lịch sử chưa
-	    Optional<UserAnswerHistory> optionalHistory =
-	            userAnswerHistoryRepository.findByUserAndTestAndQuestion(
-	                    user,
-	                    testRepository.getReferenceById(testId),
-	                    questionRepository.getReferenceById(request.getQuestionId())
-	            );
+		// Kiểm tra đã có lịch sử chưa
+		Optional<UserAnswerHistory> optionalHistory = userAnswerHistoryRepository.findByUserAndTestAndQuestion(user,
+				testRepository.getReferenceById(testId), questionRepository.getReferenceById(request.getQuestionId()));
 
-	    UserAnswerHistory userAnswerHistory;
+		UserAnswerHistory userAnswerHistory;
 
-	    if (optionalHistory.isPresent()) {
-	        // Nếu đã tồn tại thì update
-	        userAnswerHistory = optionalHistory.get();
-	        userAnswerHistory.setAnswer(answer);
-	        userAnswerHistory.setCorrect(answer.isCorrect());
-	    } else {
-	        // Nếu chưa có thì tạo mới
-	        userAnswerHistory = new UserAnswerHistory();
-	        userAnswerHistory.setUser(user);
-	        userAnswerHistory.setTest(testRepository.getReferenceById(testId));
-	        userAnswerHistory.setQuestion(questionRepository.getReferenceById(request.getQuestionId()));
-	        userAnswerHistory.setAnswer(answer);
-	        userAnswerHistory.setCorrect(answer.isCorrect());
-	        userAnswerHistory.setCreateAt(new Date());
-	    }
+		if (optionalHistory.isPresent()) {
+			// Nếu đã tồn tại thì update
+			userAnswerHistory = optionalHistory.get();
+			userAnswerHistory.setAnswer(answer);
+			userAnswerHistory.setCorrect(answer.isCorrect());
+		} else {
+			// Nếu chưa có thì tạo mới
+			userAnswerHistory = new UserAnswerHistory();
+			userAnswerHistory.setUser(user);
+			userAnswerHistory.setTest(testRepository.getReferenceById(testId));
+			userAnswerHistory.setQuestion(questionRepository.getReferenceById(request.getQuestionId()));
+			userAnswerHistory.setAnswer(answer);
+			userAnswerHistory.setCorrect(answer.isCorrect());
+			userAnswerHistory.setCreateAt(new Date());
+		}
 
-	    userAnswerHistoryRepository.save(userAnswerHistory);
+		userAnswerHistoryRepository.save(userAnswerHistory);
 	}
-
 
 	@Transactional
 	public UserTestResult submitTest(Integer testId, String email) {
@@ -298,8 +291,8 @@ public class TestService {
 		userAnswerHistoryRepository.deleteByTest_TestIdAndUser_UserId(testId, user.getUserId());
 
 		// Tìm kết quả làm bài
-		UserTestResult result = userTestResultRepository.findByTest_TestIdAndUser_UserId(testId,
-				user.getUserId()).get();
+		UserTestResult result = userTestResultRepository.findByTest_TestIdAndUser_UserId(testId, user.getUserId())
+				.get();
 
 		System.out.println("Trạng thái khi reset: " + result.isStatus());
 
@@ -352,6 +345,11 @@ public class TestService {
 		// Tính thời gian làm bài (đơn vị phút)
 		long diffInMillis = lastAnswer.getTime() - firstAnswer.getTime();
 		return (float) diffInMillis / (1000 * 60); // Chuyển đổi từ milliseconds sang phút
+	}
+
+//Quiz Manager
+	public Optional<Test> findById(int testId) {
+		return testRepository.findById(testId);
 	}
 
 //Khác
