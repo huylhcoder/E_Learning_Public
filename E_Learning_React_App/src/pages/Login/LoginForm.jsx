@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import classNames from 'classnames/bind';
-import { FaGoogle, FaFacebookF, FaGithub } from 'react-icons/fa';
+import { FaFacebookF, FaGithub } from 'react-icons/fa';
+import GoogleLoginButton from './GoogleLoginButton';
 
 import styles from './Login.module.scss';
 const cx = classNames.bind(styles);
@@ -11,7 +12,6 @@ export const LoginForm = ({
     password,
     setPassword,
     handleLogin,
-    handleGoogleLogin,
     handleFacebookLogin,
     handleGithubLogin,
 }) => {
@@ -74,18 +74,20 @@ export const LoginForm = ({
                 </div>
 
                 <div className="d-flex flex-column gap-3">
-                    <button className={cx('social-btn', 'google')} onClick={handleGoogleLogin}>
+                    <GoogleLoginButton />
+                    {/* <button className={cx('social-btn', 'google')} onClick={handleGoogleLogin}>
                         <FaGoogle className={cx('icon')} />
                         Đăng nhập bằng Google
-                    </button>
-                    <button className={cx('social-btn', 'facebook')} onClick={handleFacebookLogin}>
+                    </button> */}
+
+                    {/* <button className={cx('social-btn', 'facebook')} onClick={handleFacebookLogin}>
                         <FaFacebookF className={cx('icon')} />
                         Đăng nhập bằng Facebook
                     </button>
                     <button className={cx('social-btn', 'github')} onClick={handleGithubLogin}>
                         <FaGithub className={cx('icon')} />
                         Đăng nhập bằng GitHub
-                    </button>
+                    </button> */}
                 </div>
             </div>
         </div>

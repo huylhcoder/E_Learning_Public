@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,11 +28,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fpoly.entity.MailInfo;
+import com.fpoly.entity.Role;
 import com.fpoly.entity.User;
-
+import com.fpoly.exceptions.PermissionDenyException;
+import com.fpoly.repository.RoleRepository;
+import com.fpoly.repository.UserRepository;
 import com.fpoly.dto.IntrospectResponse;
 import com.fpoly.dto.ApiResponse;
 import com.fpoly.dto.ChangePasswordDTO;
+import com.fpoly.dto.GoogleLoginRequest;
 import com.fpoly.dto.IntrospectRequest;
 import com.fpoly.dto.UserLoginDTO;
 import com.fpoly.dto.UserRegisterDTO;
@@ -47,6 +52,10 @@ import com.fpoly.service.EmailService;
 import com.fpoly.service.RoleService;
 import com.fpoly.service.UserService;
 import com.fpoly.service.VerificationService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.nimbusds.jose.JOSEException;
 import com.fpoly.controller.OtpController.DateTimeUtils;
 
@@ -60,6 +69,10 @@ public class AuthController {
 
 	@Autowired
 	UserService userService;
+	@Autowired
+	UserRepository userRepository;
+	@Autowired
+	RoleRepository roleRepository;
 	@Autowired
 	AuthenticationService authenticationService;
 	@Autowired
@@ -125,61 +138,6 @@ public class AuthController {
 		User user = userService.createUser(userDTO);
 		return ResponseEntity.ok("Đăng ký thành công");
 	}
-//
-//	@PostMapping("/send-verification-code")
-//	public ResponseEntity<String> sendVerificationCode(@RequestBody String email) {
-//		String code = String.format("%06d", new Random().nextInt(999999));
-//		String htmlContent = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\">"
-//				+ "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">"
-//				+ "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-//				+ "<title>Mã xác minh tạo tài khoản</title>"
-//				+ "<style>body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }"
-//				+ ".container { max-width: 900px; margin: 20px auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }"
-//				+ ".header { background-color: #66cc66; padding: 10px; text-align: left; color: #ffffff; font-size: 25px; font-weight: bold; }"
-//				+ ".title { font-size: 24px; color: #4CAF50; margin: 20px 0; text-align: center; }"
-//				+ ".content { font-size: 16px; color: #333; line-height: 1.6; }"
-//				+ ".otp { font-size: 36px; color: #4CAF50; text-align: center; margin: 20px 0; font-weight: bold; }"
-//				+ ".footer { font-size: 14px; color: #666; margin-top: 20px; }</style></head>"
-//				+ "<body><div class=\"container\"><div class=\"header\">E - Learning</div>"
-//				+ "<div class=\"title\">Mã xác minh tạo tài khoản mới</div>"
-//				+ "<div class=\"content\"><p>Xin chào bạn </p>"
-//				+ "<p>Chúng tôi nhận được yêu cầu tạo tài khoản mới của bạn vào lúc "
-//				+ DateTimeUtils.getCurrentDateTime() + "</p>"
-//				+ "<p>Dưới đây là mã xác nhận để tiếp tục yêu cầu của bạn:</p></div>" + "<div class=\"otp\">[ " + code
-//				+ " ]</div>" // Replace '123456' with the actual OTP value
-//				+ "<div class=\"footer\"><p>Vui lòng không chia mã xác nhận ra bên ngoài</p>"
-//				+ "<p>Nếu bạn không yêu cầu tiếp tục tạo tài khoản, vui lòng bỏ qua email này.</p>"
-//				+ "<p>Xin cảm ơn.</p></div></div></body></html>";
-//		emailService.sendOTP(new MailInfo(email, "Đặt lại mật khẩu", htmlContent));
-//		return ResponseEntity.ok(code);
-//	}
-//
-//	@PostMapping("/register")
-//	// can we register an "admin" user ?
-//	public ResponseEntity<?> createUser(@RequestBody UserRegisterDTO userDTO) {
-//		System.out.println(userDTO.getEmail());
-//		System.out.println(userDTO.getPassword());
-//		System.out.println(userDTO.getRetypePassword());
-//		RegisterResponse registerResponse = new RegisterResponse(null, null);
-//		try {
-//			// Kiểm tra mật khẩu có giống mật khẩu xác nhận không
-//			if (!userDTO.getPassword().equals(userDTO.getRetypePassword())) {
-//				registerResponse.setMessage(MessageKeys.PASSWORD_NOT_MATCH);
-//				return ResponseEntity.badRequest().body("Mật khẩu xác nhận không khớp");
-//			}
-//			System.out.println("Đăng ký - Đã kiểm tra xác nhận mật khẩu");
-//
-//			// Tạo một người dùng mới
-//			User user = userService.createUser(userDTO);
-//			System.out.println("Đăng ký - set thông báo thành công");
-//			registerResponse.setMessage(MessageKeys.REGISTER_SUCCESSFULLY);
-//			System.out.println("Đăng ký thành công");
-//			return ResponseEntity.ok(registerResponse);
-//		} catch (Exception e) {
-//			System.out.println("Đăng ký thất bại");
-//			return ResponseEntity.badRequest().body(registerResponse);
-//		}
-//	}
 
 //Login Page
 	@PostMapping("/login")
@@ -238,6 +196,60 @@ public class AuthController {
 			return ResponseEntity.ok("Đổi mật khẩu thành công");
 		} catch (IllegalArgumentException e) {
 			return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+		}
+	}
+
+//Google Login
+	@PostMapping("/google")
+	public ResponseEntity<?> googleLogin(@RequestBody GoogleLoginRequest request) {
+		try {
+			// Bước 1: Xác thực token ID từ Google
+			GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
+					new JacksonFactory())
+					.setAudience(Collections
+							.singletonList("191517587755-sl1mq6vmh78knfhj15k9o3mahjml8qqj.apps.googleusercontent.com"))
+					.build();
+
+			GoogleIdToken idToken = verifier.verify(request.getCredential());
+			if (idToken == null) {
+				return ResponseEntity.badRequest().body("Token không hợp lệ.");
+			}
+
+			GoogleIdToken.Payload payload = idToken.getPayload();
+			String email = payload.getEmail();
+			String name = (String) payload.get("name");
+			String pictureUrl = (String) payload.get("picture");
+			String googleId = payload.getSubject();
+
+			Role role = roleRepository.findByName("USER")
+					.orElseThrow(() -> new DataIntegrityViolationException("Không tìm thấy Role USER"));
+
+			if (Role.ADMIN.equalsIgnoreCase(role.getName())) {
+				throw new PermissionDenyException("Bạn không thể đăng ký tài khoản ADMIN");
+			}
+
+			// Bước 2: Tìm user theo googleAccountId hoặc email
+			User user = userRepository.findByGoogleAccountId(googleId).orElseGet(() -> {
+				// Nếu chưa có thì tạo mới
+				User newUser = new User();
+				newUser.setEmail(email);
+				newUser.setName(name);
+				newUser.setUrlProfileImage(pictureUrl);
+				newUser.setGoogleAccountId(googleId);
+				newUser.setActive(true);
+				newUser.setRole(role);// Mặc định Role User
+				newUser.setLoginProvider("GOOGLE");
+				newUser.setCreateAt(new Date());
+				return userRepository.save(newUser);
+			});
+
+			// Bước 3: Sinh JWT token cho user
+			String jwt = jwtTokenUtils.generateToken(user);
+			return ResponseEntity.ok(Map.of("token", jwt, "user", user));
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Đăng nhập Google thất bại: " + e.getMessage());
 		}
 	}
 

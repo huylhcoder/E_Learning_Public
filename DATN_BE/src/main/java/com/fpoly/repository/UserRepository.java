@@ -13,13 +13,19 @@ import com.fpoly.entity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 //Home page
-	//Tổng số học viên tham gia
+	// Tổng số học viên tham gia
 	@Query("SELECT COUNT(u) FROM User u WHERE u.role.name = :roleName")
 	long countByRoleName(@Param("roleName") String roleName);
 
 	@Query("SELECT u FROM User u WHERE u.email = :email")
 	User timKiemUserTheoEmailToan(@Param("email") String email);
 
+//Login - Google login
+	// Trả về một cái Optional User
+	Optional<User> findByEmail(String email);
+
+	Optional<User> findByGoogleAccountId(String googleAccountId);
+//Khác
 //	User findByEmail(String email);
 
 //	Optional<User> findByEmail(String email);
@@ -74,6 +80,4 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	// Phương thức kiểm tra xem email đã tồn tại hay chưa
 	boolean existsByEmail(String email);
 
-	// Trả về một cái Optional User
-	Optional<User> findByEmail(String email);
 }

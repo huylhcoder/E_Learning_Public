@@ -106,55 +106,55 @@ public class UserService {
 //		}
 //		return userRepository.save(newUser);
 //	}
-	
+
 	public User createUser(UserRegisterDTO userDTO) throws Exception {
-	    String email = userDTO.getEmail();
+		String email = userDTO.getEmail();
 
-	    // Kiểm tra email có tồn tại trong DB chưa
-	    if (userRepository.existsByEmail(email)) {
-	        throw new DataIntegrityViolationException("Email đã tồn tại");
-	    }
+		// Kiểm tra email có tồn tại trong DB chưa
+		if (userRepository.existsByEmail(email)) {
+			throw new DataIntegrityViolationException("Email đã tồn tại");
+		}
 
-	    // Tạo đối tượng User mới
-	    User newUser = new User();
-	    newUser.setName(userDTO.getFullname());
-	    newUser.setEmail(userDTO.getEmail());
-	    newUser.setActive(true);
-	    newUser.setCreateAt(new Date());
-	    newUser.setUpdateAt(new Date());
+		// Tạo đối tượng User mới
+		User newUser = new User();
+		newUser.setName(userDTO.getFullname());
+		newUser.setEmail(userDTO.getEmail());
+		newUser.setActive(true);
+		newUser.setCreateAt(new Date());
+		newUser.setUpdateAt(new Date());
 
-	    // Gán Role mặc định = USER
-	    Role role = roleRepository.findByName("USER")
-	            .orElseThrow(() -> new DataIntegrityViolationException("Không tìm thấy Role USER"));
+		// Gán Role mặc định = USER
+		Role role = roleRepository.findByName("USER")
+				.orElseThrow(() -> new DataIntegrityViolationException("Không tìm thấy Role USER"));
 
-	    if (Role.ADMIN.equalsIgnoreCase(role.getName())) {
-	        throw new PermissionDenyException("Bạn không thể đăng ký tài khoản ADMIN");
-	    }
-	    newUser.setRole(role);
+		if (Role.ADMIN.equalsIgnoreCase(role.getName())) {
+			throw new PermissionDenyException("Bạn không thể đăng ký tài khoản ADMIN");
+		}
+		newUser.setRole(role);
 
-	    // Nếu không dùng social login thì phải lưu mật khẩu
-	    if (userDTO.getFacebookAccountId() == 0 && userDTO.getGoogleAccountId() == 0) {
-	        String password = userDTO.getPassword();
-	        String encodedPassword = passwordEncoder.encode(password);
-	        newUser.setPassword(encodedPassword);
-	    }
+		// Nếu không dùng social login thì phải lưu mật khẩu
+		if (userDTO.getFacebookAccountId() == 0 && userDTO.getGoogleAccountId() == 0) {
+			String password = userDTO.getPassword();
+			String encodedPassword = passwordEncoder.encode(password);
+			newUser.setPassword(encodedPassword);
+		}
 
-	    return userRepository.save(newUser);
+		return userRepository.save(newUser);
 	}
 
 //Change Pass Page
-	 public void changePassword(String token, ChangePasswordDTO dto) {
-	        String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
-	        User user = userRepository.findByEmail(email)
-	                .orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
+	public void changePassword(String token, ChangePasswordDTO dto) {
+		String email = jwtTokenUtils.extractEmail(token.replace("Bearer ", "").trim());
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new IllegalArgumentException("User không tồn tại"));
 
-	        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
-	            throw new IllegalArgumentException("Mật khẩu cũ không chính xác");
-	        }
+		if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+			throw new IllegalArgumentException("Mật khẩu cũ không chính xác");
+		}
 
-	        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
-	        userRepository.save(user);
-	    }
+		user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+		userRepository.save(user);
+	}
 
 //Khác
 
@@ -331,14 +331,18 @@ public class UserService {
 		}
 		User existingUser = optionalUser.get();
 
-		if (existingUser.getFacebookAccountId() == 0 && existingUser.getGooogleAccountId() == 0) {
-			// Kiểm tra mật khẩu có đúng không
-			// Kiểm tra mật khẩu có trùng với mật khẩu đã mã hóa trong User hay không
-			// Khúc này là mật khẩu chưa mã hóa 123456 có trùng với mật khẩu mã hóa không
-			// @@@@@
-			if (!passwordEncoder.matches(password, existingUser.getPassword())) {
-				throw new BadCredentialsException("User service 2- Sai tài khoản hoặc mật khẩu");
-			}
+//		if (existingUser.getFacebookAccountId() == 0 && existingUser.getGooogleAccountId() == 0) {
+//			// Kiểm tra mật khẩu có đúng không
+//			// Kiểm tra mật khẩu có trùng với mật khẩu đã mã hóa trong User hay không
+//			// Khúc này là mật khẩu chưa mã hóa 123456 có trùng với mật khẩu mã hóa không
+//			// @@@@@
+//			if (!passwordEncoder.matches(password, existingUser.getPassword())) {
+//				throw new BadCredentialsException("User service 2- Sai tài khoản hoặc mật khẩu");
+//			}
+//		}
+
+		if (!passwordEncoder.matches(password, existingUser.getPassword())) {
+			throw new BadCredentialsException("User service 2- Sai tài khoản hoặc mật khẩu");
 		}
 
 		// Check tài khoản có bị khóa không
@@ -357,8 +361,5 @@ public class UserService {
 		// Truyền User vào
 		return jwtTokenUtil.generateToken(existingUser);
 	}
-
-
-	
 
 }

@@ -25,9 +25,9 @@ function SearchCourse() {
                 const response = await axios.get(`/course/search?${queryString}`);
                 setCourses(response.data.content || []);
                 setPaginationInfo({
-                    page: response.data.number,
-                    totalPages: response.data.totalPages,
-                    totalElements: response.data.totalElements,
+                    page: response?.data?.number,
+                    totalPages: response?.data?.totalPages,
+                    totalElements: response?.data?.totalElements,
                 });
             } catch (error) {
                 console.error('Error fetching courses:', error);

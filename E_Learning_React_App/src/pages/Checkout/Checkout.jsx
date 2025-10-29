@@ -44,12 +44,6 @@ const Checkout = () => {
                     setCourses(resp.data.courses);
                     setPaymentStatus(resp.data.paymentStatus);
                 }
-
-                // Lấy danh sách voucher
-                // const voucherResp = await axios.get('/voucher/myvoucher', { headers });
-                // setVouchers(voucherResp?.data);
-                // console.log(voucherResp);
-                // Lấy danh sách voucher
                 try {
                     const voucherResp = await axios.get('/voucher/myvoucher', { headers });
                     const data = voucherResp?.data;

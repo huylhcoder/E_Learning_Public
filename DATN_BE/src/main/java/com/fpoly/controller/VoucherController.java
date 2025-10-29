@@ -46,6 +46,38 @@ public class VoucherController {
 
 // Checkout Page
 	// List My Voucher
+//	@GetMapping("/myvoucher")
+//	public ResponseEntity<?> getMyVouchers(@RequestHeader("Authorization") String authHeader) {
+//		try {
+//			if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+//				return ResponseEntity.badRequest().body("Authorization header không hợp lệ.");
+//			}
+//
+//			String token = authHeader.substring(7).trim();
+//			String email = jwtTokenUtils.extractEmail(token);
+//
+//			User user = userService.getUserByEmailToan(email);
+//			if (user == null) {
+//				return ResponseEntity.status(404).body("Người dùng không tồn tại.");
+//			}
+//
+//			List<Voucher> vouchers = voucherService.getVouchersByEmail(email);
+//			if (vouchers.isEmpty()) {
+//				return ResponseEntity.status(404).body("Không tìm thấy voucher nào cho người dùng này.");
+//			}
+//
+//			List<VoucherResponseDTO> voucherDTOs = vouchers.stream()
+//					.map(v -> new VoucherResponseDTO(v.getVoucherId(), v.getName(), v.getDescription(),
+//							v.getVoucherCode(), v.getPercentSale(), v.getStartDate(), v.getEndDate()))
+//					.toList();
+//
+//			return ResponseEntity.ok(voucherDTOs);
+//
+//		} catch (Exception e) {
+//			return ResponseEntity.status(400).body("Token không hợp lệ.");
+//		}
+//	}
+
 	@GetMapping("/myvoucher")
 	public ResponseEntity<?> getMyVouchers(@RequestHeader("Authorization") String authHeader) {
 		try {
@@ -66,14 +98,24 @@ public class VoucherController {
 				return ResponseEntity.status(404).body("Không tìm thấy voucher nào cho người dùng này.");
 			}
 
-			List<VoucherResponseDTO> voucherDTOs = vouchers.stream()
+			Date now = new Date();
+
+			// Lọc chỉ voucher còn hạn, còn lượt, còn hoạt động
+			List<VoucherResponseDTO> voucherDTOs = vouchers.stream().filter(v -> v.isStatus()) // còn hoạt động
+					.filter(v -> v.getQuantity() > 0) // còn lượt dùng
+					.filter(v -> v.getEndDate() == null || v.getEndDate().after(now)) // còn hạn hoặc chưa có hạn
 					.map(v -> new VoucherResponseDTO(v.getVoucherId(), v.getName(), v.getDescription(),
 							v.getVoucherCode(), v.getPercentSale(), v.getStartDate(), v.getEndDate()))
 					.toList();
 
+			if (voucherDTOs.isEmpty()) {
+				return ResponseEntity.status(404).body("Không có voucher nào còn hạn hoặc còn lượt dùng.");
+			}
+
 			return ResponseEntity.ok(voucherDTOs);
 
 		} catch (Exception e) {
+			e.printStackTrace();
 			return ResponseEntity.status(400).body("Token không hợp lệ.");
 		}
 	}
@@ -188,6 +230,7 @@ public class VoucherController {
 		}
 		return ResponseEntity.ok(kiemTraTonTai);
 	}
+
 //MyVoucher Page
 	@GetMapping("/rdVoucher")
 	public ResponseEntity<List<Voucher>> getRDVoucher() {

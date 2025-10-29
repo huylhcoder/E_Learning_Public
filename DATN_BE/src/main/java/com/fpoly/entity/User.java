@@ -74,7 +74,11 @@ public class User extends BaseEntity implements UserDetails {
 	private int facebookAccountId;
 
 	@Column(name = "google_account_id")
-	private int gooogleAccountId;
+	private String googleAccountId; //nvarchar(50)
+	
+	@Column(name = "login_provider")
+	private String loginProvider; // "GOOGLE", "EMAIL", "FACEBOOK"
+
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "user")

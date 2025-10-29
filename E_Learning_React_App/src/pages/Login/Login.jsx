@@ -5,9 +5,9 @@ import { ToastContainer, toast } from 'react-toastify';
 
 import AuthContext from '~/context/AuthContext';
 import { LoginForm } from './LoginForm';
-import { OAuthConfig } from '~/config/OAuthConfig';
 import LoadingSpinner from '~/components/LoadingSpinner';
 import { introspect, login } from '~/services/AuthenticationService';
+
 
 import './Login.module.scss';
 
@@ -65,14 +65,6 @@ export const Login = () => {
         }
     };
 
-    const handleGoogleLogin = () => {
-        const { authUri, clientId, redirectUri } = OAuthConfig.google;
-        const url = `${authUri}?redirect_uri=${encodeURIComponent(
-            redirectUri,
-        )}&response_type=code&client_id=${clientId}&scope=openid%20email%20profile`;
-        window.location.href = url;
-    };
-
     const handleFacebookLogin = () => {
         window.location.href = 'http://localhost:8080/oauth2/authorization/facebook';
     };
@@ -98,7 +90,6 @@ export const Login = () => {
                     password={password}
                     setPassword={setPassword}
                     handleLogin={handleLogin}
-                    handleGoogleLogin={handleGoogleLogin}
                     handleFacebookLogin={handleFacebookLogin}
                     handleGithubLogin={handleGithubLogin}
                 />

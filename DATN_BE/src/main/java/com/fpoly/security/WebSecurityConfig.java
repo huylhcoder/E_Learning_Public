@@ -73,6 +73,7 @@ public class WebSecurityConfig {
 									String.format("%s/auth/send-verification-code", apiPrefix),
 									String.format("%s/auth/login", apiPrefix),
 									String.format("%s/auth/introspect", apiPrefix),
+									String.format("%s/auth/google", apiPrefix),
 									//User
 									String.format("%s/user/certificate/**", apiPrefix),
 									// Course
