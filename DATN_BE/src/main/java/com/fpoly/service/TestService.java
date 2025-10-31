@@ -60,7 +60,6 @@ public class TestService {
 		// Tìm kết quả đã có
 		UserTestResult result = userTestResultRepository.findByTest_TestIdAndUser_UserId(testId, user.getUserId())
 				.orElse(null);
-		System.out.println("Trạng thái bài kiểm tra tại getOrCreateTestResult: " + result.isStatus());
 
 		// Nếu đã có thì trả về kết quả cho người dùng liền
 		if (result != null) {
@@ -174,35 +173,60 @@ public class TestService {
 		return dto;
 	}
 
+//	@Transactional
+//	public void saveUserAnswer(Integer testId, SaveAnswerRequest request, String email) {
+//		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+//
+//		Answer answer = answerRepository.getReferenceById(request.getAnswerId());
+//
+//		// Kiểm tra đã có lịch sử chưa
+//		List<UserAnswerHistory> histories = userAnswerHistoryRepository.findAllByUserAndTestAndQuestion(user,
+//				testRepository.getReferenceById(testId), questionRepository.getReferenceById(request.getQuestionId()));
+//
+//		UserAnswerHistory userAnswerHistory;
+//		if (!histories.isEmpty()) {
+//			userAnswerHistory = histories.get(0); // Lấy bản ghi đầu tiên
+//			userAnswerHistory.setAnswer(answer);
+//			userAnswerHistory.setCorrect(answer.isCorrect());
+//		} else {
+//			userAnswerHistory = new UserAnswerHistory();
+//			userAnswerHistory.setUser(user);
+//			userAnswerHistory.setTest(testRepository.getReferenceById(testId));
+//			userAnswerHistory.setQuestion(questionRepository.getReferenceById(request.getQuestionId()));
+//			userAnswerHistory.setAnswer(answer);
+//			userAnswerHistory.setCorrect(answer.isCorrect());
+//			userAnswerHistory.setCreateAt(new Date());
+//		}
+//
+//		userAnswerHistoryRepository.save(userAnswerHistory);
+//		System.out.println(
+//				"Saving answer: questionId=" + request.getQuestionId() + ", answerId=" + request.getAnswerId());
+//	}
+
 	@Transactional
-	public void saveUserAnswer(Integer testId, SaveAnswerRequest request, String email) {
+	public synchronized void saveUserAnswer(Integer testId, SaveAnswerRequest request, String email) {
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
 
-		Answer answer = answerRepository.getReferenceById(request.getAnswerId());
+		var test = testRepository.getReferenceById(testId);
+		var question = questionRepository.getReferenceById(request.getQuestionId());
+		var answer = answerRepository.getReferenceById(request.getAnswerId());
 
-		// Kiểm tra đã có lịch sử chưa
-		Optional<UserAnswerHistory> optionalHistory = userAnswerHistoryRepository.findByUserAndTestAndQuestion(user,
-				testRepository.getReferenceById(testId), questionRepository.getReferenceById(request.getQuestionId()));
+		// Lấy bản ghi duy nhất nếu có
+		UserAnswerHistory history = userAnswerHistoryRepository.findByUserAndTestAndQuestion(user, test, question)
+				.orElse(null);
 
-		UserAnswerHistory userAnswerHistory;
-
-		if (optionalHistory.isPresent()) {
-			// Nếu đã tồn tại thì update
-			userAnswerHistory = optionalHistory.get();
-			userAnswerHistory.setAnswer(answer);
-			userAnswerHistory.setCorrect(answer.isCorrect());
-		} else {
-			// Nếu chưa có thì tạo mới
-			userAnswerHistory = new UserAnswerHistory();
-			userAnswerHistory.setUser(user);
-			userAnswerHistory.setTest(testRepository.getReferenceById(testId));
-			userAnswerHistory.setQuestion(questionRepository.getReferenceById(request.getQuestionId()));
-			userAnswerHistory.setAnswer(answer);
-			userAnswerHistory.setCorrect(answer.isCorrect());
-			userAnswerHistory.setCreateAt(new Date());
+		if (history == null) {
+			history = new UserAnswerHistory();
+			history.setUser(user);
+			history.setTest(test);
+			history.setQuestion(question);
+			history.setCreateAt(new Date());
 		}
 
-		userAnswerHistoryRepository.save(userAnswerHistory);
+		history.setAnswer(answer);
+		history.setCorrect(answer.isCorrect());
+
+		userAnswerHistoryRepository.saveAndFlush(history); // flush ngay để đồng bộ DB
 	}
 
 	@Transactional
@@ -222,8 +246,7 @@ public class TestService {
 		float maxScoreValue = 10; // hoặc test.getMaxScore()
 		float score = ((float) correctAnswers / totalQuestions) * maxScoreValue;
 
-		// Lúc submit thì chắc chắn đã có UserTestResult (do getResult đã tạo nếu chưa
-		// có)
+		// Lúc submit thì chắc chắn đã có UserTestResult
 		UserTestResult result = userTestResultRepository.findByUser_UserIdAndTest_TestId(user.getUserId(), testId)
 				.orElseThrow(() -> new RuntimeException("Test result not found"));
 

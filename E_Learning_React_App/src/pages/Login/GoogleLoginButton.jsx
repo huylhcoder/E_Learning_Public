@@ -30,8 +30,8 @@ const GoogleLoginButton = () => {
                 // Cập nhật AuthContext
                 authContext.refresh?.();
 
-                toast.success('Đăng nhập Google thành công 🎉', {
-                    position: 'top-center',
+                toast.success('Đăng nhập thành công', {
+                    // position: 'top-center',
                     autoClose: 2000,
                 });
 

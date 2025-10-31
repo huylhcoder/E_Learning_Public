@@ -40,6 +40,11 @@ public interface UserAnswerHistoryRepository extends JpaRepository<UserAnswerHis
             Question question
     );
     
+    @Query("SELECT uah FROM UserAnswerHistory uah WHERE uah.user = :user AND uah.test = :test AND uah.question = :question")
+    List<UserAnswerHistory> findAllByUserAndTestAndQuestion(@Param("user") User user,
+                                                            @Param("test") Test test,
+                                                            @Param("question") Question question);
+    
     List<UserAnswerHistory> findByUserAndTest(User user, Test test);
 
 // Khác
