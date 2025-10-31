@@ -1,5 +1,6 @@
 package com.fpoly.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,15 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	Optional<User> findByEmail(String email);
 
 	Optional<User> findByGoogleAccountId(String googleAccountId);
+
+//Dashboard
+	/**
+	 * Đếm số lượng User được tạo (đăng ký) trong khoảng thời gian (startDate đến
+	 * endDate). Sử dụng Query Method dựa trên trường 'createAt' của Entity User.
+	 * Lưu ý: Trong JPA, 'Between' là bao gồm cả hai đầu, ta thường dùng >= start và
+	 * < end.
+	 */
+	long countByCreateAtBetween(Date startDate, Date endDate);
 //Khác
 //	User findByEmail(String email);
 

@@ -1,5 +1,6 @@
 package com.fpoly.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.fpoly.dto.CourseNameSuggestionDTO;
+import com.fpoly.dto.CourseRevenueDTO;
 import com.fpoly.entity.Course;
 
 @Repository
@@ -69,6 +71,47 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 	 */
 	@Query("SELECT SUM(rc.price) FROM RegisteredCourse rc WHERE rc.course.courseId = :courseId AND rc.statusPayment = true")
 	Double sumRevenueByCourseIdAndPaymentStatusTrue(@Param("courseId") int courseId);
+
+//Dashboard
+	/**
+	 * Đếm số lượng Course được tạo (đăng tải) trong khoảng thời gian. Sử dụng Query
+	 * Method dựa trên trường 'createAt' của Entity Course.
+	 */
+	long countByCreateAtBetween(Date startDate, Date endDate);
+
+	/**
+	 * Thống kê doanh thu, số lượt đăng ký, và số chứng chỉ đã cấp của mỗi khóa học.
+	 * Cú pháp JPQL: - SUM(rc.price) cho tổng doanh thu. -
+	 * COUNT(rc.registeredCourseId) cho số lượt đăng ký thành công. - SUM(CASE WHEN
+	 * cp.progressPercentage >= 100.0 THEN 1 ELSE 0 END) cho số chứng chỉ. * LƯU Ý:
+	 * Phải sử dụng JOIN với RegisteredCourse (rc) và LEFT JOIN với CourseProgress
+	 * (cp) để lấy số lượng hoàn thành.
+	 */
+	@Query("SELECT new com.fpoly.dto.CourseRevenueDTO(" + "c.courseId, " + "c.name, " + "c.createAt, "
+			+ "COALESCE(SUM(rc.price), 0), " + "COALESCE(COUNT(rc.registeredCourseId), 0), "
+			+ "COALESCE(SUM(CASE WHEN cp.progressPercentage >= 100.0 THEN 1 ELSE 0 END), 0)) " + "FROM Course c "
+			+ "LEFT JOIN c.listRegisteredCourse rc ON rc.statusPayment = true " + // Chỉ tính thanh toán thành công
+			"LEFT JOIN c.listCourseProgress cp ON cp.course = c " + // Lấy tiến độ để đếm chứng chỉ
+			"GROUP BY c.courseId, c.name, c.createAt " + "ORDER BY c.createAt DESC") // Mặc định sắp xếp theo Khóa học
+																						// mới nhất
+	List<CourseRevenueDTO> getCourseRevenueStatistics();
+
+	// Hàm cho sắp xếp theo tham số (sẽ xử lý logic sắp xếp trong Service)
+//	@Query("SELECT new com.fpoly.dto.CourseRevenueDTO(" + "c.courseId, c.name, c.createAt, "
+//			+ "COALESCE(SUM(rc.price), 0), " + "COALESCE(COUNT(rc.registeredCourseId), 0), "
+//			+ "COALESCE(SUM(CASE WHEN cp.progressPercentage >= 100.0 THEN 1 ELSE 0 END), 0)) " + "FROM Course c "
+//			+ "LEFT JOIN c.listRegisteredCourse rc ON rc.statusPayment = true "
+//			+ "LEFT JOIN c.listCourseProgress cp ON cp.course = c " + "GROUP BY c.courseId, c.name, c.createAt")
+//	List<CourseRevenueDTO> getRawCourseRevenueStatistics();
+	@Query("SELECT new com.fpoly.dto.CourseRevenueDTO(" + "c.courseId, " + "c.name, " + "c.createAt, " +
+	// Sửa lỗi ở đây: ÉP KIỂU kết quả SUM về LONG
+			"COALESCE(CAST(SUM(rc.price) AS long), 0), " +
+
+			"COALESCE(COUNT(rc.registeredCourseId), 0), "
+			+ "COALESCE(SUM(CASE WHEN cp.progressPercentage >= 100.0 THEN 1 ELSE 0 END), 0)) " + "FROM Course c "
+			+ "LEFT JOIN c.listRegisteredCourse rc ON rc.statusPayment = true "
+			+ "LEFT JOIN c.listCourseProgress cp ON cp.course = c " + "GROUP BY c.courseId, c.name, c.createAt")
+	List<CourseRevenueDTO> getRawCourseRevenueStatistics();
 
 //Khác
 	// ------------ CÂU TRUY VẤN SQL CỦA HBảo ----------------------------------

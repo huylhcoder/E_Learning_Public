@@ -1,5 +1,6 @@
 package com.fpoly.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -43,11 +44,46 @@ public interface RegisteredCourseRepository extends JpaRepository<RegisteredCour
 	void deleteByPaymentIds(@Param("paymentIds") List<Integer> paymentIds);
 
 //Learning
-    // Cách 1: Dùng object User và Course
-    Optional<RegisteredCourse> findByUserAndCourse(User user, Course course);
-    
+	// Cách 1: Dùng object User và Course
+	Optional<RegisteredCourse> findByUserAndCourse(User user, Course course);
+
 	// Cách 2: Dùng nested property (Spring Data JPA hỗ trợ)
 	Optional<RegisteredCourse> findByUser_UserIdAndCourse_CourseId(int userId, int courseId);
+
+//Dashboard
+	// 1. Dùng @Query để tính tổng doanh thu trong một khoảng thời gian
+	@Query("SELECT SUM(rc.price) FROM RegisteredCourse rc WHERE rc.statusPayment = true AND rc.createAt BETWEEN :startDate AND :endDate")
+	Float sumRevenueByDateRange(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+	// 2. Dùng @Query để lấy dữ liệu biểu đồ (ví dụ: Doanh thu theo ngày)
+	@Query("SELECT FUNCTION('DATE_FORMAT', rc.createAt, '%Y-%m-%d') as date, SUM(rc.price) as revenue "
+			+ "FROM RegisteredCourse rc WHERE rc.statusPayment = true AND rc.createAt BETWEEN :startDate AND :endDate "
+			+ "GROUP BY date ORDER BY date")
+	List<Object[]> findRevenueByDay(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+
+	/**
+	 * Truy vấn dữ liệu doanh thu, nhóm theo định dạng thời gian (ngày, tháng). Sử
+	 * dụng Native Query hoặc JPQL FUNCTION để định dạng ngày tháng. * @param
+	 * startDate Ngày bắt đầu khoảng thời gian
+	 * 
+	 * @param endDate Ngày kết thúc khoảng thời gian
+	 * @param format  Định dạng ngày tháng (ví dụ: '%Y-%m-%d' cho MySQL)
+	 * @return Danh sách các Object[], mỗi Object[] chứa [Nhãn_Thời_Gian,
+	 *         Tổng_Doanh_Thu]
+	 */
+//	@Query(value = "SELECT FUNCTION('DATE_FORMAT', rc.createAt, :format) as dateLabel, SUM(rc.price) as revenue "
+//			+ "FROM RegisteredCourse rc WHERE rc.statusPayment = true AND rc.createAt >= :startDate AND rc.createAt < :endDate "
+//			+ "GROUP BY dateLabel ORDER BY dateLabel", nativeQuery = false) // Sử dụng 'nativeQuery = false' nếu bạn
+//																			// dùng JPQL FUNCTION
+//	List<Object[]> findRevenueGroupedBy(@Param("startDate") Date startDate, @Param("endDate") Date endDate,
+//			@Param("format") String format);
+	// Sửa lại Query để sử dụng hàm FORMAT của SQL Server
+	@Query(value = "SELECT FUNCTION('FORMAT', rc.createAt, :format) as dateLabel, SUM(rc.price) as revenue "
+			+ "FROM RegisteredCourse rc WHERE rc.statusPayment = true AND rc.createAt >= :startDate AND rc.createAt < :endDate "
+			+ "GROUP BY dateLabel ORDER BY dateLabel", nativeQuery = false) // nativeQuery = false dùng để sử dụng JPQL
+																			// FUNCTION
+	List<Object[]> findRevenueGroupedBy(@Param("startDate") Date startDate, @Param("endDate") Date endDate,
+			@Param("format") String format);
 
 // Các method khác...
 	@Query("SELECT rc FROM RegisteredCourse rc WHERE rc.user.userId = :userId")
