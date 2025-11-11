@@ -61,7 +61,7 @@ const Dashboard = () => {
 
             {/* Khu vực Lọc Ngày/Tuần/Tháng (sẽ kích hoạt re-render của Dashboard) */}
             <div style={{ marginBottom: '20px' }}>
-                <label>Lọc theo thời gian: </label>
+                <label className='me-3'>Lọc theo thời gian: </label>
                 <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
